@@ -1,0 +1,64 @@
+@import 'variables';
+@import 'forms';
+@import 'buttons';
+@import 'modal';
+
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+
+    h1 {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .profile-section {
+        margin-bottom: 2rem;
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+    }
+}
+
+.trips-container {
+    display: grid;
+    gap: 1rem;
+
+    @media (min-width: $breakpoint-tablet) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .trip-card {
+        border: 1px solid #ccc;
+        padding: 1rem;
+        border-radius: 4px;
+    }
+}
+
+@media (max-width: $breakpoint-mobile) {
+    .profile-container {
+        padding: 1rem;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

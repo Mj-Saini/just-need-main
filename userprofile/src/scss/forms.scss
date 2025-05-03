@@ -1,0 +1,44 @@
+.form-group {
+    margin-bottom: 1rem;
+
+    label {
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    input,
+    textarea {
+        width: 100%;
+        padding: 0.5rem;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .image-preview {
+        margin-top: 0.5rem;
+    }
+}
+
+.password-strength {
+    margin-top: 0.5rem;
+    height: 5px;
+    background: #ddd;
+
+    &.weak {
+        background: #dc3545;
+    }
+
+    &.medium {
+        background: #ffc107;
+    }
+
+    &.strong {
+        background: #28a745;
+    }
+}
+
+@media (max-width: $breakpoint-mobile) {
+    .form-group {
+        width: 100%;
+    }
+}

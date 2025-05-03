@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="../dist/css/main.min.css">
+</head>
+
+<body>
+    <main class="profile-container">
+        <h1 class="profile-title">User Profile</h1>
+        <!-- update password section -->
+        <section class="profile-section" aria-label="Password Update">
+            <div class="password-update">
+                <h2>Password Update</h2>
+                <form class="password-form" id="passwordForm">
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" name="newPassword" required
+                            aria-describedby="passwordStrength">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    </div>
+                    <div id="passwordStrength" class="password-strength" role="alert"></div>
+                    <button type="submit" class="btn btn-primary">Update Password</button>
+                </form>
+            </div>
+        </section>
+        <!-- Basic Details Update section -->
+        <section class="profile-section" aria-label="Basic Details Update">
+            <div class="basic-details-update">
+                <h2>Basic Details Update</h2>
+                <form class="details-form" id="detailsForm">
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Phone</label>
+                        <input type="tel" id="phone" name="phone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <textarea id="address" name="address" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="profileImage">Profile Image</label>
+                        <input type="file" id="profileImage" name="profileImage" accept="image/*"
+                            onchange="previewImage(event)">
+                        <img id="imagePreview" src="#" alt="Profile Preview" class="image-preview"
+                            style="display:none; max-width: 200px;">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Details</button>
+                </form>
+            </div>
+        </section>
+        <!-- Recent trip section -->
+        <section class="profile-section" aria-label="Recent Trips">
+            <div class="recent-trips">
+                <h2>Recent Trips</h2>
+                <div class="trips-container">
+                    <div class="trip-card">
+                        <h3>Trip to Paris</h3>
+                        <p>Date: 15 Apr 2025</p>
+                        <p>Amount: $500</p>
+                        <a href="../assets/dummy.pdf" class="btn btn-secondary" download>Download Bill</a>
+                    </div>
+                    <div class="trip-card">
+                        <h3>Trip to London</h3>
+                        <p>Date: 10 Mar 2025</p>
+                        <p>Amount: $450</p>
+                        <a href="../assets/dummy.pdf" class="btn btn-secondary" download>Download Bill</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- deactivate account section -->
+        <section class="profile-section" aria-label="Deactivate Account">
+            <div class="deactivate-account">
+                <h2>Deactivate Account</h2>
+                <button class="btn btn-danger" id="deactivateBtn">Deactivate Account</button>
+                <div id="deactivateModal" class="modal" role="dialog" aria-labelledby="modalTitle" aria-hidden="true">
+                    <div class="modal-content">
+                        <h3 id="modalTitle">Confirm Deactivation</h3>
+                        <p>Please type "deactivate" to confirm:</p>
+                        <input type="text" id="confirmInput" aria-label="Confirmation input">
+                        <button id="confirmDeactivate" class="btn btn-danger" disabled>Confirm</button>
+                        <button id="cancelDeactivate" class="btn btn-secondary">Cancel</button>
+                        <p id="deactivateMessage" class="modal-message" role="alert"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+    <script src="../js/script.js"></script>
+</body>
+
+</html>

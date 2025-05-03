@@ -1,0 +1,19 @@
+{
+  "name": "user-profile-page",
+  "version": "1.0.0",
+  "description": "Modular User Profile Page with Gulp",
+  "scripts": {
+    "start": "gulp"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.29.3",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^8.0.0",
+    "gulp-cssmin": "^0.2.0",
+    "gulp-sass": "^5.1.0",
+    "sass": "^1.69.5"
+  },
+  "dependencies": {
+    "gulp-file-include": "^2.3.0"
+  }
+}
