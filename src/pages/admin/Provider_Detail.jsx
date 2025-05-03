@@ -4,7 +4,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { DropdownIcon } from "../../assets/icon/Icon";
 import { useLocation } from "react-router-dom";
 import { supabase } from "../../store/supabaseCreateClient";
-// import Lightbox from "react-image-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
 
