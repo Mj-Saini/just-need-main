@@ -5,7 +5,7 @@ import { DropdownIcon } from "../../assets/icon/Icon";
 import { useLocation } from "react-router-dom";
 import { supabase } from "../../store/supabaseCreateClient";
 // import Lightbox from "react-image-lightbox";
-import "react-image-lightbox/style.css";
+import "yet-another-react-lightbox/styles.css";
 
 
 const Provider_Detail = () => {
@@ -29,7 +29,7 @@ const Provider_Detail = () => {
 
   useEffect(() => {
     // Dynamically import on client-side
-    import("react-image-lightbox").then(({ default: Lightbox }) => {
+    import("yet-another-react-lightbox").then(({ default: Lightbox }) => {
       setLightboxComponent(() => Lightbox);
     });
   }, []);
