@@ -9,23 +9,25 @@ import enable_img from "../../assets/png/enable_img.png";
 import { supabase } from "../../store/supabaseCreateClient";
 import { EmailIcon, LocationIcon, PhoneIcon } from "../../assets/icon/Icons";
 import { useListingContext } from "../../store/ListingContext";
-import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
+
 import { DisableIcon, EnableIcon } from "../../assets/icon/Icon";
 import { truncateText } from "../../utility/wordTruncate";
 import { list } from "postcss";
 import userDummyImg from '../../assets/Images/Png/dummyimage.jpg'
 import active from "../../assets/png/active.png"
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
 
 const ListingDetails = () => {
   const [listData, setListData] = useState({});
   const [isOpen, setIsOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
 
-  const handleViewImage = (image) => {
-    setCurrentImage(image);
-    setIsOpen(true);
-  };
+ const handleViewImage = (image) => {
+  const index = listData?.images?.indexOf(image);
+  setCurrentImage(index);
+  setIsOpen(true);
+};
 
   const { id } = useParams();
   const { fetchlistingWithId } = useListingContext();
@@ -220,12 +222,15 @@ const ListingDetails = () => {
           </div>
 
           {isOpen && (
-            <Lightbox
-              mainSrc={currentImage}
-              onCloseRequest={() => setIsOpen(false)}
-              enableZoom={true}
-            />
-          )}
+        <Lightbox
+          open={isOpen}
+          close={() => setIsOpen(false)}
+          index={currentImage}
+          slides={listData?.images?.map(img => ({ src: img })) || []}
+          carousel={{ finite: listData?.images?.length <= 1 }}
+        />
+      )}
+          
         </div>
       </div>
 

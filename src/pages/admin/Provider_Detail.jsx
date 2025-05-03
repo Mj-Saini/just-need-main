@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { DropdownIcon } from "../../assets/icon/Icon";
 import { useLocation } from "react-router-dom";
 import { supabase } from "../../store/supabaseCreateClient";
+import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 
 
@@ -24,15 +25,8 @@ const Provider_Detail = () => {
   const [status, setStatus] = useState("Processing");
   const [complaintLogs, setComplaintLogs] = useState([]);
   const [loading, setLoading] = useState(false);
- const [LightboxComponent, setLightboxComponent] = useState(null);
 
-  useEffect(() => {
-    // Dynamically import on client-side
-    import("yet-another-react-lightbox").then(({ default: Lightbox }) => {
-      setLightboxComponent(() => Lightbox);
-    });
-  }, []);
-
+console.log(images,"images")
 
   // Fetch complaint logs from Supabase
   const fetchComplaintLogs = async () => {
@@ -255,20 +249,21 @@ const Provider_Detail = () => {
         }
     }
   };
-
-  const handleImgPreview = (item) => {
-    setPhotoIndex(item)
-    setIsFullImg(true)
-  }
-  console.log(photoIndex, "photoIndex")
+ const handleViewImage = (image) => {
+  const index = images?.indexOf(image);
+  setPhotoIndex(index);
+  setIsFullImg(true);
+};
   return (
     <div>
 
-     {isFullImg && LightboxComponent && (
-        <LightboxComponent
-          mainSrc={photoIndex}
-          onCloseRequest={() => setIsFullImg(false)}
-          enableZoom={true}
+      {isFullImg && (
+       <Lightbox
+          open={isFullImg}
+          close={() => setIsFullImg(false)}
+          index={photoIndex}
+          slides={images?.map(img => ({ src: img })) || []}
+          carousel={{ finite: images?.length <= 1 }}
         />
       )}
       <div className="flex flex-col xl:flex-row justify-between gap-5">
@@ -366,7 +361,7 @@ const Provider_Detail = () => {
             </p>
             <div className="flex gap-[14px] mt-2.5">
               {complaint?.images?.map((img, index) => (
-                <img onClick={() =>handleImgPreview(img)} key={index} src={img} alt="img" className="w-20 h-20 object-cover cursor-pointer" />
+                <img onClick={() =>handleViewImage(img)} key={index} src={img} alt="img" className="w-20 h-20 object-cover" />
               ))}
             </div>
           </div>
