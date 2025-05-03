@@ -4,9 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { DropdownIcon } from "../../assets/icon/Icon";
 import { useLocation } from "react-router-dom";
 import { supabase } from "../../store/supabaseCreateClient";
-import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
-
+// import Lightbox from "react-image-lightbox";
+import "react-image-lightbox/style.css";
 
 
 const Provider_Detail = () => {
@@ -26,7 +25,14 @@ const Provider_Detail = () => {
   const [status, setStatus] = useState("Processing");
   const [complaintLogs, setComplaintLogs] = useState([]);
   const [loading, setLoading] = useState(false);
+ const [LightboxComponent, setLightboxComponent] = useState(null);
 
+  useEffect(() => {
+    // Dynamically import on client-side
+    import("react-image-lightbox").then(({ default: Lightbox }) => {
+      setLightboxComponent(() => Lightbox);
+    });
+  }, []);
 
 
   // Fetch complaint logs from Supabase
@@ -250,12 +256,17 @@ const Provider_Detail = () => {
         }
     }
   };
+
+  const handleImgPreview = (item) => {
+    setPhotoIndex(item)
+    setIsFullImg(true)
+  }
   console.log(photoIndex, "photoIndex")
   return (
     <div>
 
-      {isFullImg && (
-        <Lightbox
+     {isFullImg && LightboxComponent && (
+        <LightboxComponent
           mainSrc={photoIndex}
           onCloseRequest={() => setIsFullImg(false)}
           enableZoom={true}
@@ -356,10 +367,7 @@ const Provider_Detail = () => {
             </p>
             <div className="flex gap-[14px] mt-2.5">
               {complaint?.images?.map((img, index) => (
-                <img onClick={() => {
-                  setPhotoIndex(img);
-                  setIsFullImg(true);
-                }} key={index} src={img} alt="img" className="w-20 h-20 object-cover cursor-pointer" />
+                <img onClick={() =>handleImgPreview(img)} key={index} src={img} alt="img" className="w-20 h-20 object-cover cursor-pointer" />
               ))}
             </div>
           </div>
