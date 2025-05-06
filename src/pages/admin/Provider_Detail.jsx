@@ -26,7 +26,7 @@ const Provider_Detail = () => {
   const [complaintLogs, setComplaintLogs] = useState([]);
   const [loading, setLoading] = useState(false);
 
-console.log(images,"images")
+  console.log(complaint, "images")
 
   // Fetch complaint logs from Supabase
   const fetchComplaintLogs = async () => {
@@ -132,6 +132,21 @@ console.log(images,"images")
     setInstructions(e.target.value);
   };
 
+  const updateComplaintStatus = async () => {
+   try {
+    const { data, error } = await supabase
+      .from("RaiseComplaint")
+      .update({ status }) 
+      .eq("id", status)
+      .select();
+
+    if (error) throw error;
+    console.log("Status updated in RaiseComplaint:", data);
+  } catch (err) {
+    console.error("Error updating status in RaiseComplaint:", err);
+  }
+};
+
   // Save log to Supabase
   const saveComplaintLog = async (logData) => {
     try {
@@ -182,19 +197,17 @@ console.log(images,"images")
       alert("Failed to save the log. Please try again.");
       return;
     }
-
+    updateComplaintStatus(
+  
+)
     // Update local state
     await fetchComplaintLogs();
+    setAssignTo("Select Assignee");
+    setInstructions("");
+    setStatus("Processing");
     setIsOpen(false);
   };
 
-  const handleImagePreviewPopUp = () => {
-    setShowImagePreviewPupUp(!showImagePreviewPopUp);
-  };
-
-  const togglePopup = () => {
-    setPopup(!popup);
-  };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -226,6 +239,7 @@ console.log(images,"images")
   const [showContact, setShowContact] = useState(false);
 
   const getDisplayStatus = (status) => {
+    console.log(status,"status1")
     // First check if it's one of our UI statuses
     switch (status) {
       case "Process":
@@ -249,16 +263,22 @@ console.log(images,"images")
         }
     }
   };
- const handleViewImage = (image) => {
-  const index = images?.indexOf(image);
-  setPhotoIndex(index);
-  setIsFullImg(true);
-};
+   console.log(status,"status2")
+  const handleViewImage = (image) => {
+    const index = images?.indexOf(image);
+    setPhotoIndex(index);
+    setIsFullImg(true);
+  };
+const currentLog = historyLog.find(log => log.active);
+const nextLog = status !== currentLog?.status 
+  ? { status, description: "Updated status", active: false }
+  : null;
+
   return (
     <div>
 
       {isFullImg && (
-       <Lightbox
+        <Lightbox
           open={isFullImg}
           close={() => setIsFullImg(false)}
           index={photoIndex}
@@ -317,7 +337,7 @@ console.log(images,"images")
               <div className="flex mt-[16px]">
                 <span className="font-normal text-sm text-[#1D1617]">Complaint Id :</span>
                 <span className="ml-2 text-[#1D1617] font-normal text-sm opacity-[50%]">
-                  {complaint?.id}
+                  {complaint?.complaintId}
                 </span>
               </div>
               <div className="flex mt-[16px]">
@@ -361,7 +381,7 @@ console.log(images,"images")
             </p>
             <div className="flex gap-[14px] mt-2.5">
               {complaint?.images?.map((img, index) => (
-                <img onClick={() =>handleViewImage(img)} key={index} src={img} alt="img" className="w-20 h-20 object-cover" />
+                <img onClick={() => handleViewImage(img)} key={index} src={img} alt="img" className="w-20 h-20 object-cover" />
               ))}
             </div>
           </div>
@@ -436,7 +456,7 @@ console.log(images,"images")
                           } ${status === "Process" ? "text-[#6C4DEF]" : ""} ${status === "Pending" ? "text-[#FFA500]" : ""
                           } ${status === "Done" ? "text-[#008000]" : ""}`}
                       >
-                        {status}
+                        {status} 
                       </span>
                       <span>
                         <DropdownIcon />
@@ -474,7 +494,11 @@ console.log(images,"images")
                     </button>
                     <button
                       className="font-normal text-base px-[34px] py-2 bg-[#F1F1F1] rounded-[10px]"
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => {
+                        setIsOpen(false); setAssignTo("Select Assignee");
+                        setInstructions("");
+                        setStatus("Processing");
+                      }}
                     >
                       Cancel
                     </button>
@@ -491,7 +515,8 @@ console.log(images,"images")
             <p>Loading history...</p>
           ) : (
             <div>
-              {historyLog.map((log, index) => (
+                {[currentLog, nextLog].filter(Boolean).map((log, index) => {
+                return(
                 <div key={index} className="flex items-start">
                   <div className="flex flex-col items-center">
                     <div
@@ -526,7 +551,8 @@ console.log(images,"images")
                       )}
                   </div>
                 </div>
-              ))}
+              )
+              })}
             </div>
           )}
         </div>

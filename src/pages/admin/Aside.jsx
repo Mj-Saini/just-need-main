@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Arrowicon, UserIcon } from "../../assets/icon/Icons";
 import { UpArrowGreen } from "../../assets/icon/Icon";
 import Charts from "../../Components/Charts";
@@ -9,10 +9,30 @@ import { cardData, customersDataList } from "../../Components/Common/Helper";
 import CustomerData from "../../Components/CustomerData";
 import RevenueGraph from "../../assets/png/revenueGraph.png";
 import Users from "./Users";
+import { supabase } from "../../store/supabaseCreateClient";
 
 function Aside() {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState(new Date());
+
+  const [adminStat, setAdminStat] = useState({})
+  
+  const getAdminStats = async() => {
+let { data: adminstats, error } = await supabase
+  .from('adminstats')
+  .select('*')
+    setAdminStat(adminstats[0])
+          
+  }
+
+  useEffect(() => {
+    getAdminStats()
+  },[])
+
+  console.log(adminStat,"adminStats")
+
+
+
   const months = [
     "Jan",
     "Feb",
@@ -39,6 +59,8 @@ function Aside() {
       (prev) => new Date(prev.getFullYear() + increment, prev.getMonth())
     );
   };
+
+
   return (
     <>
       <div className="px-[14px] bg-white rounded-[10px] ">
@@ -106,7 +128,7 @@ function Aside() {
                   )}
                 </div>
                 <div className="flex items-center justify-between mt-[15px]">
-                  <p className="text-[50px] font-medium">{card.count}</p>
+                  <p className="text-[50px] font-medium">{adminStat[card.id]}</p>
                   <div className="w-6/12">
                     {index === 3 ? (
                       <img

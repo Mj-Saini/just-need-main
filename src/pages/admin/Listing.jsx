@@ -244,13 +244,13 @@ const Listing = () => {
             {visibleData.length > 0 ? (visibleData?.map((item) => (
               <Link
                 to={`${item.id}`}
-                style={{ filter: "drop-shadow(0,0,34 rgba(0,0,0,0.11))" }}
-                className="w-6/12 mt-3 xl:mt-[15px] xl:w-3/12 px-3 filter !drop-shadow-lg"
+                // style={{ filter: "drop-shadow(0,0,34 rgba(0,0,0,0.11))" }}
+                className="w-6/12 mt-3 xl:mt-[15px] xl:w-3/12 px-3 "
                 key={item.id}
               >
-                <div className="h-full">
+                <div className="h-full border border-[#ccc] rounded-xl hover:!drop-shadow-lg overflow-hidden">
                   <div className="h-full  relative group flex flex-col">
-                    <div className="relative">
+                    <div className="relative ">
                       <img
                         className="w-full group-hover:opacity-70 h-[128px] object-cover"
                         src={item.images[0]}
@@ -261,7 +261,7 @@ const Listing = () => {
                       </button>
                     </div>
 
-                    <div className="p-2.5 bg-white flex-grow">
+                    <div className="p-2.5 ">
                       <div className="flex  justify-between items-center">
                         <p className="font-normal text-base text-black">
                           {item.title}

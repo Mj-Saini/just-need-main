@@ -125,8 +125,8 @@ export const Complaints = () => {
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
-  console.log(currentItems,"currentItems")
 
+          console.log(currentItems,"items")
   return (
     <div className="p-5 bg-white rounded-[10px]">
       {location.pathname === `/dashboard/complaints/complaintsDetails/${val}` ? (
@@ -208,9 +208,12 @@ export const Complaints = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentItems.map((item) => (
+                  {currentItems.map((item) => {
+                    
+          
 
-                  <tr key={item.id} className="align-top">
+                    return (
+                      <tr key={item.id} className="align-top">
                     <td className="text-black text-sm font-normal py-[4px] px-4">
                       <input
                         type="checkbox"
@@ -262,7 +265,8 @@ export const Complaints = () => {
                     </td>
                     <td className="text-black text-sm font-normal px-4 text_center"><ActionIcon /></td>
                   </tr>
-                ))}
+                )
+                })}
               </tbody>
             </table>
           </div>

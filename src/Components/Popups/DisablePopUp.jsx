@@ -1,4 +1,4 @@
-import React from "react";
+
 import { BlackDisableIcon } from "../../assets/icon/Icon";
 
 function DisablePopUp({ onConfirm, onCancel, isActive, confirmText = "Yes" }) {

@@ -435,7 +435,6 @@ const CustomerData = () => {
               </tr>
             ) : (
               paginatedData.map((customer) => {
-console.log(customer,"customer")
                 return (
                   <tr key={customer.id}>
                     <td className="px-[19px] md:px-[24px]">

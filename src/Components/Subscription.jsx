@@ -57,29 +57,29 @@ const Subscription = () => {
         {plans?.map((item) => (
           <div key={item.id} className="w-6/12 xl:w-4/12 2xl:w-3/12 px-3 mt-3">
             <div
-              style={{
-                background: `linear-gradient(135deg, ${item.color}, black)`,
-              }}
-              className="p-5 rounded-[10px] group bg-gradient-to-br from-[#8970F2] to-[#321A95]"
+              // style={{
+              //   background: `linear-gradient(135deg, ${item.color}, black)`,
+              // }}
+              className="p-5 rounded-[10px] group bg-white border border-[#ccc] !text-black"
             >
               <div className="flex items-center justify-between">
-                <h1 className="text-xl xl:text-[26px] font-semibold text-white uppercase">
+                <h1 className="text-xl xl:text-[26px] font-semibold text-black uppercase">
                   {item.planName}
                 </h1>
-                <div className="flex items-center gap-[15px] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                {/* <div className="flex items-center gap-[15px] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <button onClick={() => handleEditPlan(item)}>
                     <EditiconSubscription />
                   </button>
                   <button onClick={() => handleDeleteClick(item.id)}>
                     <RedDeleteIcon />
                   </button>
-                </div>
+                </div> */}
               </div>
               <div className="border-t-[1px] border-dashed border-white my-2.5"></div>
-              <p className="text-center font-normal text-[10px] xl:text-xs text-white">
+              <p className="text-center font-normal text-[10px] xl:text-xs text-black">
                 {item.cancellationPolicy}
               </p>
-              <p className="text-white text-center mt-[15px] leading-none border-[1px] border-dashed border-[#FFFFFF4D] rounded-[10px] py-3">
+              <p className="text-black text-center mt-[15px] leading-none border-[1px] border-dashed border-[#FFFFFF4D] rounded-[10px] py-3">
                 <sup className="text-xl font-normal relative top-[-30px] pe-3">
                   {item.currency}
                 </sup>
@@ -90,23 +90,23 @@ const Subscription = () => {
                   /{item.durationInDays} Months
                 </sub>
               </p>
-              <p className="mt-[15px] text-[#FFFFFF99] text-sm xl:text-base font-normal">
+              <p className="mt-[15px] text-black text-sm xl:text-base font-normal">
                 How It Works?
               </p>
               <div className="flex items-center gap-[15px] mt-[15px]">
                 <div className="rounded-[50px] text-white h-[24px] w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">
                   <span>1</span>
                 </div>
-                <p className="text-xs lg:text-sm font-normal text-[#FFFFFF99]">
-                  <span className="font-bold text-white">View Seller Profiles :</span>  Get complete access to seller details.
+                <p className="text-xs lg:text-sm font-normal text-black">
+                  <span className="font-bold text-black">View Seller Profiles :</span>  Get complete access to seller details.
                 </p>
               </div>
               <div className="flex items-center gap-[15px] mt-[15px]">
                 <div className="rounded-[50px] text-white h-[24px] w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">
                   <span>2</span>
                 </div>
-                <p className="text-xs lg:text-sm font-normal text-[#FFFFFF99]">
-                  <span className="font-bold text-white"> Chat with Sellers :</span>   Message sellers directly within the app.
+                <p className="text-xs lg:text-sm font-normal text-black">
+                  <span className="font-bold text-black"> Chat with Sellers :</span>   Message sellers directly within the app.
 
                 </p>
               </div>
@@ -114,8 +114,8 @@ const Subscription = () => {
                 <div className="rounded-[50px] text-white h-[24px] w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">
                   <span>3</span>
                 </div>
-                <p className="text-xs lg:text-sm font-normal text-[#FFFFFF99]">
-                  <span className="font-bold text-white"> Call Sellers :</span>   Instantly connect with sellers via call.
+                <p className="text-xs lg:text-sm font-normal text-black">
+                  <span className="font-bold text-black"> Call Sellers :</span>   Instantly connect with sellers via call.
 
                 </p>
               </div>
@@ -123,8 +123,8 @@ const Subscription = () => {
                 <div className="rounded-[50px] text-white h-[24px] w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">
                   <span>4</span>
                 </div>
-                <p className="text-xs lg:text-sm font-normal text-[#FFFFFF99]">
-                  <span className="font-bold text-white"> Switch to Seller Mode :</span>    Become a seller and list your services.
+                <p className="text-xs lg:text-sm font-normal text-black">
+                  <span className="font-bold text-black"> Switch to Seller Mode :</span>    Become a seller and list your services.
 
                 </p>
               </div>
@@ -132,8 +132,8 @@ const Subscription = () => {
                 <div className="rounded-[50px] text-white h-[24px] w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">
                   <span>5</span>
                 </div>
-                <p className="text-xs lg:text-sm font-normal text-[#FFFFFF99]">
-                  <span className="font-bold text-white">Priority Support:</span>   Get faster customer assistance.
+                <p className="text-xs lg:text-sm font-normal text-black">
+                  <span className="font-bold text-black">Priority Support:</span>   Get faster customer assistance.
 
                 </p>
               </div>
@@ -141,8 +141,8 @@ const Subscription = () => {
                 <div className="rounded-[50px] text-white h-[24px] w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">
                   <span>6</span>
                 </div>
-                <p className="text-xs lg:text-sm font-normal text-[#FFFFFF99]">
-                  <span className="font-bold text-white">Exclusive Offers :</span>    Access special deals and discounts.
+                <p className="text-xs lg:text-sm font-normal text-black">
+                  <span className="font-bold text-black">Exclusive Offers :</span>    Access special deals and discounts.
 
                 </p>
               </div>

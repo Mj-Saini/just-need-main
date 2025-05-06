@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { useState, useRef, useEffect } from "react";
 import { ChromePicker } from "react-color";
 import Logo from "../../assets/logo.png"; // Default logo image
@@ -239,7 +240,7 @@ function SettinGeneral() {
           </label>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-5 lg:items-center mt-[30px]">
+        {/* <div className="flex flex-col lg:flex-row gap-5 lg:items-center mt-[30px]">
           <p className="min-w-[160px] text-base font-normal text-black">
             Platform Appearance:
           </p>
@@ -297,7 +298,7 @@ function SettinGeneral() {
               </div>
             )}
           </div>
-        </div>
+        </div> */}
       </div>
 
       <div className="my-[15px] border-t-[1px] border-[#00000033]"></div>
