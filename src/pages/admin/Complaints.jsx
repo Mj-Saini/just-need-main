@@ -260,7 +260,7 @@ export const Complaints = () => {
                         ? 'bg-[#FFA50029] text-[#FFA500]'
                         : 'bg-[#0080001A] text-[#008000]'
                         }`}>
-                        {item.userdetails?.verificationStatus}
+                        {item?.status}
                       </span>
                     </td>
                     <td className="text-black text-sm font-normal px-4 text_center"><ActionIcon /></td>

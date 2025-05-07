@@ -79,7 +79,7 @@ const Subscription = () => {
               <p className="text-center font-normal text-[10px] xl:text-xs text-black">
                 {item.cancellationPolicy}
               </p>
-              <p className="text-black text-center mt-[15px] leading-none border-[1px] border-dashed border-[#FFFFFF4D] rounded-[10px] py-3">
+              <p className="text-black text-center mt-[15px] leading-none border-[1px] border-dashed border-[#FFFFFF4D] rounded-[10px] py-3 bg-[#f1f1f1]">
                 <sup className="text-xl font-normal relative top-[-30px] pe-3">
                   {item.currency}
                 </sup>

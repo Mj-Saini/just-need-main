@@ -26,7 +26,7 @@ const Provider_Detail = () => {
   const [complaintLogs, setComplaintLogs] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  console.log(complaint, "images")
+  
 
   // Fetch complaint logs from Supabase
   const fetchComplaintLogs = async () => {
@@ -43,10 +43,11 @@ const Provider_Detail = () => {
       if (data && data.length > 0) {
         setComplaintLogs(data);
         const latestLog = data[data.length - 1];
-        setStatus(latestLog.status);
-        setAssignTo(latestLog.assignTo || "Select Assignee");
-        setInstructions(latestLog.instruction || "");
+        // setStatus(latestLog.status);
+        // setAssignTo(latestLog.assignTo || "Select Assignee");
+        // setInstructions(latestLog.instruction || "");
       }
+      
     } catch (error) {
       console.error("Error fetching complaint logs:", error);
     } finally {
@@ -132,12 +133,15 @@ const Provider_Detail = () => {
     setInstructions(e.target.value);
   };
 
+
   const updateComplaintStatus = async () => {
-   try {
+  try {
     const { data, error } = await supabase
       .from("RaiseComplaint")
-      .update({ status }) 
-      .eq("id", status)
+      .update({
+        status
+      })
+      .eq("complaintId", complaint.complaintId)
       .select();
 
     if (error) throw error;
@@ -160,16 +164,17 @@ const Provider_Detail = () => {
       };
 
       const dbStatus = statusMap[logData.status] || logData.status;
+console.log("Mapped DB Status:", dbStatus);
 
       const { data, error } = await supabase
-        .from("ComplaintLogs")
-        .insert([{
-          ...logData,
-          status: dbStatus,
-          logid: logID,
-          createdAt: Date.now()
-        }])
-        .select();
+  .from("ComplaintLogs")
+  .upsert([{
+    ...logData,
+    status: dbStatus,
+    logid: logID,
+    createdAt: Date.now()
+  }], { onConflict: ['complaintid', 'status', 'assignTo'] })
+  .select();
 
       if (error) throw error;
       return data;
@@ -197,16 +202,16 @@ const Provider_Detail = () => {
       alert("Failed to save the log. Please try again.");
       return;
     }
-    updateComplaintStatus(
-  
-)
+
+    updateComplaintStatus();  // make sure this runs when you click Apply
     // Update local state
     await fetchComplaintLogs();
     setAssignTo("Select Assignee");
     setInstructions("");
-    setStatus("Processing");
+    setStatus(status);
     setIsOpen(false);
   };
+  console.log("Applying with status:", status);
 
 
   useEffect(() => {
@@ -520,24 +525,24 @@ const nextLog = status !== currentLog?.status
                 <div key={index} className="flex items-start">
                   <div className="flex flex-col items-center">
                     <div
-                      className={`w-4 h-4 border-2 rounded-full ${log.active ? "border-[#6C4DEF]" : "border-gray-300"}`}
+                      className={`w-4 h-4 border-2 rounded-full ${log.active ? "border-[#6C4DEF]" : "border-[#6C4DEF]"}`}
                     ></div>
                     {index < historyLog.length - 1 && (
                       <div
                         className={`w-[2px] h-20 border border-dashed ${log.active && historyLog[index + 1].active
                           ? "border-[#6C4DEF]"
-                          : "border-[#000] opacity-10"}`}
+                          : "border-0"}`}
                       ></div>
                     )}
                   </div>
                   <div className="ml-4">
                     <h3
-                      className={`font-semibold font-base ${log.active ? "text-black" : "text-gray-400"}`}
+                      className={`font-semibold font-base ${log.active ? "text-black" : "text-black"}`}
                     >
                       {log.status}
                     </h3>
                     <p
-                      className={`text-sm font-normal text-black opacity-[80%] mt-2.5 ${log.active ? "text-black" : "text-gray-400"}`}
+                      className={`text-sm font-normal text-black opacity-[80%] mt-2.5 ${log.active ? "text-black" : "text-black"}`}
                     >
                       {log.description}
                     </p>
