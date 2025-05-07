@@ -211,7 +211,7 @@ console.log("Mapped DB Status:", dbStatus);
     setStatus(status);
     setIsOpen(false);
   };
-  console.log("Applying with status:", status);
+
 
 
   useEffect(() => {
