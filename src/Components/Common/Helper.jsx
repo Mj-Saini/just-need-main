@@ -1,6 +1,6 @@
 export const cardData = [
   {
-    id:"totalcomplaints",
+    id:"totalusers",
     title: 'Total Users',
     count: 500,
     increase: '10+',
@@ -14,7 +14,7 @@ export const cardData = [
     description: 'Increased from last month',
   },
   {
-    id:"totalusers",
+    id:"totalcomplaints",
     title: 'Complaints',
     count: '08',
     increase: '-2',
