@@ -52,7 +52,7 @@ function BannerDetails() {
 
   const fetchOffer = async () => {
     try {
-      const { data, error } = await supabase.from("offers").select("*");
+      const { data, error } = await supabase.from("Offers").select("*");
       if (error) throw error;
       setOffer(data || []);
       const initialLoadedState = (data || []).reduce((acc, item) => {
@@ -224,7 +224,7 @@ function BannerDetails() {
 
       if (editingOffer) {
         const { error } = await supabase
-          .from("offers")
+          .from("Offers")
           .update({
             tagOffer: tags,
             service: service,
@@ -238,7 +238,7 @@ function BannerDetails() {
         if (error) throw error;
         toast.success("Banner updated successfully!");
       } else {
-        const { error } = await supabase.from("offers").insert([
+        const { error } = await supabase.from("Offers").insert([
           {
             tagOffer: tags,
             service: service,
@@ -267,7 +267,7 @@ function BannerDetails() {
   const handleDeleteConfirm = async () => {
     try {
       const { error } = await supabase
-        .from("offers")
+        .from("Offers")
         .delete()
         .eq("id", deleteId);
       if (error) throw error;

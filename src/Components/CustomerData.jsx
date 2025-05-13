@@ -177,7 +177,7 @@ const CustomerData = () => {
   const handleConfirmDelete = async () => {
     try {
       const { error } = await supabase
-        .from("users")
+        .from("Users")
         .delete()
         .in("id", selectItem);
 
@@ -200,7 +200,7 @@ const CustomerData = () => {
 
   const handleCancelDelete = () => {
     setShowDeletePopup(false);
-    setSelectItem([]); // Clear selection after canceling
+    setSelectItem([]); 
   };
 
   const location = useLocation();

@@ -33,7 +33,7 @@ function DisableProviderPopUp({ handlePopupDisable, userId }) {
 
       // Update the users table in Supabase
       const { data, error } = await supabase
-        .from("users")
+        .from("Users")
         .update({
           accountStatus: newStatus,
           // Optionally store the reason too

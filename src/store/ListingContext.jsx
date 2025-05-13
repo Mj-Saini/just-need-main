@@ -8,7 +8,7 @@ export const useListingContext = () => useContext(ListingContext);
 
 function ListingProvider({ children }) {
   const fetchlisting = async () => {
-    const { data, error } = await supabase.from("service_listings").select("");
+    const { data, error } = await supabase.from("ServiceListings").select("");
     if (!error) {
       return data;
     }
@@ -18,7 +18,7 @@ function ListingProvider({ children }) {
 
   const fetchlistingWithId = async (id) => {
     const { data, error } = await supabase
-      .from("service_listings")
+      .from("ServiceListings")
       .select("*")
       .eq("id", id) // Fetch data where id matches
       .single(); // Get only one record

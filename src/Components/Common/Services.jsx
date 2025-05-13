@@ -102,55 +102,28 @@ function Services() {
     }
   }, [categories, loading]);
 
-  const filteredCategoriesData = useMemo(() => {
-    if (!searchQuery.trim()) {
-      return categories
-        .filter((cat) => cat.isActive)
-        .map((category) => ({
-          ...category,
-          subcategory: (category.subcategory || []).filter((sub) => sub.isActive),
-        }))
-        .filter((cat) => cat.subcategory.length > 0);
-    }
-
-    return categories
-      .map((category) => {
-        if (!category.isActive) return null;
-
-        const categoryMatches = category?.categoryName
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase());
-
-        const filteredSubcategories = (category.subcategory || []).filter(
-          (sub) =>
-            sub.isActive &&
-            sub?.categoryName?.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-
-        if (categoryMatches || filteredSubcategories.length > 0) {
-          return {
-            ...category,
-            subcategory:
-              filteredSubcategories.length > 0 || categoryMatches
-                ? filteredSubcategories
-                : [],
-          };
-        }
-        return null;
-      })
-      .filter((cat) => cat !== null && cat.subcategory.length > 0);
-  }, [categories, searchQuery]);
-
   // const filteredCategoriesData = useMemo(() => {
-  //   if (!searchQuery.trim()) return categories;
+  //   if (!searchQuery.trim()) {
+  //     return categories
+  //       .filter((cat) => cat.isActive)
+  //       .map((category) => ({
+  //         ...category,
+  //         subcategory: (category.subcategory || []).filter((sub) => sub.isActive),
+  //       }))
+  //       .filter((cat) => cat.subcategory.length > 0);
+  //   }
 
   //   return categories
   //     .map((category) => {
+  //       if (!category.isActive) return null;
+
   //       const categoryMatches = category?.categoryName
   //         ?.toLowerCase()
   //         .includes(searchQuery.toLowerCase());
+
   //       const filteredSubcategories = (category.subcategory || []).filter(
   //         (sub) =>
+  //           sub.isActive &&
   //           sub?.categoryName?.toLowerCase().includes(searchQuery.toLowerCase())
   //       );
 
@@ -159,15 +132,43 @@ function Services() {
   //           ...category,
   //           subcategory:
   //             filteredSubcategories.length > 0 || categoryMatches
-  //               ? category.subcategory
+  //               ? filteredSubcategories
   //               : [],
   //         };
   //       }
   //       return null;
   //     })
-  //     .filter((cat) => cat !== null);
+  //     .filter((cat) => cat !== null && cat.subcategory.length > 0);
   // }, [categories, searchQuery]);
 
+  const filteredCategoriesData = useMemo(() => {
+    if (!searchQuery.trim()) return categories;
+
+    return categories
+      .map((category) => {
+        const categoryMatches = category?.categoryName
+          ?.toLowerCase()
+          .includes(searchQuery.toLowerCase());
+        const filteredSubcategories = (category.subcategory || []).filter(
+          (sub) =>
+            sub?.categoryName?.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+
+        if (categoryMatches || filteredSubcategories.length > 0) {
+          return {
+            ...category,
+            subcategory:
+              filteredSubcategories.length > 0 || categoryMatches
+                ? category.subcategory
+                : [],
+          };
+        }
+        return null;
+      })
+      .filter((cat) => cat !== null);
+  }, [categories, searchQuery]);
+
+  console.log(filteredCategoriesData,"filterdsfs")
   const toggle = useCallback(() => {
     setShowForm((prev) => {
       if (!prev) {
@@ -288,7 +289,7 @@ function Services() {
 
           // Update the category with the new image URL in the database
           const { error: updateError } = await supabase
-            .from("categories") // Replace with your actual table name
+            .from("Categories") // Replace with your actual table name
             .update({ image: publicUrlData.publicUrl })
             .eq("id", editingCategoryId);
 
@@ -542,6 +543,9 @@ function Services() {
       )
     );
   };
+
+
+  console.log(categories,"categories")
 
   return (
     <div className="p-[14px] rounded-[10px] shadow-md bg-white">

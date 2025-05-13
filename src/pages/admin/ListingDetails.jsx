@@ -46,7 +46,7 @@ const ListingDetails = () => {
     const confirmDelete = window.confirm("Are you sure to Block user?");
     if (confirmDelete) {
       const { data, error } = await supabase
-        .from("service_listings")
+        .from("ServiceListings")
         .update({
           blockStatus: {
             isBlocked: !val.isBlocked,

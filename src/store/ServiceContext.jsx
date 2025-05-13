@@ -3,7 +3,7 @@
 /* eslint-disable no-unused-vars */
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { supabase } from "./supabaseCreateClient";
-import Loader from "../Components/Common/Loader";
+
 
 const serviceProvider = createContext();
 export const useServiceContext = () => useContext(serviceProvider);
@@ -24,14 +24,13 @@ function ServiceContext({ children }) {
         throw new Error(`Failed to fetch categories: ${error.message}`);
 
       const formattedData = data.map((category) => {
+        console.log(category,"category")
         return {
           ...category,
           subcategory: category.subcategory ?? [],
         };
       });
-
-
-      setCategories(formattedData);
+ setCategories(formattedData);
     } catch (error) {
       console.error("Error fetching data:", error.message);
     } finally {
@@ -81,7 +80,7 @@ function ServiceContext({ children }) {
 
       // Insert category into Supabase
       const { data: category, error: categoryError } = await supabase
-        .from("categories")
+        .from("Categories")
         .insert([
           {
             categoryName,
@@ -117,7 +116,7 @@ function ServiceContext({ children }) {
       ]);
     } catch (error) {
       console.error("Error in addCategoriesSubCategories:", error.message);
-      throw error; // Re-throw to be caught in the popup
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -146,7 +145,7 @@ function ServiceContext({ children }) {
       }
 
       const { data, error } = await supabase
-        .from("subcategories")
+        .from("SubCategories")
         .insert([
           {
             catId: categoryId,
@@ -204,7 +203,7 @@ function ServiceContext({ children }) {
       }
 
       const { data, error } = await supabase
-        .from("subcategories")
+        .from("SubCategories")
         .update({
           ...updatedData,
           image: imageUrl,
@@ -274,7 +273,7 @@ function ServiceContext({ children }) {
       if (imageUrl) updateData.image = imageUrl; // Only update image if a new one is provided
 
       const { data, error } = await supabase
-        .from("categories")
+        .from("Categories")
         .update(updateData)
         .eq("id", categoryId)
         .select()
@@ -301,7 +300,7 @@ function ServiceContext({ children }) {
     setLoading(true);
     try {
       const { error } = await supabase
-        .from("categories")
+        .from("Categories")
         .update({ isActive: newStatus })
         .eq("id", categoryId);
 
@@ -326,7 +325,7 @@ function ServiceContext({ children }) {
     setLoading(true);
     try {
       const { error } = await supabase
-        .from("subcategories")
+        .from("SubCategories")
         .update({ isActive: newStatus })
         .eq("id", subcategoryId);
 
@@ -354,7 +353,7 @@ function ServiceContext({ children }) {
     setLoading(true);
     try {
       const { error } = await supabase
-        .from("subcategories")
+        .from("SubCategories")
         .delete()
         .eq("id", subCategoryId);
       if (error)
@@ -383,7 +382,7 @@ function ServiceContext({ children }) {
     }
     try {
       const { error } = await supabase
-        .from("subcategories")
+        .from("SubCategories")
         .update({ categoryName: updatedName })
         .eq("id", subCategoryId);
 
@@ -405,6 +404,8 @@ function ServiceContext({ children }) {
       setLoading(false);
     }
   };
+
+  console.log(categories,"categories")
 
   return (
     <serviceProvider.Provider

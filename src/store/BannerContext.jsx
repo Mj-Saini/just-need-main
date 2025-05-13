@@ -13,7 +13,7 @@ function BannerProvider({ children }) {
   }, []);
 
   const fetchOffer = async () => {
-    const { data, error } = await supabase.from("offers").select("*");
+    const { data, error } = await supabase.from("Offers").select("*");
     if (error) {
       toast.error("Error fetching Offers");
     } else {
@@ -24,7 +24,7 @@ function BannerProvider({ children }) {
 
   const handleDelete = async (id) => {
     // console.log("harish", id);
-    const { error } = await supabase.from("offers").delete().eq("id", id);
+    const { error } = await supabase.from("Offers").delete().eq("id", id);
     if (error) {
       toast.error("Error deleting offer");
     } else {

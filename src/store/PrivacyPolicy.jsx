@@ -9,7 +9,7 @@ function PolicyProvider({ children }) {
 
   const fetchPolicy = async () => {
     const { data, error } = await supabase
-      .from("policy")
+      .from("Policy")
       .select("*")
       .eq("id", 2)
       .single();
@@ -21,7 +21,7 @@ function PolicyProvider({ children }) {
   // Add policy
   const AddPolicy = async (value) => {
     const { data, error } = await supabase
-      .from("policy")
+      .from("Policy")
       .update({ privacy: value.privacy, service: value.service })
       .eq("id", 2); // passing Id hardcode because there is not delete option in admin panel so it will be fix
     if (error) {

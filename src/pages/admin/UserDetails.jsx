@@ -81,7 +81,7 @@ function UserDetails() {
       };
 
       const { data, error } = await supabase
-        .from("service_listings")
+        .from("ServiceListings")
         .update({ blockStatus: updatedBlockStatus })
         .eq("id", listing.id);
 
@@ -112,7 +112,7 @@ function UserDetails() {
   //   if (!confirmDelete) return;
 
   //   const { error } = await supabase
-  //     .from("users")
+  //     .from("Users")
   //     .delete()
   //     .eq("id", user.id);
 
@@ -131,7 +131,7 @@ function UserDetails() {
     if (!confirmDeny) return;
 
     const { error } = await supabase
-      .from("users")
+      .from("Users")
       .update({ "businessDetail.status": "Rejected" })
       .eq("id", user.id);
 
@@ -163,7 +163,7 @@ function UserDetails() {
 
     try {
       const { data, error } = await supabase
-        .from('Businessdetailsview')
+        .from('BusinessDetailsView')
         .update({ status: 'Approved' })
         .eq('businessId', user.businessDetail.businessId)
         .select();
