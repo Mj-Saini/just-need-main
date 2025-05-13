@@ -93,53 +93,53 @@ const Subscription = () => {
               <p className="mt-[15px] text-black text-sm xl:text-base font-normal">
                 How It Works?
               </p>
-              <div className="flex items-center gap-[15px] mt-[15px]">
+              <div className="flex items-center gap-2 mt-[15px]">
                 <div className="rounded-[50px] text-white h-[24px] w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">
-                  <span>1</span>
+                  <span className="rounded-[50px] text-white h-[24px] !w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">1</span>
                 </div>
                 <p className="text-xs lg:text-sm font-normal text-black">
                   <span className="font-bold text-black">View Seller Profiles :</span>  Get complete access to seller details.
                 </p>
               </div>
-              <div className="flex items-center gap-[15px] mt-[15px]">
+              <div className="flex items-center gap-2 mt-[15px]">
                 <div className="rounded-[50px] text-white h-[24px] w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">
-                  <span>2</span>
+                  <span className="rounded-[50px] text-white h-[24px] !w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">2</span>
                 </div>
                 <p className="text-xs lg:text-sm font-normal text-black">
                   <span className="font-bold text-black"> Chat with Sellers :</span>   Message sellers directly within the app.
 
                 </p>
               </div>
-              <div className="flex items-center gap-[15px] mt-[15px]">
+              <div className="flex items-center gap-2 mt-[15px]">
                 <div className="rounded-[50px] text-white h-[24px] w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">
-                  <span>3</span>
+                  <span className="rounded-[50px] text-white h-[24px] !w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">3</span>
                 </div>
                 <p className="text-xs lg:text-sm font-normal text-black">
                   <span className="font-bold text-black"> Call Sellers :</span>   Instantly connect with sellers via call.
 
                 </p>
               </div>
-              <div className="flex items-center gap-[15px] mt-[15px]">
+              <div className="flex items-center gap-2 mt-[15px]">
                 <div className="rounded-[50px] text-white h-[24px] w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">
-                  <span>4</span>
+                  <span className="rounded-[50px] text-white h-[24px] !w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">4</span>
                 </div>
                 <p className="text-xs lg:text-sm font-normal text-black">
                   <span className="font-bold text-black"> Switch to Seller Mode :</span>    Become a seller and list your services.
 
                 </p>
               </div>
-              <div className="flex items-center gap-[15px] mt-[15px]">
+              <div className="flex items-center gap-2 mt-[15px]">
                 <div className="rounded-[50px] text-white h-[24px] w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">
-                  <span>5</span>
+                  <span className="rounded-[50px] text-white h-[24px] !w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">5</span>
                 </div>
                 <p className="text-xs lg:text-sm font-normal text-black">
                   <span className="font-bold text-black">Priority Support:</span>   Get faster customer assistance.
 
                 </p>
               </div>
-              <div className="flex items-center gap-[15px] mt-[15px]">
-                <div className="rounded-[50px] text-white h-[24px] w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">
-                  <span>6</span>
+              <div className="flex items-center gap-2 mt-[15px]">
+                <div className="rounded-[50px] text-white h-[24px] !w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">
+                  <span className="rounded-[50px] text-white h-[24px] !w-[24px] bg-[#382488] text-sm font-normal flex items-center justify-center">6</span>
                 </div>
                 <p className="text-xs lg:text-sm font-normal text-black">
                   <span className="font-bold text-black">Exclusive Offers :</span>    Access special deals and discounts.
