@@ -24,7 +24,7 @@ function ServiceContext({ children }) {
         throw new Error(`Failed to fetch categories: ${error.message}`);
 
       const formattedData = data.map((category) => {
-        console.log(category,"category")
+        // console.log(category,"category")
         return {
           ...category,
           subcategory: category.subcategory ?? [],
@@ -265,7 +265,7 @@ function ServiceContext({ children }) {
         }
 
         imageUrl = urlData.publicUrl;
-        console.log("Updated Image URL:", imageUrl);
+ 
       }
 
       // Prepare the update object
@@ -405,7 +405,7 @@ function ServiceContext({ children }) {
     }
   };
 
-  console.log(categories,"categories")
+
 
   return (
     <serviceProvider.Provider

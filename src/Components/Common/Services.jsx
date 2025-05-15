@@ -168,7 +168,6 @@ function Services() {
       .filter((cat) => cat !== null);
   }, [categories, searchQuery]);
 
-  console.log(filteredCategoriesData,"filterdsfs")
   const toggle = useCallback(() => {
     setShowForm((prev) => {
       if (!prev) {
@@ -545,7 +544,6 @@ function Services() {
   };
 
 
-  console.log(categories,"categories")
 
   return (
     <div className="p-[14px] rounded-[10px] shadow-md bg-white">

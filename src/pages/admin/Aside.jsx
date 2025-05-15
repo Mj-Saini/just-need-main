@@ -8,7 +8,6 @@ import blur from "../../assets/Images/Png/blur.png";
 import { cardData, customersDataList } from "../../Components/Common/Helper";
 import CustomerData from "../../Components/CustomerData";
 import RevenueGraph from "../../assets/png/revenueGraph.png";
-import Users from "./Users";
 import { supabase } from "../../store/supabaseCreateClient";
 
 function Aside() {
@@ -29,7 +28,7 @@ let { data: adminstats, error } = await supabase
     getAdminStats()
   },[])
 
-  console.log(adminStat,"adminStats")
+  // console.log(adminStat,"adminStats")
 
 
 
