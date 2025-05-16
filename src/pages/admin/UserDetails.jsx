@@ -27,9 +27,8 @@ function UserDetails() {
   const [user, setUser] = useState(null);
   const [showPopupDisable, setShowPopupDisable] = useState(false);
   const [listings, setListings] = useState([]);
-  const [approveUsers, setUpproveUsers] = useState(false);
 
-  const { users, loading, setLoading } = useCustomerContext();
+  const { users,setUsers, loading, setLoading } = useCustomerContext();
   const { fetchlisting } = useListingContext();
 
   const { setUserName } = useUserContext()
@@ -107,50 +106,60 @@ function UserDetails() {
   const isActive = user.accountStatus === "active";
 
 
-  // const userDenied = async () => {
-  //   const confirmDelete = window.confirm("Are you sure you want to deny this user?");
-  //   if (!confirmDelete) return;
-
-  //   const { error } = await supabase
-  //     .from("Users")
-  //     .delete()
-  //     .eq("id", user.id);
-
-  //   if (!error) {
-  //     toast.success("User denied and removed successfully");
-  //     setUser(null);
-  //   } else {
-  //     console.error("Error deleting user:", error);
-  //     toast.error("Failed to deny user. Please try again.");
-  //   }
-  // };
-
 
   const userDenied = async () => {
     const confirmDeny = window.confirm("Are you sure you want to deny this user?");
     if (!confirmDeny) return;
 
-    const { error } = await supabase
-      .from("Users")
-      .update({ "businessDetail.status": "Rejected" })
-      .eq("id", user.id);
 
-    if (!error) {
-      toast.success("User denied successfully");
-      // Optionally update local user state if needed
-      setUser(prev => ({
-        ...prev,
-        businessDetail: {
-          ...prev.businessDetail,
-          status: "Rejected"
-        }
-      }));
-    } else {
-      console.error("Error denying user:", error);
-      toast.error("Failed to deny user. Please try again.");
+
+    // Step 2: Update status in BusinessDetailsView and use .select() to return updated data
+    const { data, error } = await supabase
+      .from("BusinessDetailsView")
+      .update({ status: "Rejected" })
+      .eq("businessId", user.businessDetail.businessId)
+      .select();
+
+    if (error) {
+      console.error("Failed to update business status:", error);
+      toast.error("Failed to reject business.");
+      return;
     }
-  };
 
+    // Step 3: Update local state with returned data
+    toast.success("User denied successfully");
+ 
+  const updatedStatus = data?.[0]?.status || "Rejected";
+
+  // ✅ Update user detail
+  setUser(prev => ({
+    ...prev,
+    businessDetail: {
+      ...prev.businessDetail,
+      status: updatedStatus,
+    },
+
+  }));
+    
+
+  // ✅ Update context user list
+  setUsers(prevUsers =>
+    Array.isArray(prevUsers)
+      ? prevUsers.map(u =>
+          u.id === user.id
+            ? {
+                ...u,
+                businessDetail: {
+                  ...u.businessDetail,
+                  status: updatedStatus,
+                },
+              }
+            : u
+        )
+      : prevUsers
+  );
+
+  };
 
   const approveUser = async () => {
     const confirmApprove = window.confirm("Are you sure you want to approve this user?");
@@ -178,6 +187,10 @@ function UserDetails() {
           ...prevUser,
           businessDetail: { ...prevUser.businessDetail, status: 'Approved' }
         }));
+        setUsers((prevUser) => ({
+          ...prevUser,
+          businessDetail: { ...prevUser.businessDetail, status: 'Approved' }
+        }));
       }
     } catch (err) {
       console.error("🚨 Unexpected Error:", err);
@@ -190,7 +203,7 @@ function UserDetails() {
   return (
     <div className="px-4">
       <div className="flex items-center justify-center">
-  
+
 
         {user.IsSeller ? (
           user.businessDetail.status === "Approved" ? (
@@ -211,17 +224,25 @@ function UserDetails() {
                 </>
               )}
             </button>
+          ) : user.businessDetail.status === "Rejected" ? (
+            // ❌ Seller Rejected => Show special button
+            <button
+              // onClick={() => toast.info("This seller has been rejected")}
+              className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px]  text-[#FF0000]"
+            >
+              <DisableRedicon />  Rejected
+            </button>
           ) : (
             // ❌ Seller NOT Approved => Show Approve/Deny Buttons
             <div className="flex gap-4">
               <button
-                  onClick={approveUser}
+                onClick={approveUser}
                 className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-green-500 text-white"
               >
                 Approve
               </button>
               <button
-                  onClick={userDenied}
+                onClick={userDenied}
                 className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-red-500 text-white"
               >
                 Deny

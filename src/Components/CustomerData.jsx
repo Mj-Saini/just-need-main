@@ -105,7 +105,6 @@ const CustomerData = () => {
       setSelectItem([]);
     }
   };
-
   // Individual checkbox handler
   const checkHandler = (e) => {
     const value = e.target.value;
@@ -174,36 +173,78 @@ const CustomerData = () => {
   };
 
   // Confirm delete handler (works for both single and multiple users)
+  // const handleConfirmDelete = async () => {
+  //   try {
+  //     const { error } = await supabase
+  //       .from("Users")
+  //       .delete()
+  //       .in("id", selectItem);
+
+  //     if (error) throw error;
+
+  //     setUsers((prevUsers) =>
+  //       prevUsers.filter((user) => !selectItem.includes(user.id))
+  //     );
+  //     setSelectItem([]);
+  //     setMainCheckbox(false);
+  //     setShowDeletePopup(false);
+  //     toast.success(
+  //       `Successfully deleted.`
+  //     );
+  //   } catch (err) {
+  //     console.error("Error deleting users:", err);
+  //     toast.error("Failed to delete users. Please try again.");
+  //   }
+  // };
+
+
   const handleConfirmDelete = async () => {
-    try {
-      const { error } = await supabase
-        .from("Users")
+  try {
+    // Fetch the businessIds of users being deleted
+    const usersToDelete = users.filter((user) => selectItem.includes(user.id));
+    const businessIdsToDelete = usersToDelete
+      .map((user) => user.businessDetail?.businessId)
+      .filter(Boolean); // Remove undefined/null
+
+    // Step 1: Delete from BusinessDetailsView
+    if (businessIdsToDelete.length > 0) {
+      const { error: businessError } = await supabase
+        .from("BusinessDetailsView")
         .delete()
-        .in("id", selectItem);
+        .in("businessId", businessIdsToDelete);
 
-      if (error) throw error;
-
-      setUsers((prevUsers) =>
-        prevUsers.filter((user) => !selectItem.includes(user.id))
-      );
-      setSelectItem([]);
-      setMainCheckbox(false);
-      setShowDeletePopup(false);
-      toast.success(
-        `Successfully deleted.`
-      );
-    } catch (err) {
-      console.error("Error deleting users:", err);
-      toast.error("Failed to delete users. Please try again.");
+      if (businessError) throw businessError;
     }
-  };
+
+    // Step 2: Delete users
+    const { error: userError } = await supabase
+      .from("Users")
+      .delete()
+      .in("id", selectItem);
+
+    if (userError) throw userError;
+
+    // Step 3: Update local state
+    setUsers((prevUsers) =>
+      prevUsers.filter((user) => !selectItem.includes(user.id))
+    );
+    setSelectItem([]);
+    setMainCheckbox(false);
+    setShowDeletePopup(false);
+
+    toast.success("Successfully deleted users.");
+  } catch (err) {
+    console.error("Error deleting users", err);
+    toast.error("Failed to delete users. Please try again.");
+  }
+};
+
 
   const handleCancelDelete = () => {
     setShowDeletePopup(false);
     setSelectItem([]); 
   };
 
-  const location = useLocation();
   const dropdownRef = useRef(null);
   const [showItemsDropdown, setShowItemsDropdown] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState("bottom");
@@ -299,7 +340,6 @@ const CustomerData = () => {
       updatedUsers = updatedUsers.filter(user => user.verificationStatus === filters.subscriptionStatus);
     }
 
-    console.log(updatedUsers, "Updated Users After Filtering");
 
     // **Update States**
     setFilteredUsers(updatedUsers);
