@@ -45,7 +45,6 @@ const Chat = () => {
       if (!selectedRoomId) return;
 
       const roomIdAsInt = parseInt(selectedRoomId, 10);
-      console.log(typeof roomIdAsInt), "roomIdAsInt";
 
       if (isNaN(roomIdAsInt)) {
         console.error("Invalid room_id:", selectedRoomId);

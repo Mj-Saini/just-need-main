@@ -4,15 +4,10 @@ import React, { useEffect, useState } from "react";
 import user from "../../assets/png/user for listing.png";
 import star from "../../assets/png/star.png";
 import { Link, useParams } from "react-router-dom";
-import disable_img from "../../assets/png/disable_img.png";
-import enable_img from "../../assets/png/enable_img.png";
 import { supabase } from "../../store/supabaseCreateClient";
-import { EmailIcon, LocationIcon, PhoneIcon } from "../../assets/icon/Icons";
 import { useListingContext } from "../../store/ListingContext";
 
 import { DisableIcon, EnableIcon } from "../../assets/icon/Icon";
-import { truncateText } from "../../utility/wordTruncate";
-import { list } from "postcss";
 import userDummyImg from '../../assets/Images/Png/dummyimage.jpg'
 import active from "../../assets/png/active.png"
 import Lightbox from "yet-another-react-lightbox";
@@ -73,8 +68,6 @@ const ListingDetails = () => {
   useEffect(() => {
     getData();
   }, []);
-
-  console.log(listData, "list data")
 
   return (
     <div className="bg-white rounded-md flex flex-col lg:flex-row h-full overflow-auto scrollRemove">

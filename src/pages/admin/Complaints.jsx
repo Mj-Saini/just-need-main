@@ -126,7 +126,6 @@ export const Complaints = () => {
   }, []);
 
 
-          console.log(currentItems,"items")
   return (
     <div className="p-5 bg-white rounded-[10px]">
       {location.pathname === `/dashboard/complaints/complaintsDetails/${val}` ? (

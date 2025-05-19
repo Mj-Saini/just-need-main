@@ -23,7 +23,6 @@ function BannerProvider({ children }) {
 
 
   const handleDelete = async (id) => {
-    // console.log("harish", id);
     const { error } = await supabase.from("Offers").delete().eq("id", id);
     if (error) {
       toast.error("Error deleting offer");

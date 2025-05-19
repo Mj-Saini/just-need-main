@@ -164,7 +164,7 @@ const Provider_Detail = () => {
       };
 
       const dbStatus = statusMap[logData.status] || logData.status;
-console.log("Mapped DB Status:", dbStatus);
+
 
       const { data, error } = await supabase
   .from("ComplaintLogs")
@@ -244,7 +244,6 @@ console.log("Mapped DB Status:", dbStatus);
   const [showContact, setShowContact] = useState(false);
 
   const getDisplayStatus = (status) => {
-    console.log(status,"status1")
     // First check if it's one of our UI statuses
     switch (status) {
       case "Process":
@@ -268,7 +267,6 @@ console.log("Mapped DB Status:", dbStatus);
         }
     }
   };
-   console.log(status,"status2")
   const handleViewImage = (image) => {
     const index = images?.indexOf(image);
     setPhotoIndex(index);

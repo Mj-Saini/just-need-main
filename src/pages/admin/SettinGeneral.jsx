@@ -44,7 +44,6 @@ function SettinGeneral() {
     try {
       const { data, error } = await supabase.from("Config").select("*"); // Fetch all config data
       if (error) throw error;
-      console.log("Fetched Config Data:", data);
       if (data && data.length > 0) {
         const config = data[0]; // Use first record (modify if multiple records exist)
         setImage(config.logo || Logo); // Set logo or default
@@ -90,7 +89,7 @@ function SettinGeneral() {
       if (error) throw error;
 
       toast.success("Data updated in Supabase successfully!");
-      console.log("Updated Data:", newConfig);
+     
       setUpdatePopup(false); // Close popup after update
     } catch (error) {
       toast.error("Error updating data: " + error.message);

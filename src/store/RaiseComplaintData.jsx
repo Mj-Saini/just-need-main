@@ -22,7 +22,6 @@ export const ComplaintProvider = ({ children }) => {
     useEffect(() => {
         fetchComplaints(); // Fetch complaints on mount
     }, []);
-    console.log(complaints,"cpomsd")
 
     return (
         <ComplaintContext.Provider value={{ complaints, setComplaints }}>

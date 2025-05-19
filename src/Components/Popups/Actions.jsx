@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+/* eslint-disable react/prop-types */
+import  { useState } from "react";
 import {
   Crossicon,
   EditiconActionPopUp,
@@ -28,7 +29,6 @@ function Actions({ selectedItem, handleOverlayClick }) {
     }
   };
 
-  console.log(allSubcategories);
 
   const handleInputChange = (index, event) => {
     const value = event.target.value;
@@ -40,7 +40,6 @@ function Actions({ selectedItem, handleOverlayClick }) {
 
     // Correct way to update the state
     setAllSubCategories((prevItems) => {
-      console.log(prevItems, "prev Items"); // Logs before updating
 
       return prevItems.map((item, i) =>
         i === index ? { ...item, subCategoryName: value, id: item.id } : item
@@ -129,7 +128,6 @@ function Actions({ selectedItem, handleOverlayClick }) {
             .filter((value) => !value.isMarkedForDeletion)
             .map(
               (item, index) => (
-                console.log(item.categoryName, "item Name"),
                 (
                   <div key={index} className="w-4/12 px-3">
                     <div className="flex items-center mt-[30px]">

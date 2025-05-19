@@ -27,8 +27,7 @@ let { data: adminstats, error } = await supabase
   useEffect(() => {
     getAdminStats()
   },[])
-
-  // console.log(adminStat,"adminStats")
+console.log(adminStat,"adminStat")
 
 
 

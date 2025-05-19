@@ -198,33 +198,100 @@ const CustomerData = () => {
   // };
 
 
+//   const handleConfirmDelete = async () => {
+//   try {
+//     // Fetch the businessIds of users being deleted
+//     const usersToDelete = users.filter((user) => selectItem.includes(user.id));
+//     const businessIdsToDelete = usersToDelete
+//       .map((user) => user.businessDetail?.businessId)
+//       .filter(Boolean); // Remove undefined/null
+
+//     // Step 1: Delete from BusinessDetailsView
+//     if (businessIdsToDelete.length > 0) {
+//       const { error: businessError } = await supabase
+//         .from("BusinessDetailsView")
+//         .delete()
+//         .in("businessId", businessIdsToDelete);
+
+//       if (businessError) throw businessError;
+//     }
+
+//     // Step 2: Delete users
+//     const { error: userError } = await supabase
+//       .from("Users")
+//       .delete()
+//       .in("id", selectItem);
+
+//     if (userError) throw userError;
+
+//     // Step 3: Update local state
+//     setUsers((prevUsers) =>
+//       prevUsers.filter((user) => !selectItem.includes(user.id))
+//     );
+//     setSelectItem([]);
+//     setMainCheckbox(false);
+//     setShowDeletePopup(false);
+
+//     toast.success("Successfully deleted users.");
+//   } catch (err) {
+//     console.error("Error deleting users", err);
+//     toast.error("Failed to delete users. Please try again.");
+//   }
+  // };
+  
   const handleConfirmDelete = async () => {
   try {
-    // Fetch the businessIds of users being deleted
     const usersToDelete = users.filter((user) => selectItem.includes(user.id));
+    const userIds = usersToDelete.map((user) => user.id);
     const businessIdsToDelete = usersToDelete
       .map((user) => user.businessDetail?.businessId)
-      .filter(Boolean); // Remove undefined/null
+      .filter(Boolean);
 
-    // Step 1: Delete from BusinessDetailsView
+    // Step 1: Delete Business Details
     if (businessIdsToDelete.length > 0) {
       const { error: businessError } = await supabase
         .from("BusinessDetailsView")
         .delete()
         .in("businessId", businessIdsToDelete);
-
       if (businessError) throw businessError;
     }
 
-    // Step 2: Delete users
+    // Step 2: Delete Chatrooms
+    const { error: chatroomError } = await supabase
+      .from("Chatrooms")
+      .delete()
+      .in("userId", userIds); 
+    if (chatroomError) throw chatroomError;
+
+    // Step 3: Delete ChatMessages
+    const { error: messagesError } = await supabase
+      .from("ChatMessages")
+      .delete()
+      .or(`senderId.in.(${userIds.join(",")}),receiverId.in.(${userIds.join(",")})`);
+    if (messagesError) throw messagesError;
+
+    // Step 4: Delete Service Listings
+    const { error: listingsError } = await supabase
+      .from("ServiceListings")
+      .delete()
+      .in("userId", userIds); // or use user_detail.id depending on schema
+    if (listingsError) throw listingsError;
+
+    // Step 5: Delete Complaints
+    const { error: complaintsError } = await supabase
+      .from("RaiseComplaint")
+      .delete()
+      .or(`complainBy.in.(${userIds.join(",")}),complainOn.in.(${userIds.join(",")})`);
+    if (complaintsError) throw complaintsError;
+
+    // Step 6: Delete Users
     const { error: userError } = await supabase
       .from("Users")
       .delete()
-      .in("id", selectItem);
-
+      .in("id", userIds);
     if (userError) throw userError;
 
-    // Step 3: Update local state
+    // Update local state
     setUsers((prevUsers) =>
       prevUsers.filter((user) => !selectItem.includes(user.id))
     );
@@ -232,12 +299,13 @@ const CustomerData = () => {
     setMainCheckbox(false);
     setShowDeletePopup(false);
 
-    toast.success("Successfully deleted users.");
+    toast.success("Successfully deleted users and all related data.");
   } catch (err) {
-    console.error("Error deleting users", err);
+    console.error("Error deleting users and related data:", err);
     toast.error("Failed to delete users. Please try again.");
   }
 };
+
 
 
   const handleCancelDelete = () => {
@@ -311,7 +379,6 @@ const CustomerData = () => {
 
   const applyFilters = (filters) => {
     let updatedUsers = users;
-    console.log(filters, "Filters Applied");
 
     // **Filter by User Type (Seller / Consumer)**
     if (filters.selectedUserType) {
@@ -441,11 +508,11 @@ const CustomerData = () => {
               <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[200px]">
                 Created At
               </th>
-              <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[200px]">
+              {/* <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[200px]">
                 Updated At
-              </th>
+              </th> */}
               <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
-                Profile Status
+               Is Seller Online
               </th>
               <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                 Business Profile
@@ -474,7 +541,7 @@ const CustomerData = () => {
                 </td>
               </tr>
             ) : (
-              paginatedData.map((customer) => {
+                  paginatedData.map((customer) => {
                 return (
                   <tr key={customer.id}>
                     <td className="px-[19px] md:px-[24px]">
@@ -506,10 +573,7 @@ const CustomerData = () => {
                       {customer.mobile_number}
                     </td>
                     <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000] w-[120px] truncate">
-                      {Array.isArray(customer?.address) && customer.address.length > 0
-                        ? customer.address.map((item) => `${item.city}/${item.state}`).join(", ")
-                        : "N/A"}
-
+                         {customer.address.city }/{customer.address.state} 
                     </td>
                     <td
                       className={`px-[19px] text-sm font-normal truncate ${customer.IsSeller == true
@@ -526,9 +590,9 @@ const CustomerData = () => {
                     <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
                       {formatDate(customer.created_at)}
                     </td>
-                    <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                    {/* <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
                       {formatDate(customer.updated_at)}
-                    </td>
+                    </td> */}
                     <td>
                       <div className="flex justify-center items-center">
                         <span

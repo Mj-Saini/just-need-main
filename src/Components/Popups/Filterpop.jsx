@@ -82,12 +82,10 @@ const FilterComponent = ({ onClose, onApplyFilters ,preSelectedCategories = [], 
             ratings: selectedFilters.ratings
         };
 
-        console.log(filters, "filters")
         onApplyFilters(filters);  
         onClose(); 
     };
 
-    console.log(selectedFilters.priceRange, "selectedFilters")
     return (
         <div className="p-[18px] bg-white rounded-lg">
             <div className='flex flex-col justify-between  overflow-y-scroll h-[390px] scrollRemove'>

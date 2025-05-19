@@ -24,7 +24,6 @@ function ServiceContext({ children }) {
         throw new Error(`Failed to fetch categories: ${error.message}`);
 
       const formattedData = data.map((category) => {
-        // console.log(category,"category")
         return {
           ...category,
           subcategory: category.subcategory ?? [],
@@ -44,7 +43,6 @@ function ServiceContext({ children }) {
       let imageUrl = null;
 
       if (categoryImage) {
-        console.log("Uploading image:", categoryImage.name, categoryImage.size);
         const fileExt = categoryImage.name.split(".").pop();
         const fileName = `${Date.now()}.${fileExt}`;
         const filePath = `categoriesImage/${fileName}`;
@@ -66,14 +64,12 @@ function ServiceContext({ children }) {
         const { data: urlData } = supabase.storage
           .from("just_need")
           .getPublicUrl(filePath);
-        console.log("URL Data:", urlData); // Debug the URL response
         if (!urlData?.publicUrl) {
           console.error("Public URL not retrieved for filePath:", filePath);
           throw new Error("Failed to retrieve public URL");
         }
 
         imageUrl = urlData.publicUrl;
-        console.log("Image URL set to:", imageUrl);
       } else {
         console.log("No image provided for upload");
       }
@@ -107,7 +103,6 @@ function ServiceContext({ children }) {
         throw new Error("Category insertion returned no data");
       }
 
-      console.log("Category inserted successfully:", category);
 
       // Update state
       setCategories((prevCategories) => [

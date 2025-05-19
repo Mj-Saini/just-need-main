@@ -32,8 +32,6 @@ export const SubscriptionContext = ({ children }) => {
                 .select();
 
             if (error) throw error;
-
-            console.log("Plan added successfully:", data);
             setPlans((prev) => [...prev, data[0]]);
             setShowPopup(false);
             toast.success("Plan added successfully!");
@@ -55,8 +53,6 @@ export const SubscriptionContext = ({ children }) => {
                 .eq("id", planId);
 
             if (error) throw error;
-
-            console.log("Plan deleted successfully!");
             setPlans((prev) => prev.filter((plan) => plan.id !== planId));
             toast.success("Plan deleted successfully!");
             return { success: true };
@@ -85,8 +81,6 @@ export const SubscriptionContext = ({ children }) => {
                 .select();
 
             if (error) throw error;
-
-            console.log("Plan updated successfully:", data);
             setPlans((prev) =>
                 prev.map((plan) =>
                     plan.id === planId ? { ...plan, ...data[0] } : plan

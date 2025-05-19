@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+/* eslint-disable react/prop-types */
+import { useState } from "react";
 import { useAuthContext } from "../../store/AuthContext";
 import { toast } from "react-toastify";
 import Loader from "../Common/Loader"; // Ensure you have a Loader component
@@ -12,7 +13,6 @@ function LogOutPopUp({ onCancle }) {
     handleLogOut()
       .then((response) => {
         if (response.success) {
-          console.log("Logout successfully!");
           toast.success("Logout successfully!");
           setTimeout(() => {
             window.location.reload();
