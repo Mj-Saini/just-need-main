@@ -27,6 +27,7 @@ import ProtectedRoute from "../../Components/ProtectedRoute";
 import BannerDetails from "../../pages/admin/BannerDetails";
 import Listing from "../../pages/admin/Listing";
 import ListingDetails from "../../pages/admin/ListingDetails";
+import DeleteAccount from "../../Components/DeleteAccount";
 
 function AdminRoutes() {
   return (
@@ -54,6 +55,7 @@ function AdminRoutes() {
         element={<ProtectedRoute Children={AdminLayout} />}
       >
         <Route index element={<Aside />} />
+        <Route path="delete-account" element={<DeleteAccount />} />
         <Route path="usersList" element={<Users />}>
           <Route path="userDetails/:id" element={<UserDetails />} />
         </Route>
