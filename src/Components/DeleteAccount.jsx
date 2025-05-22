@@ -26,7 +26,7 @@ const DeleteAccount = () => {
                 
             <p className="text-lg font-bold text-black mb-0">Step 1: Open the Mobile Application</p>
             <p className="text-sm font-normal text-black mt-2">
-              Open the “Just Need” mobile application on your device.
+              Open the “JUST NEED It” mobile application on your device.
             </p>
           </>
         );
@@ -107,7 +107,7 @@ const DeleteAccount = () => {
       <div className="mx-auto flex-grow px-4">
         <p className="text-lg font-bold text-black mt-4 pt-1">Account Deletion Request</p>
         <p className="text-sm font-normal text-black mt-3 pt-1">
-          Welcome to JUST NEED Account Deletion Page. At JUST NEED, we understand that
+          Welcome to JUST NEED It Account Deletion Page. At JUST NEED It, we understand that
           your privacy is important. If you wish to delete your user account, please follow the
           steps below.
         </p>
@@ -177,7 +177,7 @@ const DeleteAccount = () => {
       <div className="bg-[#0832DE] py-3">
         <div className="max-w-6xl mx-auto">
           <p className="text-white text-sm mb-0">
-            © All Rights Reserved at    JUST NEED
+            © All Rights Reserved at    JUST NEED It
           </p>
         </div>
       </div>
