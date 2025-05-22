@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import ss1 from '../assets/Images/Png/ss1.jpeg';
 import ss2 from '../assets/Images/Png/ss2.jpeg';
-import ss3 from '../assets/Images/Png/ss3.jpeg';
+import ss11 from '../assets/Images/Png/ss11.jpeg';
 import ss4 from '../assets/Images/Png/ss4.jpeg';
 
 const DeleteAccount = () => {
@@ -49,7 +49,8 @@ const DeleteAccount = () => {
             <p className="text-sm font-normal text-black mt-2">
               Look for the "Delete Account" feature or button
                 </p>
-                <div className='flex gap-5'> <img className='w-[300px] py-6' src={ss3} alt="ss" />
+                <div className='flex gap-5'>
+                    <img className='w-[600px] py-6' src={ss11} alt="ss" />
                  </div>
           </>
         );
