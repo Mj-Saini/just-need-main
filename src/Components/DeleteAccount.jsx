@@ -106,13 +106,13 @@ const DeleteAccount = () => {
       <div className="mx-auto flex-grow px-4">
         <p className="text-lg font-bold text-black mt-4 pt-1">Account Deletion Request</p>
         <p className="text-sm font-normal text-black mt-3 pt-1">
-          Welcome to [Your Company] Account Deletion Page. At [Your Company], we understand that
+          Welcome to JUST NEED Account Deletion Page. At JUST NEED, we understand that
           your privacy is important. If you wish to delete your user account, please follow the
           steps below.
         </p>
 
         <div className="overflow-auto mt-4">
-          <div className="flex items-center gap-4 min-w-[700px] mb-1">
+          <div className="flex  gap-4 min-w-[700px] mb-1">
             {steps.map(({ key, title, subtitle }) => (
               <div
                 key={key}
@@ -120,8 +120,8 @@ const DeleteAccount = () => {
                 className={`flex flex-col items-center w-full p-3 rounded-md cursor-pointer  ${
                   step === key ? 'bg-[#0832DE]' : 'bg-[#6C4DEF] '
                         }`}>
-                <p className="text-xs font-medium text-white my-1">{title}</p>
-                <p className="text-[10px] font-normal text-white text-center">{subtitle}</p>
+                <p className="text-base font-medium text-white my-1">{title}</p>
+                <p className="text-sm lg:text-lg font-normal text-white text-center">{subtitle}</p>
               </div>
             ))}
           </div>
@@ -132,7 +132,7 @@ const DeleteAccount = () => {
           <div className="flex justify-end gap-4 mt-4">
             {step !== 'step1' && (
               <button
-                className="bg-green-600 text-white px-4 py-1 text-sm rounded"
+                className="bg-green-600 text-white px-4 py-1 text-base rounded"
                 onClick={() => {
                   const index = stepOrder.indexOf(step);
                   if (index > 0) setStep(stepOrder[index - 1]);
@@ -142,7 +142,7 @@ const DeleteAccount = () => {
             )}
             {step !== 'step6' && (
               <button
-                className="bg-[#0832DE] text-white px-4 py-1 text-sm rounded"
+                className="bg-[#0832DE] text-white px-4 py-1 text-base rounded"
                 onClick={() => {
                   const index = stepOrder.indexOf(step);
                   if (index < stepOrder.length - 1) setStep(stepOrder[index + 1]);
@@ -176,7 +176,7 @@ const DeleteAccount = () => {
       <div className="bg-[#0832DE] py-3">
         <div className="max-w-6xl mx-auto">
           <p className="text-white text-sm mb-0">
-            © All Rights Reserved at STSM - Save Time Save Money
+            © All Rights Reserved at    JUST NEED
           </p>
         </div>
       </div>
