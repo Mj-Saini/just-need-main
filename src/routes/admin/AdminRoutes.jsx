@@ -33,6 +33,7 @@ function AdminRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<ProtectedRoute Children={LoginPupUp} />} />
+      <Route path="delete-account" element={<DeleteAccount />} />
       <Route
         path="/resetPassword"
         element={<ProtectedRoute Children={resetPassword} />}
@@ -55,7 +56,7 @@ function AdminRoutes() {
         element={<ProtectedRoute Children={AdminLayout} />}
       >
         <Route index element={<Aside />} />
-        <Route path="delete-account" element={<DeleteAccount />} />
+        
         <Route path="usersList" element={<Users />}>
           <Route path="userDetails/:id" element={<UserDetails />} />
         </Route>
