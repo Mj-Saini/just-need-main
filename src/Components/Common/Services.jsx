@@ -48,7 +48,7 @@ function Services() {
   const [isEditing, setIsEditing] = useState(false);
   const [categoryImage, setCategoryImage] = useState(null); // State for category image
   const [categoryImageUrl, setCategoryImageUrl] = useState(""); // State for image URL
-
+const [subCat, setSubCat] = useState(null);
   const [isVertical, setIsVertical] = useState(false);
 
   const toggleLayout = () => {
@@ -102,44 +102,7 @@ function Services() {
     }
   }, [categories, loading]);
 
-  // const filteredCategoriesData = useMemo(() => {
-  //   if (!searchQuery.trim()) {
-  //     return categories
-  //       .filter((cat) => cat.isActive)
-  //       .map((category) => ({
-  //         ...category,
-  //         subcategory: (category.subcategory || []).filter((sub) => sub.isActive),
-  //       }))
-  //       .filter((cat) => cat.subcategory.length > 0);
-  //   }
-
-  //   return categories
-  //     .map((category) => {
-  //       if (!category.isActive) return null;
-
-  //       const categoryMatches = category?.categoryName
-  //         ?.toLowerCase()
-  //         .includes(searchQuery.toLowerCase());
-
-  //       const filteredSubcategories = (category.subcategory || []).filter(
-  //         (sub) =>
-  //           sub.isActive &&
-  //           sub?.categoryName?.toLowerCase().includes(searchQuery.toLowerCase())
-  //       );
-
-  //       if (categoryMatches || filteredSubcategories.length > 0) {
-  //         return {
-  //           ...category,
-  //           subcategory:
-  //             filteredSubcategories.length > 0 || categoryMatches
-  //               ? filteredSubcategories
-  //               : [],
-  //         };
-  //       }
-  //       return null;
-  //     })
-  //     .filter((cat) => cat !== null && cat.subcategory.length > 0);
-  // }, [categories, searchQuery]);
+ 
 
   const filteredCategoriesData = useMemo(() => {
     if (!searchQuery.trim()) return categories;
@@ -168,19 +131,31 @@ function Services() {
       .filter((cat) => cat !== null);
   }, [categories, searchQuery]);
 
-  const toggle = useCallback(() => {
-    setShowForm((prev) => {
-      if (!prev) {
-        setCategoryName("");
-        setEditingCategoryId(null);
-        setEditingSubcategoryId(null);
-        setCategoryImage(null); // Reset image when closing form
-        setCategoryImageUrl(""); // Reset image URL when closing form
-      }
-      return !prev;
-    });
-  }, []);
+  // const toggle = useCallback(() => {
+  //   setShowForm((prev) => {
+  //     if (!prev) {
+  //       setCategoryName("");
+  //       setEditingCategoryId(null);
+  //       setEditingSubcategoryId(null);
+  //       setCategoryImage(null); // Reset image when closing form
+  //       setCategoryImageUrl(""); // Reset image URL when closing form
+  //     }
+  //     return !prev;
+  //   });
+  // }, []);
 
+  const toggle = useCallback(() => {
+  setShowForm((prev) => {
+    if (!prev) {
+      setCategoryName("");
+      setEditingCategoryId(null);
+      setEditingSubcategoryId(null);
+      setCategoryImage(null);
+      setCategoryImageUrl("");
+    }
+    return !prev;
+  });
+}, []);
   const handleNewServicePopUp = useCallback(() => {
     setShowNewServicePopUp((prev) => !prev);
   }, []);
@@ -252,71 +227,122 @@ function Services() {
     setCategoryName(e.target.value);
   }, []);
 
-  const handleSaveEditPopup = useCallback(async () => {
-    if (categoryName.trim() === "") {
-      toast.error("Name cannot be empty.");
-      return;
-    }
+  
 
-    try {
-      if (editingCategoryId) {
-        // Update category name
-        const nameSuccess = await updateCategoryName(editingCategoryId, categoryName);
+const handleSaveEditPopup = useCallback(async () => {
+  if (categoryName.trim() === "") {
+    toast.error("Name cannot be empty.");
+    return;
+  }
 
-        // Update category image if a new image is uploaded
-        let imageSuccess = true;
-        if (categoryImage) {
-          const fileExt = categoryImage.name.split(".").pop();
-          const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-          const filePath = `category-images/${fileName}`;
+  try {
+    if (editingCategoryId) {
+      // 🟢 Category update
+      const nameSuccess = await updateCategoryName(editingCategoryId, categoryName);
+      // ...image upload logic (already done in your code)
 
-          // Upload image to Supabase storage
-          const { data: imageData, error: imageError } = await supabase.storage
-            .from("just_need") // Replace with your actual bucket name
-            .upload(filePath, categoryImage, {
-              cacheControl: "3600",
-              upsert: false,
-            });
-
-          if (imageError) throw new Error("Image upload failed: " + imageError.message);
-
-          const { data: publicUrlData } = supabase.storage
-            .from("just_need")
-            .getPublicUrl(filePath);
-
-          if (!publicUrlData?.publicUrl) throw new Error("Failed to get public URL");
-
-          // Update the category with the new image URL in the database
-          const { error: updateError } = await supabase
-            .from("Categories") // Replace with your actual table name
-            .update({ image: publicUrlData.publicUrl })
-            .eq("id", editingCategoryId);
-
-          if (updateError) throw new Error("Failed to update category image: " + updateError.message);
-
-          imageSuccess = true;
-        }
-
-        if (nameSuccess && imageSuccess) {
-          toast.success("Category updated successfully!");
-          await getCategoriesWithSubcategories();
-          toggle();
-        } else {
-          toast.error("Failed to update category.");
-        }
+      if (nameSuccess) {
+        toast.success("Category updated successfully!");
+        await getCategoriesWithSubcategories();
+        toggle();
       }
-    } catch (error) {
-      console.error("Error updating category:", error);
-      toast.error(`An error occurred: ${error.message}`);
+    } else if (editingSubcategoryId) {
+      // 🔵 Subcategory update
+      const updatedData = { categoryName };
+      const result = await updateSubcategoryName(editingSubcategoryId, updatedData);
+
+      if (result) {
+        toast.success("Subcategory updated successfully!");
+        await getCategoriesWithSubcategories();
+        toggle();
+      } else {
+        toast.error("Failed to update subcategory");
+      }
+    } else {
+      toast.error("Missing ID for update");
     }
-  }, [
-    categoryName,
-    categoryImage,
-    editingCategoryId,
-    updateCategoryName,
-    getCategoriesWithSubcategories,
-    toggle,
-  ]);
+  } catch (error) {
+    console.error("Update error:", error);
+    toast.error(`An error occurred: ${error.message}`);
+  }
+}, [
+  categoryName,
+  categoryImage,
+  editingCategoryId,
+  editingSubcategoryId, // 👈 very important
+  updateCategoryName,
+  updateSubcategoryName,
+  getCategoriesWithSubcategories,
+  toggle,
+]);
+
+
+
+  // const handleSaveEditPopup = useCallback(async () => {
+  //   if (categoryName.trim() === "") {
+  //     toast.error("Name cannot be empty.");
+  //     return;
+  //   }
+
+  //   try {
+  //     if (editingCategoryId) {
+  //       // Update category name
+  //       const nameSuccess = await updateCategoryName(editingCategoryId, categoryName);
+
+  //       // Update category image if a new image is uploaded
+  //       let imageSuccess = true;
+  //       if (categoryImage) {
+  //         const fileExt = categoryImage.name.split(".").pop();
+  //         const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
+  //         const filePath = `category-images/${fileName}`;
+
+  //         // Upload image to Supabase storage
+  //         const { data: imageData, error: imageError } = await supabase.storage
+  //           .from("just_need") // Replace with your actual bucket name
+  //           .upload(filePath, categoryImage, {
+  //             cacheControl: "3600",
+  //             upsert: false,
+  //           });
+
+  //         if (imageError) throw new Error("Image upload failed: " + imageError.message);
+
+  //         const { data: publicUrlData } = supabase.storage
+  //           .from("just_need")
+  //           .getPublicUrl(filePath);
+
+  //         if (!publicUrlData?.publicUrl) throw new Error("Failed to get public URL");
+
+  //         // Update the category with the new image URL in the database
+  //         const { error: updateError } = await supabase
+  //           .from("Categories") // Replace with your actual table name
+  //           .update({ image: publicUrlData.publicUrl })
+  //           .eq("id", editingCategoryId);
+
+  //         if (updateError) throw new Error("Failed to update category image: " + updateError.message);
+
+  //         imageSuccess = true;
+  //       }
+
+  //       if (nameSuccess && imageSuccess) {
+  //         toast.success("Category updated successfully!");
+  //         await getCategoriesWithSubcategories();
+  //         toggle();
+  //       } else {
+  //         toast.error("Failed to update category.");
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating category:", error);
+  //     toast.error(`An error occurred: ${error.message}`);
+  //   }
+  // }, [
+  //   categoryName,
+  //   categoryImage,
+  //   editingCategoryId,
+  //   updateCategoryName,
+  //   getCategoriesWithSubcategories,
+  //   toggle,
+  // ]);
 
   const handleOverlayClick = useCallback(() => {
     setShowPopup(false);
@@ -566,7 +592,7 @@ function Services() {
                   <input
                     className="text-[16px] font-normal outline-none ms-[10px] bg-transparent"
                     type="text"
-                    placeholder="Search Task"
+                    placeholder="Search Services"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -656,7 +682,9 @@ function Services() {
 
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-between gap-[18px] mt-6 flex-wrap whitespace-nowrap">
             {selectedSubcategories?.length > 0 &&
-              selectedSubcategories?.map((sub, index) => (
+              selectedSubcategories?.filter((sub) => sub?.isActive).map((sub, index) => {
+                console.log("Subcategory:", sub);
+                return (
                 <div
                   key={index}
                   className="group hover:bg-[#6C4DEF1A] hover:border-[#6CDEF1A] border border-[#0000001A] lg:p-5 p-3 rounded-[10px] h-full transition w-full"
@@ -685,17 +713,15 @@ function Services() {
                     <div className="flex lg:gap-4 gap-2">
                       <div
                         className="cursor-pointer"
-                        onClick={(e) => handleSubcategoryEdit(sub.id, sub.categoryName, e)}
+                        onClick={(e) => { handleSubcategoryEdit(sub.id, sub.categoryName, e); setSubCat(sub)}}
                       >
                         <Editicon />
                       </div>
-                      <div onClick={() => handleDisableClick(sub.id)} className="cursor-pointer">
-                        {sub.isActive ? <EnableRedIcon /> : <DisableRedicon />}
-                      </div>
+                      
                     </div>
                   </div>
                 </div>
-              ))}
+              )})}
           </div>
 
           {selectedSubcategories?.length === 0 && (
@@ -831,7 +857,7 @@ function Services() {
                           <div onClick={(e) => {
                             e.stopPropagation();
                             handleCategoryDisable(sub.id);
-                          }}>
+                          }} className="disable_icon cursor-pointer">
                             <DisableRedicon />
                           </div>
                         </div>
@@ -924,6 +950,17 @@ function Services() {
                   >
                     Save Details
                   </button>
+              {subCat && (
+  <button
+    onClick={() => handleDisableClick(subCat.id)}
+    className={`w-full font-normal text-base mt-6 py-2 rounded-[10px] flex justify-center items-center gap-2 
+      ${subCat.isActive ? "bg-[#e70000] text-white" : "bg-green-500 text-white"}
+    `}
+  >
+    {subCat.isActive ? <DisableRedicon /> : <EnableRedIcon />}
+    {subCat.isActive ? "Block" : "Active"}
+  </button>
+)}
                 </div>
               </div>
             )}

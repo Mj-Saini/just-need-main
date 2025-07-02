@@ -18,7 +18,10 @@ function AddNewServicePopUp({ handleNewServicePopUp, onSuccess }) {
       toast.error("Please enter a category name.");
       return;
     }
-
+  if (!categoryImage) {
+    toast.error("Please upload a category image.");
+    return;
+  }
     // Check if the category name already exists
     const categoryExists = categories.some(
       (cat) => cat.categoryName.toLowerCase() === categoryName.toLowerCase()
@@ -84,7 +87,7 @@ function AddNewServicePopUp({ handleNewServicePopUp, onSuccess }) {
             id="serviceName"
             name="serviceName"
             type="text"
-            placeholder="Service Type"
+            placeholder="Enter service Name"
             className="w-full px-3 py-[12px] bg-gray-100 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-base placeholder:font-normal"
           />
         </div>
@@ -92,7 +95,7 @@ function AddNewServicePopUp({ handleNewServicePopUp, onSuccess }) {
           className="block text-base font-normal text-[#000000] mb-2.5 mt-[15px]"
           htmlFor="imageText"
         >
-          Category Image
+        Service Image
         </label>
         <div className="flex items-center gap-2 bg-[#F2F2F2] rounded-lg p-2">
           <input
@@ -107,6 +110,7 @@ function AddNewServicePopUp({ handleNewServicePopUp, onSuccess }) {
             disabled
           />
           <input
+            required
             type="file"
             className="hidden"
             id="fileUpload"
@@ -132,7 +136,7 @@ function AddNewServicePopUp({ handleNewServicePopUp, onSuccess }) {
           onClick={handleSaveDetails}
           className="w-full bg-[#0832DE] text-base text-white font-medium h-[42px] py-2.5 rounded-[10px] mt-[15px]"
         >
-          Save Details
+          Save Service
         </button>
       </div>
     </div>

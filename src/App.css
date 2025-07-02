@@ -126,7 +126,9 @@
 .text_center {
   text-align: -webkit-center;
 }
-
+.disable_icon svg path {
+  fill: red ;
+}
 
 .lightbox-slide img {
   border: 2px solid red;

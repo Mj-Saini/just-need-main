@@ -96,13 +96,7 @@ const DeleteAccount = () => {
 
   return (
     <div className="flex flex-col min-h-screen">
-      {/* <div className="bg-[#0832DE] py-3">
-        <div className="max-w-6xl mx-auto flex items-center">
-          <p className="text-base font-bold text-white ml-2 mb-0">
-            STSM - Save Time Save Money
-          </p>
-        </div>
-      </div> */}
+  
 
       <div className="mx-auto flex-grow px-4">
         <p className="text-lg font-bold text-black mt-4 pt-1">Account Deletion Request</p>
