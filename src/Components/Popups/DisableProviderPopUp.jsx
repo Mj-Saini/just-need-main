@@ -21,11 +21,11 @@ function DisableProviderPopUp({ handlePopupDisable, userId }) {
 
   const handleUpdate = async () => {
     // Check if reason is empty
-    if (!popUpData.reason.trim()) {
-      toast.info("Please write a reason");
-      setError("Please write a reason");
-      return;
-    }
+  if (popUpData.status === "Block" && !popUpData.reason.trim()) {
+  toast.info("Please write a reason");
+  setError("Please write a reason");
+  return;
+}
 
     try {
       // Determine the new account status
@@ -92,25 +92,26 @@ function DisableProviderPopUp({ handlePopupDisable, userId }) {
               </span>
             </div>
           </div>
-
-          <div className="mb-6">
-            <label
-              htmlFor="reason"
-              className="block font-normal text-base mb-2.5"
-            >
-              Reason
-            </label>
-            <textarea
-              name="reason"
-              onChange={handleOnChange}
-              value={popUpData.reason}
-              placeholder="type here.."
-              className={`w-full h-28 px-3 py-2 bg-gray-100 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
-                error ? "border-red-500" : "border-none"
-              }`}
-            ></textarea>
-            {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-          </div>
+{popUpData.status === "Block" && (
+  <div className="mb-6">
+    <label
+      htmlFor="reason"
+      className="block font-normal text-base mb-2.5"
+    >
+      Reason
+    </label>
+    <textarea
+      name="reason"
+      onChange={handleOnChange}
+      value={popUpData.reason}
+      placeholder="type here.."
+      className={`w-full h-28 px-3 py-2 bg-gray-100 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none ${
+        error ? "border-red-500" : "border-none"
+      }`}
+    ></textarea>
+    {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+  </div>
+)}
 
           <button
             onClick={handleUpdate}

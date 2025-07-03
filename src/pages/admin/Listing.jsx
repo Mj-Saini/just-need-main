@@ -19,7 +19,7 @@ const Listing = () => {
   const [isFilterPopup, setIsfilterPopup] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [searchPlaceholder, setSearchPlaceholder] = useState("Search Name");
+  const [searchPlaceholder, setSearchPlaceholder] = useState("Search Listing");
   const [appliedFilters, setAppliedFilters] = useState(null);
   const [visibleCount, setVisibleCount] = useState(10);
   

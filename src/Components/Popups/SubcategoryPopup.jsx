@@ -46,10 +46,10 @@ function AddSubCategoryPopUp({
       toast.error("Please enter a subcategory name.");
       return;
     }
-    // if (!subcategoryImage) {
-    //   toast.error("Please enter a subcategory Image.");
-    //   return;
-    // }
+    if (!subcategoryImage) {
+      toast.error("Please enter a subcategory Image.");
+      return;
+    }
 
     // Check if the subcategory name already exists in the selected category
     const selectedCategory = categories.find((cat) => cat.id === selectedCategoryId);

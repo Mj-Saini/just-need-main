@@ -37,33 +37,66 @@ const ListingDetails = () => {
   }
 
   async function handleBlock(e, val) {
-    e.preventDefault();
-    const confirmDelete = window.confirm("Are you sure to Block user?");
-    if (confirmDelete) {
-      const { data, error } = await supabase
-        .from("ServiceListings")
-        .update({
-          blockStatus: {
-            isBlocked: !val.isBlocked,
-            reason: val.reason,
-            blockedBy: val.blockedBy,
-          },
-        })
-        .eq("id", id);
+  e.preventDefault();
 
-      if (!error) {
-        setListData((prev) => ({
-          ...prev,
-          blockStatus: {
-            ...listData.blockStatus,
-            isBlocked: !prev.blockStatus.isBlocked,
-          },
-        }));
-      } else {
-        alert("Something went wrong. Please try again");
-      }
+  const actionText = val.isBlocked ? "Unblock" : "Block";
+  const confirmAction = window.confirm(`Are you sure you want to ${actionText} this user?`);
+
+  if (confirmAction) {
+    const { data, error } = await supabase
+      .from("ServiceListings")
+      .update({
+        blockStatus: {
+          isBlocked: !val.isBlocked,
+          reason: val.reason,
+          blockedBy: val.blockedBy,
+        },
+      })
+      .eq("id", id);
+
+    if (!error) {
+      setListData((prev) => ({
+        ...prev,
+        blockStatus: {
+          ...prev.blockStatus,
+          isBlocked: !prev.blockStatus.isBlocked,
+        },
+      }));
+    } else {
+      alert("Something went wrong. Please try again");
     }
   }
+}
+
+
+  // async function handleBlock(e, val) {
+  //   e.preventDefault();
+  //   const confirmDelete = window.confirm("Are you sure to Block user?");
+  //   if (confirmDelete) {
+  //     const { data, error } = await supabase
+  //       .from("ServiceListings")
+  //       .update({
+  //         blockStatus: {
+  //           isBlocked: !val.isBlocked,
+  //           reason: val.reason,
+  //           blockedBy: val.blockedBy,
+  //         },
+  //       })
+  //       .eq("id", id);
+
+  //     if (!error) {
+  //       setListData((prev) => ({
+  //         ...prev,
+  //         blockStatus: {
+  //           ...listData.blockStatus,
+  //           isBlocked: !prev.blockStatus.isBlocked,
+  //         },
+  //       }));
+  //     } else {
+  //       alert("Something went wrong. Please try again");
+  //     }
+  //   }
+  // }
 
   useEffect(() => {
     getData();
@@ -159,7 +192,7 @@ const ListingDetails = () => {
                     <span className="me-2">
                       <DisableIcon />
                     </span>
-                    Block
+                    Inactive
                   </button>
                 ) : (
                   <button className="px-[37px] py-[12px] text-[green] border-[green] border font-medium text-base rounded-[10px] mt-[19px] flex items-center">

@@ -205,7 +205,7 @@ function UserDetails() {
       <div className="flex items-center justify-center">
 
 
-        {user.IsSeller ? (
+        {/* {user.IsSeller ? (
           user.businessDetail.status === "Approved" ? (
             // ✅ Seller Approved => Show Block/Enable Button
             <button
@@ -267,7 +267,72 @@ function UserDetails() {
               </>
             )}
           </button>
-        )}
+        )} */}
+
+        {user.IsSeller ? (
+  user.businessDetail.status === "Approved" ? (
+    // ✅ Seller Approved => Show Block/Unblock Provider
+    <button
+      onClick={handlePopupDisable}
+      className="flex items-center gap-3 py-2.5 h-[42px] px-3 xl:px-[15px] rounded-[10px]"
+    >
+      {isActive ? (
+        <>
+          <DisableRedicon />
+          <span className="text-black font-normal text-base">Block Provider</span>
+        </>
+      ) : (
+        <>
+          <EnableRedIcon />
+          <span className="text-black font-normal text-base">Enable Provider</span>
+        </>
+      )}
+    </button>
+  ) : user.businessDetail.status === "Rejected" ? (
+    // ❌ Seller Rejected => Show disabled message
+    <button
+      className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] text-[#FF0000] cursor-not-allowed"
+      disabled
+    >
+      <DisableRedicon />
+      Rejected
+    </button>
+  ) : (
+    // ⏳ Pending or others => Show Approve/Deny
+    <div className="flex gap-4">
+      <button
+        onClick={approveUser}
+        className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-green-500 text-white"
+      >
+        Approve
+      </button>
+      <button
+        onClick={userDenied}
+        className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-red-500 text-white"
+      >
+        Deny
+      </button>
+    </div>
+  )
+) : (
+  // 🔹 Non-Seller => Show Block/Unblock User
+  <button
+    onClick={handlePopupDisable}
+    className="flex items-center gap-3 py-2.5 h-[42px] px-3 xl:px-[15px] rounded-[10px]"
+  >
+    {isActive ? (
+      <>
+        <DisableRedicon />
+        <span className="text-black font-normal text-base">Block User</span>
+      </>
+    ) : (
+      <>
+        <EnableRedIcon />
+        <span className="text-black font-normal text-base">Unblock User</span>
+      </>
+    )}
+  </button>
+)}
 
 
 

@@ -663,7 +663,7 @@ const CustomerData = () => {
                     className={`absolute ${dropdownPosition === "top" ? "bottom-full mb-1" : "top-full mt-1"
                       } bg-white border rounded shadow-lg w-full z-10`}
                   >
-                    {[5, 10, 15, 20].map((item) => (
+                    {[10, 20, 50, 100].map((item) => (
                       <button
                         key={item}
                         onClick={(e) => {

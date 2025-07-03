@@ -48,7 +48,7 @@ function Services() {
   const [isEditing, setIsEditing] = useState(false);
   const [categoryImage, setCategoryImage] = useState(null); // State for category image
   const [categoryImageUrl, setCategoryImageUrl] = useState(""); // State for image URL
-const [subCat, setSubCat] = useState(null);
+  const [subCat, setSubCat] = useState(null);
   const [isVertical, setIsVertical] = useState(false);
 
   const toggleLayout = () => {
@@ -102,7 +102,7 @@ const [subCat, setSubCat] = useState(null);
     }
   }, [categories, loading]);
 
- 
+
 
   const filteredCategoriesData = useMemo(() => {
     if (!searchQuery.trim()) return categories;
@@ -145,17 +145,17 @@ const [subCat, setSubCat] = useState(null);
   // }, []);
 
   const toggle = useCallback(() => {
-  setShowForm((prev) => {
-    if (!prev) {
-      setCategoryName("");
-      setEditingCategoryId(null);
-      setEditingSubcategoryId(null);
-      setCategoryImage(null);
-      setCategoryImageUrl("");
-    }
-    return !prev;
-  });
-}, []);
+    setShowForm((prev) => {
+      if (!prev) {
+        setCategoryName("");
+        setEditingCategoryId(null);
+        setEditingSubcategoryId(null);
+        setCategoryImage(null);
+        setCategoryImageUrl("");
+      }
+      return !prev;
+    });
+  }, []);
   const handleNewServicePopUp = useCallback(() => {
     setShowNewServicePopUp((prev) => !prev);
   }, []);
@@ -227,54 +227,54 @@ const [subCat, setSubCat] = useState(null);
     setCategoryName(e.target.value);
   }, []);
 
-  
 
-const handleSaveEditPopup = useCallback(async () => {
-  if (categoryName.trim() === "") {
-    toast.error("Name cannot be empty.");
-    return;
-  }
 
-  try {
-    if (editingCategoryId) {
-      // 🟢 Category update
-      const nameSuccess = await updateCategoryName(editingCategoryId, categoryName);
-      // ...image upload logic (already done in your code)
-
-      if (nameSuccess) {
-        toast.success("Category updated successfully!");
-        await getCategoriesWithSubcategories();
-        toggle();
-      }
-    } else if (editingSubcategoryId) {
-      // 🔵 Subcategory update
-      const updatedData = { categoryName };
-      const result = await updateSubcategoryName(editingSubcategoryId, updatedData);
-
-      if (result) {
-        toast.success("Subcategory updated successfully!");
-        await getCategoriesWithSubcategories();
-        toggle();
-      } else {
-        toast.error("Failed to update subcategory");
-      }
-    } else {
-      toast.error("Missing ID for update");
+  const handleSaveEditPopup = useCallback(async () => {
+    if (categoryName.trim() === "") {
+      toast.error("Name cannot be empty.");
+      return;
     }
-  } catch (error) {
-    console.error("Update error:", error);
-    toast.error(`An error occurred: ${error.message}`);
-  }
-}, [
-  categoryName,
-  categoryImage,
-  editingCategoryId,
-  editingSubcategoryId, // 👈 very important
-  updateCategoryName,
-  updateSubcategoryName,
-  getCategoriesWithSubcategories,
-  toggle,
-]);
+
+    try {
+      if (editingCategoryId) {
+        // 🟢 Category update
+        const nameSuccess = await updateCategoryName(editingCategoryId, categoryName);
+        // ...image upload logic (already done in your code)
+
+        if (nameSuccess) {
+          toast.success("Category updated successfully!");
+          await getCategoriesWithSubcategories();
+          toggle();
+        }
+      } else if (editingSubcategoryId) {
+        // 🔵 Subcategory update
+        const updatedData = { categoryName };
+        const result = await updateSubcategoryName(editingSubcategoryId, updatedData);
+
+        if (result) {
+          toast.success("Subcategory updated successfully!");
+          await getCategoriesWithSubcategories();
+          toggle();
+        } else {
+          toast.error("Failed to update subcategory");
+        }
+      } else {
+        toast.error("Missing ID for update");
+      }
+    } catch (error) {
+      console.error("Update error:", error);
+      toast.error(`An error occurred: ${error.message}`);
+    }
+  }, [
+    categoryName,
+    categoryImage,
+    editingCategoryId,
+    editingSubcategoryId, // 👈 very important
+    updateCategoryName,
+    updateSubcategoryName,
+    getCategoriesWithSubcategories,
+    toggle,
+  ]);
 
 
 
@@ -349,40 +349,37 @@ const handleSaveEditPopup = useCallback(async () => {
     setSelectedItem(null);
   }, []);
 
+
+
+
+  // Your final function
   const toggleDisableCard = useCallback(
     async (itemId, currentStatus, action, isCategory = false) => {
+      console.log("🔥 toggleDisableCard called with", { itemId, currentStatus, action, isCategory });
       if (action === "confirm") {
         setShowDisablePopup(false);
         setCurrentCardIndex(null);
         if (showForm) toggle();
 
         const newStatus = !currentStatus;
+
         try {
           if (isCategory) {
             await toggleCategoryStatus(itemId, newStatus);
+
             const updatedCategories = categories.map((cat) =>
               cat.id === itemId ? { ...cat, isActive: newStatus } : cat
             );
-            const activeCategoryIndex = updatedCategories.findIndex(
-              (cat) => cat.isActive
-            );
+
+            const activeCategoryIndex = updatedCategories.findIndex((cat) => cat.isActive);
+
             if (newStatus) {
-              const enabledIndex = updatedCategories.findIndex(
-                (cat) => cat.id === itemId
-              );
+              const enabledIndex = updatedCategories.findIndex((cat) => cat.id === itemId);
               setActiveTab(enabledIndex);
-              setSelectedSubcategories(
-                updatedCategories[enabledIndex]?.subcategory || []
-              );
-              setSelectedCategoryId(
-                updatedCategories[enabledIndex]?.id || null
-              );
-            } else if (
-              activeTab === categories.findIndex((cat) => cat.id === itemId)
-            ) {
-              setActiveTab(
-                activeCategoryIndex !== -1 ? activeCategoryIndex : 0
-              );
+              setSelectedSubcategories(updatedCategories[enabledIndex]?.subcategory || []);
+              setSelectedCategoryId(updatedCategories[enabledIndex]?.id || null);
+            } else if (activeTab === categories.findIndex((cat) => cat.id === itemId)) {
+              setActiveTab(activeCategoryIndex !== -1 ? activeCategoryIndex : 0);
               setSelectedSubcategories(
                 activeCategoryIndex !== -1
                   ? updatedCategories[activeCategoryIndex]?.subcategory || []
@@ -402,7 +399,9 @@ const handleSaveEditPopup = useCallback(async () => {
               )
             );
           }
-          await getCategoriesWithSubcategories();
+
+          await getCategoriesWithSubcategories(); // Refresh all data
+
           toast.success(
             newStatus
               ? `${isCategory ? "Category" : "Subcategory"} enabled successfully!`
@@ -423,15 +422,97 @@ const handleSaveEditPopup = useCallback(async () => {
       }
     },
     [
-      toggleSubcategoryStatus,
-      toggleCategoryStatus,
-      getCategoriesWithSubcategories,
       showForm,
       toggle,
       categories,
       activeTab,
+      getCategoriesWithSubcategories,
     ]
   );
+  // const toggleDisableCard = useCallback(
+  //   async (itemId, currentStatus, action, isCategory = false) => {
+  //     console.log(itemId, currentStatus, action, isCategory," toggleDisableCard called");
+  //     if (action === "confirm") {
+  //       setShowDisablePopup(false);
+  //       setCurrentCardIndex(null);
+  //       if (showForm) toggle();
+
+  //       const newStatus = !currentStatus;
+  //       try {
+  //         if (isCategory) {
+  //           await toggleCategoryStatus(itemId, newStatus);
+  //           const updatedCategories = categories.map((cat) =>
+  //             cat.id === itemId ? { ...cat, isActive: newStatus } : cat
+  //           );
+  //           const activeCategoryIndex = updatedCategories.findIndex(
+  //             (cat) => cat.isActive
+  //           );
+  //           if (newStatus) {
+  //             const enabledIndex = updatedCategories.findIndex(
+  //               (cat) => cat.id === itemId
+  //             );
+  //             setActiveTab(enabledIndex);
+  //             setSelectedSubcategories(
+  //               updatedCategories[enabledIndex]?.subcategory || []
+  //             );
+  //             setSelectedCategoryId(
+  //               updatedCategories[enabledIndex]?.id || null
+  //             );
+  //           } else if (
+  //             activeTab === categories.findIndex((cat) => cat.id === itemId)
+  //           ) {
+  //             setActiveTab(
+  //               activeCategoryIndex !== -1 ? activeCategoryIndex : 0
+  //             );
+  //             setSelectedSubcategories(
+  //               activeCategoryIndex !== -1
+  //                 ? updatedCategories[activeCategoryIndex]?.subcategory || []
+  //                 : []
+  //             );
+  //             setSelectedCategoryId(
+  //               activeCategoryIndex !== -1
+  //                 ? updatedCategories[activeCategoryIndex]?.id || null
+  //                 : null
+  //             );
+  //           }
+  //         } else {
+  //           await toggleSubcategoryStatus(itemId, newStatus);
+  //           setSelectedSubcategories((prev) =>
+  //             prev.map((sub) =>
+  //               sub.id === itemId ? { ...sub, isActive: newStatus } : sub
+  //             )
+  //           );
+  //         }
+  //         await getCategoriesWithSubcategories();
+  //         toast.success(
+  //           newStatus
+  //             ? `${isCategory ? "Category" : "Subcategory"} enabled successfully!`
+  //             : `${isCategory ? "Category" : "Subcategory"} disabled successfully!`
+  //         );
+  //       } catch (error) {
+  //         console.error(
+  //           `Error toggling ${isCategory ? "category" : "subcategory"} status:`,
+  //           error
+  //         );
+  //         toast.error(
+  //           `Failed to toggle ${isCategory ? "category" : "subcategory"} status: ${error.message}`
+  //         );
+  //       }
+  //     } else {
+  //       setShowDisablePopup(false);
+  //       setCurrentCardIndex(null);
+  //     }
+  //   },
+  //   [
+  //     toggleSubcategoryStatus,
+  //     toggleCategoryStatus,
+  //     getCategoriesWithSubcategories,
+  //     showForm,
+  //     toggle,
+  //     categories,
+  //     activeTab,
+  //   ]
+  // );
 
   const handleCategoryClick = useCallback(
     (index) => {
@@ -486,8 +567,12 @@ const handleSaveEditPopup = useCallback(async () => {
     [showForm, toggle]
   );
 
+
+
+
   const handleCategoryDisable = useCallback(
     (categoryId) => {
+      console.log("Clicked Disable for ID:", categoryId);
       setCurrentCardIndex(categoryId);
       setIsCategoryToggle(true);
       setShowDisablePopup(true);
@@ -569,6 +654,33 @@ const handleSaveEditPopup = useCallback(async () => {
     );
   };
 
+const handleUnblockBoth = async (subcategoryId, categoryId) => {
+   try {
+    let didSomething = false;
+
+    if (subcategoryId) {
+      await toggleSubcategoryStatus(subcategoryId, true);
+      toast.success("Subcategory unblocked successfully!");
+      didSomething = true;
+    }
+
+    if (categoryId) {
+      await toggleCategoryStatus(categoryId, true);
+      toast.success("Category unblocked successfully!");
+      didSomething = true;
+    }
+
+    if (!didSomething) {
+      toast.info("No valid ID found to unblock.");
+    } else {
+      await getCategoriesWithSubcategories(); // Refresh only if something changed
+    }
+
+  } catch (error) {
+    console.error("Error unblocking:", error.message);
+    toast.error("Something went wrong while unblocking.");
+  }
+};
 
 
   return (
@@ -683,45 +795,46 @@ const handleSaveEditPopup = useCallback(async () => {
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-between gap-[18px] mt-6 flex-wrap whitespace-nowrap">
             {selectedSubcategories?.length > 0 &&
               selectedSubcategories?.filter((sub) => sub?.isActive).map((sub, index) => {
-                console.log("Subcategory:", sub);
-                return (
-                <div
-                  key={index}
-                  className="group hover:bg-[#6C4DEF1A] hover:border-[#6CDEF1A] border border-[#0000001A] lg:p-5 p-3 rounded-[10px] h-full transition w-full"
-                >
-                  <div className="flex items-center justify-between">
-                    {editIndex === index ? (
-                      <input
-                        type="text"
-                        value={editData}
-                        onChange={handleInputChange}
-                        onBlur={() => handleSaveEdit(sub.id)}
-                        className="w-full bg-transparent border border-black me-2 focus:outline-none p-1 rounded-[10px]"
-                        autoFocus
-                      />
-                    ) : (
-                      <p className="font-normal text-sm text-[#00000099] lg:mx-[5px] transition group-hover:text-[#6C4DEF] flex items-center lg:gap-4 gap-2">
-                        <img
-                          className="w-[25px] h-[25px] object-cover rounded-full"
-                          src={sub.image}
-                          alt=""
-                        />
-                        {highlightText(sub?.categoryName, searchQuery)}
-                      </p>
-                    )}
 
-                    <div className="flex lg:gap-4 gap-2">
-                      <div
-                        className="cursor-pointer"
-                        onClick={(e) => { handleSubcategoryEdit(sub.id, sub.categoryName, e); setSubCat(sub)}}
-                      >
-                        <Editicon />
+                return (
+                  <div
+                    key={index}
+                    className="group hover:bg-[#6C4DEF1A] hover:border-[#6CDEF1A] border border-[#0000001A] lg:p-5 p-3 rounded-[10px] h-full transition w-full"
+                  >
+                    <div className="flex items-center justify-between">
+                      {editIndex === index ? (
+                        <input
+                          type="text"
+                          value={editData}
+                          onChange={handleInputChange}
+                          onBlur={() => handleSaveEdit(sub.id)}
+                          className="w-full bg-transparent border border-black me-2 focus:outline-none p-1 rounded-[10px]"
+                          autoFocus
+                        />
+                      ) : (
+                        <p className="font-normal text-sm text-[#00000099] lg:mx-[5px] transition group-hover:text-[#6C4DEF] flex items-center lg:gap-4 gap-2">
+                          <img
+                            className="w-[25px] h-[25px] object-cover rounded-full"
+                            src={sub.image}
+                            alt=""
+                          />
+                          {highlightText(sub?.categoryName, searchQuery)}
+                        </p>
+                      )}
+
+                      <div className="flex lg:gap-4 gap-2">
+                        <div
+                          className="cursor-pointer"
+                          onClick={(e) => { handleSubcategoryEdit(sub.id, sub.categoryName, e); setSubCat(sub) }}
+                        >
+                          <Editicon />
+                        </div>
+
                       </div>
-                      
                     </div>
                   </div>
-                </div>
-              )})}
+                )
+              })}
           </div>
 
           {selectedSubcategories?.length === 0 && (
@@ -781,8 +894,13 @@ const handleSaveEditPopup = useCallback(async () => {
             />
           )}
           {showDisablePopup && (
+            <> 
+              {console.log("✅ DisablePopUp is rendering", currentCardIndex)}
+              
             <DisablePopUp
+              
               onConfirm={() =>
+
                 toggleDisableCard(
                   currentCardIndex,
                   isCategoryToggle
@@ -804,7 +922,7 @@ const handleSaveEditPopup = useCallback(async () => {
                   ? "Yes Enable"
                   : "Yes Disable"
               }
-            />
+            /></>
           )}
 
           <div className="flex justify-center items-center">
@@ -856,7 +974,8 @@ const handleSaveEditPopup = useCallback(async () => {
                           </div>
                           <div onClick={(e) => {
                             e.stopPropagation();
-                            handleCategoryDisable(sub.id);
+                            handleUnblockBoth(sub.id);
+                            // handleDisableClick(sub.id);
                           }} className="disable_icon cursor-pointer">
                             <DisableRedicon />
                           </div>
@@ -876,7 +995,7 @@ const handleSaveEditPopup = useCallback(async () => {
                 >
                   <div className="flex justify-center items-center border-b pb-6">
                     <h2 className="text-lg font-semibold">
-                      {editingCategoryId ? "Edit Category" : "Edit Subcategory"}
+                      {editingCategoryId ? "Edit Service" : "Edit Subservice"}
                     </h2>
                     <button
                       onClick={toggle}
@@ -887,7 +1006,7 @@ const handleSaveEditPopup = useCallback(async () => {
                   </div>
                   <div className="mt-6">
                     <label className="block text-base font-normal text-[#000000]">
-                      {editingCategoryId ? "Category Name" : "Subcategory Name"}
+                      {editingCategoryId ? "Service Name" : "Subservice Name"}
                     </label>
                     <input
                       type="text"
@@ -896,8 +1015,8 @@ const handleSaveEditPopup = useCallback(async () => {
                       className="w-full mt-[10px] p-2 border rounded text-[#000000] focus:outline-none"
                       placeholder={
                         editingCategoryId
-                          ? "Enter category name"
-                          : "Enter subcategory name"
+                          ? "Enter Service name"
+                          : "Enter subservice name"
                       }
                     />
                   </div>
@@ -908,7 +1027,7 @@ const handleSaveEditPopup = useCallback(async () => {
                         className="block text-base font-normal text-[#000000] mb-2.5 mt-[15px]"
                         htmlFor="imageText"
                       >
-                        Category Image
+                        Service Image
                       </label>
                       <div className="flex items-center gap-2 bg-[#F2F2F2] rounded-lg p-2">
                         <input
@@ -950,17 +1069,17 @@ const handleSaveEditPopup = useCallback(async () => {
                   >
                     Save Details
                   </button>
-              {subCat && (
-  <button
-    onClick={() => handleDisableClick(subCat.id)}
-    className={`w-full font-normal text-base mt-6 py-2 rounded-[10px] flex justify-center items-center gap-2 
+                  {subCat && (
+                    <button
+                      onClick={() => handleDisableClick(subCat.id)}
+                      className={`w-full font-normal text-base mt-6 py-2 rounded-[10px] flex justify-center items-center gap-2 
       ${subCat.isActive ? "bg-[#e70000] text-white" : "bg-green-500 text-white"}
     `}
-  >
-    {subCat.isActive ? <DisableRedicon /> : <EnableRedIcon />}
-    {subCat.isActive ? "Block" : "Active"}
-  </button>
-)}
+                    >
+                      {subCat.isActive ? <DisableRedicon /> : <EnableRedIcon />}
+                      {subCat.isActive ? "Block" : "Active"}
+                    </button>
+                  )}
                 </div>
               </div>
             )}
