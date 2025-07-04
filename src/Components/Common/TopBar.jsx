@@ -112,7 +112,7 @@ function TopBar() {
         </div>
 
         <div className="flex items-center gap-2 xl:gap-4">
-          <div
+          {/* <div
             ref={searchRef}
             className={`flex items-center h-[40px] rounded-[50px] bg-[#F1F1F1] ${isInputVisible ? "w-[185px] lg:max-w-[330px] xl:w-[330px]" : "max-w-[40px]"
               } transition-all duration-300`}
@@ -135,7 +135,7 @@ function TopBar() {
                 <BlackCloseIcon />
               </div>
             )}
-          </div>
+          </div> */}
           <button onClick={setchatPopup}>
             <ChatIcon />
           </button>

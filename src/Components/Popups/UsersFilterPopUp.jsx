@@ -17,6 +17,7 @@ function UsersFilterPopUp({ handleFilterPopupClose, applyFilters   }) {
 
 
   const handleUserTypeChange = (type) => {
+
     setFilterState((prev) => ({ ...prev, selectedUserType: type }));
   };
 
@@ -24,6 +25,7 @@ function UsersFilterPopUp({ handleFilterPopupClose, applyFilters   }) {
     setFilterState((prev) => ({ ...prev, selectedStatus: status }));
   };
   const handleStatusProfileChange = (status) => {
+
     setFilterState((prev) => ({ ...prev, selectedProfileStatus: status }));
   };
   const handleStatusBusinessChange = (status) => {
@@ -34,7 +36,6 @@ function UsersFilterPopUp({ handleFilterPopupClose, applyFilters   }) {
     applyFilters(filterState);  
     handleFilterPopupClose();   
   };
-
 
   return (
     <>

@@ -160,12 +160,12 @@ const Listing = () => {
                   posted listing
                 </h1>
               </div>
-              <button className="border border-[#F1F1F1] text-[#00000099] py-[7px] px-[20px] rounded-[10px] flex items-center gap-2">
+              {/* <button className="border border-[#F1F1F1] text-[#00000099] py-[7px] px-[20px] rounded-[10px] flex items-center gap-2">
                 My Action
                 <span>
                   <DownArrow />
                 </span>
-              </button>
+              </button> */}
             </div>
 
             <div className="flex">

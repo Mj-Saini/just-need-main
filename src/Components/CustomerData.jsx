@@ -377,47 +377,91 @@ const CustomerData = () => {
 
   const showActionButtons = selectItem.length >= 2;
 
+  // const applyFilters = (filters) => {
+  //   let updatedUsers = users;
+  //   console.log(filters,"::::")
+
+
+  //   // **Filter by User Type (Seller / Consumer)**
+  //   if (filters.selectedUserType) {
+  //     updatedUsers = updatedUsers.filter(user => {
+  //       if (filters.selectedUserType === "Seller") {
+  //         return user.IsSeller === true;
+  //       } else if (filters.selectedUserType === "Consumer") {
+  //         return user.IsSeller === false;
+  //       }
+  //       return true;
+  //     });
+  //   }
+
+  //   // **Filter by Profile Status**
+  //   if (filters.selectedProfileStatus) {
+  //     updatedUsers = updatedUsers.filter(user => user.accountStatus === filters.selectedProfileStatus);
+  //   }
+
+  //   // **Filter by Business Status**
+  //   if (filters.selectedBusinessStatus) {
+  //     updatedUsers = updatedUsers.filter(user => user.businessDetail?.status === filters.selectedBusinessStatus);
+  //   }
+
+  //   // **Filter by Subscription Status**
+  //   if (filters.subscriptionStatus) {
+  //     updatedUsers = updatedUsers.filter(user => user.verificationStatus === filters.selectedStatus);
+  //   }
+
+  //   console.log(users,"users")
+  //   // **Update States**
+  //   setFilteredUsers(updatedUsers);
+  //   setCurrentPage(1); // Pagination reset
+
+  //   // **Paginate Data**
+  //   const startIndex = 0;
+  //   const endIndex = Math.min(itemsPerPage, updatedUsers.length);
+  //   setPaginatedData(updatedUsers.slice(startIndex, endIndex));
+  // };
+
+
+
   const applyFilters = (filters) => {
-    let updatedUsers = users;
+  let updatedUsers = users;
+  console.log(filters, "::::");
+  console.log(users, "users");
 
-    // **Filter by User Type (Seller / Consumer)**
-    if (filters.selectedUserType) {
-      updatedUsers = updatedUsers.filter(user => {
-        if (filters.selectedUserType === "Seller") {
-          return user.IsSeller === true;
-        } else if (filters.selectedUserType === "Consumer") {
-          return user.IsSeller === false;
-        }
-        return true;
-      });
-    }
+  // Filter by User Type (Seller / Consumer)
+  if (filters.selectedUserType) {
+    updatedUsers = updatedUsers.filter(user => {
+      if (filters.selectedUserType === "Seller") {
+        return user.IsSeller === true;
+      } else if (filters.selectedUserType === "Consumer") {
+        return user.IsSeller === false;
+      }
+      return true;
+    });
+  }
 
-    // **Filter by Profile Status**
-    if (filters.profileStatus) {
-      updatedUsers = updatedUsers.filter(user => user.profileStatus === filters.profileStatus);
-    }
+  // Filter by Profile Status
+  if (filters.selectedProfileStatus) {
+    updatedUsers = updatedUsers.filter(user => user.accountStatus === filters.selectedProfileStatus);
+  }
 
-    // **Filter by Business Status**
-    if (filters.businessStatus) {
-      updatedUsers = updatedUsers.filter(user => user.businessDetail?.status === filters.businessStatus);
-    }
+  // Filter by Business Status
+  if (filters.selectedBusinessStatus) {
+    updatedUsers = updatedUsers.filter(user => user.businessDetail?.status === filters.selectedBusinessStatus);
+  }
 
-    // **Filter by Subscription Status**
-    if (filters.subscriptionStatus) {
-      updatedUsers = updatedUsers.filter(user => user.verificationStatus === filters.subscriptionStatus);
-    }
+  // Filter by Subscription Status
+  if (filters.selectedStatus) {
+    updatedUsers = updatedUsers.filter(user => user.verificationStatus === filters.selectedStatus);
+  }
 
+  // Update States
+  setFilteredUsers(updatedUsers);
+  setCurrentPage(1);
 
-    // **Update States**
-    setFilteredUsers(updatedUsers);
-    setCurrentPage(1); // Pagination reset
-
-    // **Paginate Data**
-    const startIndex = 0;
-    const endIndex = Math.min(itemsPerPage, updatedUsers.length);
-    setPaginatedData(updatedUsers.slice(startIndex, endIndex));
-  };
-
+  const startIndex = 0;
+  const endIndex = Math.min(itemsPerPage, updatedUsers.length);
+  setPaginatedData(updatedUsers.slice(startIndex, endIndex));
+};
 
 
 
@@ -482,14 +526,14 @@ const CustomerData = () => {
         <table className="w-full text-left border-separate border-spacing-4 whitespace-nowrap rounded-[10px]">
           <thead>
             <tr className="py-[8px]">
-              <th className="px-[19px] py-[8px] md:px-[24px]">
+              {/* <th className="px-[19px] py-[8px] md:px-[24px]">
                 <input
                   className="w-[16px] h-[16px]"
                   type="checkbox"
                   checked={mainCheckbox}
                   onChange={handleMainCheckboxChange}
                 />
-              </th>
+              </th> */}
               <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                 Full Name
               </th>
@@ -544,7 +588,7 @@ const CustomerData = () => {
                   paginatedData.map((customer) => {
                 return (
                   <tr key={customer.id}>
-                    <td className="px-[19px] md:px-[24px]">
+                    {/* <td className="px-[19px] md:px-[24px]">
                       <input
                         className="w-[16px] h-[16px]"
                         type="checkbox"
@@ -552,7 +596,7 @@ const CustomerData = () => {
                         checked={selectItem.includes(customer.id)}
                         value={customer.id}
                       />
-                    </td>
+                    </td> */}
                     <td className="px-[19px] md:px-[24px] text-[#6C4DEF] flex items-center gap-2 min-w-[160px]">
                       <Link
                         className="flex gap-2"
@@ -632,12 +676,12 @@ const CustomerData = () => {
                         <button className="text-2xl font-medium">
                           <EyeIcon />
                         </button></Link>
-                      <button
+                      {/* <button
                         className="text-2xl font-medium ms-[6px]"
                         onClick={() => handleSingleDeleteClick(customer.id)}
                       >
                         <DeleteRedIcon />
-                      </button>
+                      </button> */}
                     </td>
                   </tr>
                 )

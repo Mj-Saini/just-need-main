@@ -136,3 +136,7 @@
   max-width: 100%;
   height: auto;
 }
+
+.view_block_icon svg path{
+  fill: white;
+}

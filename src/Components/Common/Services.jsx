@@ -50,6 +50,7 @@ function Services() {
   const [categoryImageUrl, setCategoryImageUrl] = useState(""); // State for image URL
   const [subCat, setSubCat] = useState(null);
   const [isVertical, setIsVertical] = useState(false);
+  const [activeServiceTab, setActiveServiceTab] = useState("services");
 
   const toggleLayout = () => {
     setIsVertical((prev) => !prev);
@@ -102,34 +103,62 @@ function Services() {
     }
   }, [categories, loading]);
 
+const filteredCategoriesData = useMemo(() => {
+  if (!searchQuery.trim()) {
+    return categories.filter(cat => cat.isActive !== false);
+  }
 
-
-  const filteredCategoriesData = useMemo(() => {
-    if (!searchQuery.trim()) return categories;
-
-    return categories
-      .map((category) => {
-        const categoryMatches = category?.categoryName
-          ?.toLowerCase()
-          .includes(searchQuery.toLowerCase());
-        const filteredSubcategories = (category.subcategory || []).filter(
-          (sub) =>
-            sub?.categoryName?.toLowerCase().includes(searchQuery.toLowerCase())
+  return categories
+    .filter(cat => cat.isActive !== false)
+    .map((category) => {
+      const categoryMatches = category?.categoryName
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const filteredSubcategories = (category.subcategory || [])
+        .filter(sub => sub.isActive !== false)
+        .filter((sub) =>
+          sub?.categoryName?.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
-        if (categoryMatches || filteredSubcategories.length > 0) {
-          return {
-            ...category,
-            subcategory:
-              filteredSubcategories.length > 0 || categoryMatches
-                ? category.subcategory
-                : [],
-          };
-        }
-        return null;
-      })
-      .filter((cat) => cat !== null);
-  }, [categories, searchQuery]);
+      if (categoryMatches || filteredSubcategories.length > 0) {
+        return {
+          ...category,
+          subcategory: filteredSubcategories.length > 0 || categoryMatches
+            ? filteredSubcategories
+            : [],
+        };
+      }
+      return null;
+    })
+    .filter((cat) => cat !== null);
+}, [categories, searchQuery]);
+
+  // const filteredCategoriesData = useMemo(() => {
+  //   if (!searchQuery.trim()) return categories;
+
+  //   return categories
+  //     .map((category) => {
+  //       const categoryMatches = category?.categoryName
+  //         ?.toLowerCase()
+  //         .includes(searchQuery.toLowerCase());
+  //       const filteredSubcategories = (category.subcategory || []).filter(
+  //         (sub) =>
+  //           sub?.categoryName?.toLowerCase().includes(searchQuery.toLowerCase())
+  //       );
+
+  //       if (categoryMatches || filteredSubcategories.length > 0) {
+  //         return {
+  //           ...category,
+  //           subcategory:
+  //             filteredSubcategories.length > 0 || categoryMatches
+  //               ? category.subcategory
+  //               : [],
+  //         };
+  //       }
+  //       return null;
+  //     })
+  //     .filter((cat) => cat !== null);
+  // }, [categories, searchQuery]);
 
   // const toggle = useCallback(() => {
   //   setShowForm((prev) => {
@@ -350,120 +379,81 @@ function Services() {
   }, []);
 
 
-
-
-  // Your final function
-  const toggleDisableCard = useCallback(
-    async (itemId, currentStatus, action, isCategory = false) => {
-      console.log("🔥 toggleDisableCard called with", { itemId, currentStatus, action, isCategory });
-      if (action === "confirm") {
-        setShowDisablePopup(false);
-        setCurrentCardIndex(null);
-        if (showForm) toggle();
-
+// Update the toggleDisableCard function
+const toggleDisableCard = useCallback(
+  async (itemId, currentStatus, action, isCategory = false) => {
+    if (action === "confirm") {
+      setShowDisablePopup(false);
+      setCurrentCardIndex(null);
+      
+      try {
         const newStatus = !currentStatus;
-
-        try {
-          if (isCategory) {
-            await toggleCategoryStatus(itemId, newStatus);
-
-            const updatedCategories = categories.map((cat) =>
-              cat.id === itemId ? { ...cat, isActive: newStatus } : cat
-            );
-
-            const activeCategoryIndex = updatedCategories.findIndex((cat) => cat.isActive);
-
-            if (newStatus) {
-              const enabledIndex = updatedCategories.findIndex((cat) => cat.id === itemId);
-              setActiveTab(enabledIndex);
-              setSelectedSubcategories(updatedCategories[enabledIndex]?.subcategory || []);
-              setSelectedCategoryId(updatedCategories[enabledIndex]?.id || null);
-            } else if (activeTab === categories.findIndex((cat) => cat.id === itemId)) {
-              setActiveTab(activeCategoryIndex !== -1 ? activeCategoryIndex : 0);
-              setSelectedSubcategories(
-                activeCategoryIndex !== -1
-                  ? updatedCategories[activeCategoryIndex]?.subcategory || []
-                  : []
-              );
-              setSelectedCategoryId(
-                activeCategoryIndex !== -1
-                  ? updatedCategories[activeCategoryIndex]?.id || null
-                  : null
-              );
-            }
-          } else {
-            await toggleSubcategoryStatus(itemId, newStatus);
-            setSelectedSubcategories((prev) =>
-              prev.map((sub) =>
-                sub.id === itemId ? { ...sub, isActive: newStatus } : sub
-              )
-            );
+        
+        if (isCategory) {
+          await toggleCategoryStatus(itemId, newStatus);
+          // Close edit form if it was open
+          if (showForm) toggle();
+          
+          // Update active tab if needed
+          if (!newStatus && activeTab === categories.findIndex(cat => cat.id === itemId)) {
+            const newActiveTab = categories.findIndex(cat => cat.isActive && cat.id !== itemId);
+            setActiveTab(newActiveTab >= 0 ? newActiveTab : 0);
           }
-
-          await getCategoriesWithSubcategories(); // Refresh all data
-
-          toast.success(
-            newStatus
-              ? `${isCategory ? "Category" : "Subcategory"} enabled successfully!`
-              : `${isCategory ? "Category" : "Subcategory"} disabled successfully!`
-          );
-        } catch (error) {
-          console.error(
-            `Error toggling ${isCategory ? "category" : "subcategory"} status:`,
-            error
-          );
-          toast.error(
-            `Failed to toggle ${isCategory ? "category" : "subcategory"} status: ${error.message}`
-          );
+        } else {
+          await toggleSubcategoryStatus(itemId, newStatus);
         }
-      } else {
-        setShowDisablePopup(false);
-        setCurrentCardIndex(null);
+        
+        await getCategoriesWithSubcategories();
+        
+        toast.success(
+          `${isCategory ? "Service" : "Subservice"} ${
+            newStatus ? "unblocked" : "blocked"
+          } successfully!`
+        );
+      } catch (error) {
+        console.error("Error toggling status:", error);
+        toast.error(
+          `Failed to ${newStatus ? "unblock" : "block"}: ${error.message}`
+        );
       }
-    },
-    [
-      showForm,
-      toggle,
-      categories,
-      activeTab,
-      getCategoriesWithSubcategories,
-    ]
-  );
+    } else {
+      setShowDisablePopup(false);
+      setCurrentCardIndex(null);
+    }
+  },
+  [toggleCategoryStatus, toggleSubcategoryStatus, getCategoriesWithSubcategories, showForm, toggle, activeTab, categories]
+);
+
+
+
+  // // Your final function
   // const toggleDisableCard = useCallback(
   //   async (itemId, currentStatus, action, isCategory = false) => {
-  //     console.log(itemId, currentStatus, action, isCategory," toggleDisableCard called");
+  //     console.log("🔥 toggleDisableCard called with", { itemId, currentStatus, action, isCategory });
   //     if (action === "confirm") {
   //       setShowDisablePopup(false);
   //       setCurrentCardIndex(null);
   //       if (showForm) toggle();
 
   //       const newStatus = !currentStatus;
+
   //       try {
   //         if (isCategory) {
   //           await toggleCategoryStatus(itemId, newStatus);
+
   //           const updatedCategories = categories.map((cat) =>
   //             cat.id === itemId ? { ...cat, isActive: newStatus } : cat
   //           );
-  //           const activeCategoryIndex = updatedCategories.findIndex(
-  //             (cat) => cat.isActive
-  //           );
+
+  //           const activeCategoryIndex = updatedCategories.findIndex((cat) => cat.isActive);
+
   //           if (newStatus) {
-  //             const enabledIndex = updatedCategories.findIndex(
-  //               (cat) => cat.id === itemId
-  //             );
+  //             const enabledIndex = updatedCategories.findIndex((cat) => cat.id === itemId);
   //             setActiveTab(enabledIndex);
-  //             setSelectedSubcategories(
-  //               updatedCategories[enabledIndex]?.subcategory || []
-  //             );
-  //             setSelectedCategoryId(
-  //               updatedCategories[enabledIndex]?.id || null
-  //             );
-  //           } else if (
-  //             activeTab === categories.findIndex((cat) => cat.id === itemId)
-  //           ) {
-  //             setActiveTab(
-  //               activeCategoryIndex !== -1 ? activeCategoryIndex : 0
-  //             );
+  //             setSelectedSubcategories(updatedCategories[enabledIndex]?.subcategory || []);
+  //             setSelectedCategoryId(updatedCategories[enabledIndex]?.id || null);
+  //           } else if (activeTab === categories.findIndex((cat) => cat.id === itemId)) {
+  //             setActiveTab(activeCategoryIndex !== -1 ? activeCategoryIndex : 0);
   //             setSelectedSubcategories(
   //               activeCategoryIndex !== -1
   //                 ? updatedCategories[activeCategoryIndex]?.subcategory || []
@@ -483,7 +473,9 @@ function Services() {
   //             )
   //           );
   //         }
-  //         await getCategoriesWithSubcategories();
+
+  //         await getCategoriesWithSubcategories(); // Refresh all data
+
   //         toast.success(
   //           newStatus
   //             ? `${isCategory ? "Category" : "Subcategory"} enabled successfully!`
@@ -504,13 +496,11 @@ function Services() {
   //     }
   //   },
   //   [
-  //     toggleSubcategoryStatus,
-  //     toggleCategoryStatus,
-  //     getCategoriesWithSubcategories,
   //     showForm,
   //     toggle,
   //     categories,
   //     activeTab,
+  //     getCategoriesWithSubcategories,
   //   ]
   // );
 
@@ -602,11 +592,38 @@ function Services() {
     setIsVisible((prev) => !prev);
   }, []);
 
-  const blockedSubcategories = useMemo(() => {
-    return categories
-      .flatMap((category) => category.subcategory || [])
-      .filter((sub) => sub.isActive === false);
-  }, [categories]);
+  const blockedItems = useMemo(() => {
+  const blockedCategories = categories
+    .filter((cat) => cat.isActive === false)
+    .map((cat) => ({
+      id: cat.id,
+      name: cat.categoryName,
+      type: 'category',
+      image: cat.image
+    }));
+
+  const blockedSubcategories = categories
+    .flatMap((category) => 
+      (category.subcategory || [])
+        .filter((sub) => sub.isActive === false)
+        .map((sub) => ({
+          ...sub,
+          type: 'subcategory',
+          parentCategoryName: category.categoryName
+        }))
+    );
+
+  return {
+    categories: blockedCategories,
+    subcategories: blockedSubcategories
+  };
+}, [categories]);
+
+  // const blockedSubcategories = useMemo(() => {
+  //   return categories
+  //     .flatMap((category) => category.subcategory || [])
+  //     .filter((sub) => sub.isActive === false);
+  // }, [categories]);
 
   const popupRef = useRef();
 
@@ -653,35 +670,43 @@ function Services() {
       )
     );
   };
-
-const handleUnblockBoth = async (subcategoryId, categoryId) => {
-   try {
-    let didSomething = false;
-
-    if (subcategoryId) {
-      await toggleSubcategoryStatus(subcategoryId, true);
-      toast.success("Subcategory unblocked successfully!");
-      didSomething = true;
-    }
-
-    if (categoryId) {
-      await toggleCategoryStatus(categoryId, true);
-      toast.success("Category unblocked successfully!");
-      didSomething = true;
-    }
-
-    if (!didSomething) {
-      toast.info("No valid ID found to unblock.");
+// Update the handleUnblockBoth function
+const handleUnblockBoth = async (itemId, isCategory = false) => {
+  try {
+    if (isCategory) {
+      await toggleCategoryStatus(itemId, true);
     } else {
-      await getCategoriesWithSubcategories(); // Refresh only if something changed
+      await toggleSubcategoryStatus(itemId, true);
     }
-
+    
+    await getCategoriesWithSubcategories();
+    toast.success(
+      `${isCategory ? "Service" : "Subservice"} unblocked successfully!`
+    );
   } catch (error) {
-    console.error("Error unblocking:", error.message);
-    toast.error("Something went wrong while unblocking.");
+    console.error("Error unblocking:", error);
+    toast.error(`Failed to unblock: ${error.message}`);
   }
 };
 
+//   const handleUnblockBoth = async (itemId, isCategory = false) => {
+//   try {
+//     if (isCategory) {
+//       // Unblock category
+//       await toggleCategoryStatus(itemId, true);
+//       toast.success("Service unblocked successfully!");
+//     } else {
+//       // Unblock subcategory
+//       await toggleSubcategoryStatus(itemId, true);
+//       toast.success("Subservice unblocked successfully!");
+//     }
+    
+//     await getCategoriesWithSubcategories(); // Refresh data
+//   } catch (error) {
+//     console.error("Error unblocking:", error);
+//     toast.error(`Failed to unblock: ${error.message}`);
+//   }
+// };
 
   return (
     <div className="p-[14px] rounded-[10px] shadow-md bg-white">
@@ -697,7 +722,7 @@ const handleUnblockBoth = async (subcategoryId, categoryId) => {
         <>
           <div className="xl:flex-row flex-col flex xl:items-center justify-between">
             <h1 className="font-medium text-[22px]">{categories[activeTab]?.categoryName}</h1>
-            <div className="flex items-center mt-[20px] xl:mt-[0px]">
+            <div className="flex items-center justify-between mt-[20px] xl:mt-[0px]">
               <div className="bg-[#F1F1F1] w-[337px] px-[16px] py-2.5 h-[42px] rounded-[10px]">
                 <div className="flex items-center">
                   <Searchicon />
@@ -710,7 +735,8 @@ const handleUnblockBoth = async (subcategoryId, categoryId) => {
                   />
                 </div>
               </div>
-              <div
+              <div className="flex">
+                 <div
                 onClick={handleNewServicePopUp}
                 className="whitespace-nowrap cursor-pointer bg-[#0832DE] flex items-center h-[42px] px-[16px] py-2.5 rounded-[10px] ms-[20px]"
               >
@@ -719,123 +745,166 @@ const handleUnblockBoth = async (subcategoryId, categoryId) => {
                   Add New Service
                 </p>
               </div>
-            </div>
-          </div>
-
-          <div className="mt-8 relative">
-            <div className={`flex whitespace-nowrap ${isVertical ? "border-b border-[rgb(128,128,128)]" : ""}`}>
-              <div
-                className={`gap-4 flex items-center grid-3 cursor-pointer scrollRemove border-b-2 ${isVertical ? "flex-wrap" : "overflow-x-auto "}`}
-              >
-                {filteredCategoriesData?.map((items, index) => (
-                  <div
-                    key={index}
-                    className={`flex items-center pb-2 ${!isVertical ? "border-b-2" : ""} px-5 hover:text-blue-500 hover:border-blue-500 ${activeTab === index
-                      ? "border-blue-500 text-blue-500"
-                      : "border-transparent text-gray-700"
-                      } ${!items.isActive ? "opacity-50" : ""}`}
-                    onClick={() => handleCategoryClick(index)}
-                  >
-                    <img
-                      className="h-[30px] w-[30px] object-cover rounded-full"
-                      src={items.image}
-                      alt=""
-                    />
-                    <p className="font-normal text-base transition mx-[5px]">
-                      {highlightText(items?.categoryName)}
-                    </p>
-                    <span className="font-normal text-xs flex justify-center items-center w-[25px] h-[17px] bg-[#0000000F] rounded-[60px] py-1 px-1.5 me-1">
-                      {items?.subcategory?.length || 0}
-                    </span>
-
-                    <div className="flex gap-2">
-                      <div
-                        onClick={(e) =>
-                          handleCategoryEdit(items.id, items.categoryName, e)
-                        }
-                      >
-                        <Editicon />
-                      </div>
-                      <div
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleCategoryDisable(items.id);
-                        }}
-                        className="ms-2"
-                      >
-                        {items.isActive ? <EnableRedIcon /> : <DisableRedicon />}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex">
-                <div
-                  className={`cursor-pointer ps-5 flex flex-col justify-start mt-3 ${!isVertical ? "border-b border-[rgb(128,128,128)]" : ""}`}
-                  onClick={toggleLayout}
-                >
-                  <UnderIcon />
-                </div>
+              <div className="flex whitespace-nowrap cursor-pointer bg-[#0832DE] items-center h-[42px] px-[16px] py-2.5 rounded-[10px] ms-[20px]">
+              
 
                 <div
-                  className={`bg-white ps-5 ${!isVertical ? "border-b border-[rgb(128,128,128)]" : ""}`}
+                  className={``}
                 >
                   <button
-                    className="text-[#6C4DEF] font-normal text-base"
+                    className="text-[#ffffff] font-normal text-base"
                     onClick={toggleOptionsVisibility}
                   >
                     View Blocked List
                   </button>
+                  </div>
+                    <div
+                  className={`cursor-pointer ps-1 flex flex-col justify-start view_block_icon`}
+                  onClick={toggleLayout}
+                >
+                  <UnderIcon />
                 </div>
               </div>
+             </div>
             </div>
           </div>
+         
 
-          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 justify-between gap-[18px] mt-6 flex-wrap whitespace-nowrap">
-            {selectedSubcategories?.length > 0 &&
-              selectedSubcategories?.filter((sub) => sub?.isActive).map((sub, index) => {
-
-                return (
-                  <div
-                    key={index}
-                    className="group hover:bg-[#6C4DEF1A] hover:border-[#6CDEF1A] border border-[#0000001A] lg:p-5 p-3 rounded-[10px] h-full transition w-full"
-                  >
-                    <div className="flex items-center justify-between">
-                      {editIndex === index ? (
-                        <input
-                          type="text"
-                          value={editData}
-                          onChange={handleInputChange}
-                          onBlur={() => handleSaveEdit(sub.id)}
-                          className="w-full bg-transparent border border-black me-2 focus:outline-none p-1 rounded-[10px]"
-                          autoFocus
+          <div className="flex h-[calc(100vh-215px)]">
+             <div className="mt-8 relative w-[400px] overflow-auto ">
+              <div className={`flex w-full ${isVertical ? "border-b border-[rgb(128,128,128)]" : ""}`}>
+                <div
+                  className={`gap-4 flex flex-col w-full cursor-pointer scrollRemove border-b-2 shadow-2xl px-4 ${isVertical ? "flex-wrap" : ""}`}
+                >
+                  {/* {filteredCategoriesData?.map((items, index) => (
+                    <div
+                      key={items.id}
+                      className={`flex items-center pb-2 justify-between ${!isVertical ? "border-b-2" : ""} hover:text-blue-500 hover:border-blue-500 ${activeTab === index
+                        ? "border-blue-500 text-blue-500"
+                        : "border-transparent text-gray-700"
+                        } ${!items.isActive ? "opacity-50" : ""}`}
+                      onClick={() => handleCategoryClick(index)}
+                    >
+                      <div className="flex gap-2">
+                        <img
+                          className="h-[30px] w-[30px] object-cover rounded-full"
+                          src={items.image}
+                          alt=""
                         />
-                      ) : (
-                        <p className="font-normal text-sm text-[#00000099] lg:mx-[5px] transition group-hover:text-[#6C4DEF] flex items-center lg:gap-4 gap-2">
-                          <img
-                            className="w-[25px] h-[25px] object-cover rounded-full"
-                            src={sub.image}
-                            alt=""
-                          />
-                          {highlightText(sub?.categoryName, searchQuery)}
+                        <p className="font-normal text-base transition mx-[5px]">
+                          {highlightText(items?.categoryName)}
                         </p>
-                      )}
+                        <span className="font-normal text-xs flex justify-center items-center w-[25px] h-[17px] bg-[#0000000F] rounded-[60px] py-1 px-1.5 -ms-5">
+                          {items?.subcategory?.length || 0}
+                        </span>
+                      </div>
 
-                      <div className="flex lg:gap-4 gap-2">
+                      <div className="flex gap-2">
                         <div
-                          className="cursor-pointer"
-                          onClick={(e) => { handleSubcategoryEdit(sub.id, sub.categoryName, e); setSubCat(sub) }}
+                          onClick={(e) =>
+                            handleCategoryEdit(items.id, items.categoryName, e)
+                          }
                         >
                           <Editicon />
                         </div>
-
+                        
                       </div>
                     </div>
-                  </div>
-                )
-              })}
+                  ))} */}
+                  {filteredCategoriesData?.map((items, index) => (
+    <div
+      key={items.id} 
+      className={`flex items-center pb-2 justify-between ${!isVertical ? "border-b-2" : ""} hover:text-blue-500 hover:border-blue-500 ${
+        activeTab === index
+          ? "border-blue-500 text-blue-500"
+          : "border-transparent text-gray-700"
+      } ${!items.isActive ? "opacity-50" : ""}`}
+      onClick={() => {
+        if (items.isActive) { // Only handle click if service is active
+          handleCategoryClick(index);
+        }
+      }}
+    >
+      <div className="flex gap-2">
+        <img
+          className="h-[30px] w-[30px] object-cover rounded-full"
+          src={items.image}
+          alt=""
+        />
+        <p className="font-normal text-base transition mx-[5px]">
+          {highlightText(items?.categoryName)}
+        </p>
+        <span className="font-normal text-xs flex justify-center items-center w-[25px] h-[17px] bg-[#0000000F] rounded-[60px] py-1 px-1.5 -ms-5">
+          {items?.subcategory?.filter(sub => sub.isActive).length || 0} {/* Only count active subcategories */}
+        </span>
+      </div>
+
+      <div className="flex gap-2">
+        {items.isActive && ( // Only show edit icon for active services
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              handleCategoryEdit(items.id, items.categoryName, e);
+            }}
+          >
+            <Editicon />
           </div>
+        )}
+      </div>
+    </div>
+  ))}
+                </div>
+
+                
+              </div>
+            </div>
+
+          <div className="ps-5 flex flex-col items-center w-full overflow-auto ">
+             <div className="flex justify-between gap-[18px] mt-6 flex-wrap w-full bg-[#6C4DEF1A] ">
+              {selectedSubcategories?.length > 0 &&
+                selectedSubcategories?.filter((sub) => sub?.isActive).map((sub, index) => {
+
+                  return (
+                    <div
+                      key={index}
+                      className="group hover:bg-[#6C4DEF1A] hover:border-[#6CDEF1A] border border-[#0000001A] lg:p-5 p-3 rounded-[10px] transition w-full"
+                    >
+                      <div className="flex items-center justify-between">
+                        {editIndex === index ? (
+                          <input
+                            type="text"
+                            value={editData}
+                            onChange={handleInputChange}
+                            onBlur={() => handleSaveEdit(sub.id)}
+                            className="w-full bg-transparent border border-black me-2 focus:outline-none p-1 rounded-[10px]"
+                            autoFocus
+                          />
+                        ) : (
+                          <p className="font-normal text-sm text-[#00000099] lg:mx-[5px] transition group-hover:text-[#6C4DEF] flex items-center lg:gap-4 gap-2">
+                            <img
+                              className="w-[25px] h-[25px] object-cover rounded-full"
+                              src={sub.image}
+                              alt=""
+                            />
+                            {highlightText(sub?.categoryName, searchQuery)}
+                          </p>
+                        )}
+
+                        <div className="flex lg:gap-4 gap-2">
+                          <div
+                            className="cursor-pointer"
+                            onClick={(e) => { handleSubcategoryEdit(sub.id, sub.categoryName, e); setSubCat(sub) }}
+                          >
+                            <Editicon />
+                          </div>
+
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+            </div>
+    
 
           {selectedSubcategories?.length === 0 && (
             <div className="flex flex-col">
@@ -861,6 +930,8 @@ const handleUnblockBoth = async (subcategoryId, categoryId) => {
               </p>
             </div>
           </div>
+           </div>
+           </div>
 
           {showPopup && (
             <div
@@ -894,195 +965,297 @@ const handleUnblockBoth = async (subcategoryId, categoryId) => {
             />
           )}
           {showDisablePopup && (
-            <> 
+            <>
               {console.log("✅ DisablePopUp is rendering", currentCardIndex)}
-              
-            <DisablePopUp
-              
-              onConfirm={() =>
 
-                toggleDisableCard(
-                  currentCardIndex,
+              <DisablePopUp
+
+                onConfirm={() =>
+
+                  toggleDisableCard(
+                    currentCardIndex,
+                    isCategoryToggle
+                      ? categories.find((cat) => cat.id === currentCardIndex)?.isActive
+                      : selectedSubcategories.find((sub) => sub.id === currentCardIndex)?.isActive,
+                    "confirm",
+                    isCategoryToggle
+                  )
+                }
+                onCancel={() => setShowDisablePopup(false)}
+                isActive={
                   isCategoryToggle
                     ? categories.find((cat) => cat.id === currentCardIndex)?.isActive
-                    : selectedSubcategories.find((sub) => sub.id === currentCardIndex)?.isActive,
-                  "confirm",
-                  isCategoryToggle
-                )
-              }
-              onCancel={() => setShowDisablePopup(false)}
-              isActive={
-                isCategoryToggle
-                  ? categories.find((cat) => cat.id === currentCardIndex)?.isActive
-                  : selectedSubcategories.find((sub) => sub.id === currentCardIndex)?.isActive
-              }
-              confirmText={
-                isCategoryToggle &&
-                  !categories.find((cat) => cat.id === currentCardIndex)?.isActive
-                  ? "Yes Enable"
-                  : "Yes Disable"
-              }
-            /></>
+                    : selectedSubcategories.find((sub) => sub.id === currentCardIndex)?.isActive
+                }
+                confirmText={
+                  isCategoryToggle &&
+                    !categories.find((cat) => cat.id === currentCardIndex)?.isActive
+                    ? "Yes Enable"
+                    : "Yes Disable"
+                }
+              /></>
           )}
 
           <div className="flex justify-center items-center">
-            {isVisible && (
+         
+{isVisible && (
+  <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
+    <div
+      onClick={(e) => e.stopPropagation()}
+      className="w-[450px] bg-white shadow-lg rounded-lg flex flex-col"
+    >
+      {/* Header */}
+      <div className="p-4 bg-[#EEEEEE] flex justify-between items-center rounded-t-lg">
+        <span className="font-normal text-base">Blocked Items</span>
+        <button
+          onClick={() => setIsVisible(false)}
+          className="focus:outline-none me-1"
+        >
+          <AiOutlineClose size={20} />
+        </button>
+      </div>
+      
+      {/* Tabs */}
+      <div className="flex border-b border-gray-300">
+        <button
+          onClick={() => setActiveServiceTab("services")}
+          className={`flex-1 py-2 text-center ${
+            activeServiceTab === "services"
+              ? "border-b-2 border-[#3B60E4] text-[#3B60E4] font-medium"
+              : "text-gray-500"
+          }`}
+        >
+          Services ({blockedItems.categories.length})
+        </button>
+        <button
+          onClick={() => setActiveServiceTab("subservices")}
+          className={`flex-1 py-2 text-center ${
+            activeServiceTab === "subservices"
+              ? "border-b-2 border-[#3B60E4] text-[#3B60E4] font-medium"
+              : "text-gray-500"
+          }`}
+        >
+          Sub Services ({blockedItems.subcategories.length})
+        </button>
+      </div>
+
+      {/* Content */}
+      <div className="py-2.5 px-5 h-[300px] overflow-y-scroll">
+        {activeServiceTab === "services" ? (
+          blockedItems.categories.length === 0 ? (
+            <p className="text-[#999999] font-normal text-base py-2">
+              No blocked services found.
+            </p>
+          ) : (
+            blockedItems.categories.map((item) => (
               <div
-                className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center"
-                onClick={() => setIsVisible(false)}
+                key={`cat-${item.id}`}
+                className="flex justify-between items-center py-2 border-b border-gray-100"
               >
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-[401px] bg-white shadow-lg rounded-lg flex flex-col"
-                >
-                  <div className="fixed z-10 w-[400px]">
-                    <div className="p-4 bg-[#EEEEEE] flex justify-between items-center rounded-t-lg">
-                      <span className="font-normal text-base">
-                        Blocked Services
-                      </span>
-                      <button
-                        onClick={() => setIsVisible(false)}
-                        className="focus:outline-none me-1"
-                      >
-                        <AiOutlineClose size={20} />
-                      </button>
-                    </div>
-                  </div>
-                  <div className="py-2.5 px-5 h-[250px] overflow-y-scroll pt-14">
-                    {blockedSubcategories.length === 0 ? (
-                      <p className="text-[#999999] font-normal text-base py-2">
-                        No blocked subcategories found.
-                      </p>
-                    ) : (
-                      blockedSubcategories.map((sub, index) => (
-                        <div
-                          key={sub.id}
-                          className="flex justify-between items-center py-2"
-                        >
-                          <div
-                            className={`flex items-center ${index === 0 ? "mt-3" : ""}`}
-                          >
-                            <label className="custom-radio">
-                              <input type="radio" name="blockedService" />
-                            </label>
-                            <span className="text-[#999999] font-normal text-base px-2.5">
-                              {highlightText(
-                                sub.categoryName || "Unnamed Subcategory",
-                                searchQuery
-                              )}
-                            </span>
-                          </div>
-                          <div onClick={(e) => {
-                            e.stopPropagation();
-                            handleUnblockBoth(sub.id);
-                            // handleDisableClick(sub.id);
-                          }} className="disable_icon cursor-pointer">
-                            <DisableRedicon />
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {showForm && (
-              <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
-                <div
-                  ref={popupRef}
-                  className="bg-white p-6 rounded-lg w-[649px] shadow-lg relative"
-                >
-                  <div className="flex justify-center items-center border-b pb-6">
-                    <h2 className="text-lg font-semibold">
-                      {editingCategoryId ? "Edit Service" : "Edit Subservice"}
-                    </h2>
-                    <button
-                      onClick={toggle}
-                      className="text-gray-600 hover:text-black absolute right-6 top-4"
-                    >
-                      <AiOutlineClose size={20} />
-                    </button>
-                  </div>
-                  <div className="mt-6">
-                    <label className="block text-base font-normal text-[#000000]">
-                      {editingCategoryId ? "Service Name" : "Subservice Name"}
-                    </label>
-                    <input
-                      type="text"
-                      value={categoryName}
-                      onChange={handleCategoryInputChange}
-                      className="w-full mt-[10px] p-2 border rounded text-[#000000] focus:outline-none"
-                      placeholder={
-                        editingCategoryId
-                          ? "Enter Service name"
-                          : "Enter subservice name"
-                      }
+                <div className="flex items-center">
+                  {item.image && (
+                    <img 
+                      src={item.image} 
+                      alt="" 
+                      className="w-8 h-8 rounded-full mr-3 object-cover"
                     />
-                  </div>
-
-                  {editingCategoryId && (
-                    <>
-                      <label
-                        className="block text-base font-normal text-[#000000] mb-2.5 mt-[15px]"
-                        htmlFor="imageText"
-                      >
-                        Service Image
-                      </label>
-                      <div className="flex items-center gap-2 bg-[#F2F2F2] rounded-lg p-2">
-                        <input
-                          type="text"
-                          placeholder={categoryImageUrl ? "Image Uploaded" : "No Image Chosen"}
-                          value={categoryImageUrl ? "Image Uploaded" : "No Image Chosen"} // Reflect the current state
-                          className="flex-1 px-3 py-2 bg-transparent border-none text-gray-500"
-                          disabled
-                        />
-                        <input
-                          type="file"
-                          className="hidden"
-                          id="fileUpload"
-                          accept="image/*"
-                          onChange={handleCategoryImageChange}
-                        />
-                        <label
-                          htmlFor="fileUpload"
-                          className="px-2.5 py-1 border border-[#E03F3F] text-[#E03F3F] rounded-lg cursor-pointer flex items-center"
-                        >
-                          <PlusIcon className="mr-1" />
-                          Upload
-                        </label>
-                      </div>
-
-                      {categoryImageUrl && (
-                        <img
-                          src={categoryImageUrl}
-                          alt="Category Preview"
-                          className="mt-2 w-[100px] h-[100px] object-cover rounded-lg"
-                        />
-                      )}
-                    </>
                   )}
-
-                  <button
-                    onClick={handleSaveEditPopup}
-                    className="w-full bg-[#0832DE] font-normal text-base text-white mt-6 py-2 rounded-[10px]"
-                  >
-                    Save Details
-                  </button>
-                  {subCat && (
-                    <button
-                      onClick={() => handleDisableClick(subCat.id)}
-                      className={`w-full font-normal text-base mt-6 py-2 rounded-[10px] flex justify-center items-center gap-2 
-      ${subCat.isActive ? "bg-[#e70000] text-white" : "bg-green-500 text-white"}
-    `}
-                    >
-                      {subCat.isActive ? <DisableRedicon /> : <EnableRedIcon />}
-                      {subCat.isActive ? "Block" : "Active"}
-                    </button>
-                  )}
+                  <span className="text-[#333] font-normal text-base">
+                    {item.name || "Unnamed Service"}
+                  </span>
                 </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleUnblockBoth(item.id, true); // true indicates this is a category
+                  }}
+                  className="text-green-600 hover:text-green-800 font-medium"
+                >
+                  Unblock
+                </button>
               </div>
-            )}
+            ))
+          )
+        ) : blockedItems.subcategories.length === 0 ? (
+          <p className="text-[#999999] font-normal text-base py-2">
+            No blocked sub services found.
+          </p>
+        ) : (
+          blockedItems.subcategories.map((item) => (
+            <div
+              key={`sub-${item.id}`}
+              className="flex justify-between items-center py-2 border-b border-gray-100"
+            >
+              <div>
+                <p className="text-[#333] text-base font-normal">
+                  {item.categoryName || "Unnamed Sub Service"}
+                </p>
+                <p className="text-xs text-gray-500">
+                  Parent: {item.parentCategoryName || "No parent service"}
+                </p>
+              </div>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleUnblockBoth(item.id, false); // false indicates this is a subcategory
+                }}
+                className="text-green-600 hover:text-green-800 font-medium"
+              >
+                Unblock
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+  </div>
+)}
+            
+            {showForm && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-30 z-50">
+    <div
+      ref={popupRef}
+      className="bg-white p-6 rounded-lg w-[649px] shadow-lg relative"
+    >
+      {/* Header */}
+      <div className="flex justify-center items-center border-b pb-6">
+        <h2 className="text-lg font-semibold">
+          {editingCategoryId ? "Edit Service" : "Edit Subservice"}
+        </h2>
+        <button
+          onClick={toggle}
+          className="text-gray-600 hover:text-black absolute right-6 top-4"
+        >
+          <AiOutlineClose size={20} />
+        </button>
+      </div>
+
+      {/* Name Field */}
+      <div className="mt-6">
+        <label className="block text-base font-normal text-[#000000]">
+          {editingCategoryId ? "Service Name" : "Subservice Name"}
+        </label>
+        <input
+          type="text"
+          value={categoryName}
+          onChange={handleCategoryInputChange}
+          className="w-full mt-[10px] p-2 border rounded text-[#000000] focus:outline-none"
+          placeholder={
+            editingCategoryId
+              ? "Enter Service name"
+              : "Enter subservice name"
+          }
+        />
+      </div>
+
+      {/* Image Upload (only for services) */}
+      {editingCategoryId && (
+        <>
+          <label
+            className="block text-base font-normal text-[#000000] mb-2.5 mt-[15px]"
+            htmlFor="fileUpload"
+          >
+            Service Image
+          </label>
+          <div className="flex items-center gap-2 bg-[#F2F2F2] rounded-lg p-2">
+            <input
+              type="text"
+              placeholder={categoryImageUrl ? "Image Uploaded" : "No Image Chosen"}
+              value={categoryImageUrl ? "Image Uploaded" : "No Image Chosen"}
+              className="flex-1 px-3 py-2 bg-transparent border-none text-gray-500"
+              disabled
+            />
+            <input
+              type="file"
+              className="hidden"
+              id="fileUpload"
+              accept="image/*"
+              onChange={handleCategoryImageChange}
+            />
+            <label
+              htmlFor="fileUpload"
+              className="px-2.5 py-1 border border-[#E03F3F] text-[#E03F3F] rounded-lg cursor-pointer flex items-center"
+            >
+              <PlusIcon className="mr-1" />
+              Upload
+            </label>
+          </div>
+
+          {categoryImageUrl && (
+            <div className="mt-2 flex items-center gap-2">
+              <img
+                src={categoryImageUrl}
+                alt="Category Preview"
+                className="w-[100px] h-[100px] object-cover rounded-lg"
+              />
+              <button
+                onClick={() => {
+                  setCategoryImage(null);
+                  setCategoryImageUrl("");
+                }}
+                className="text-red-500 text-sm"
+              >
+                Remove Image
+              </button>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Save Button */}
+      <button
+        onClick={handleSaveEditPopup}
+        disabled={!categoryName.trim()}
+        className={`w-full font-normal text-base text-white mt-6 py-2 rounded-[10px] ${
+          !categoryName.trim() ? "bg-gray-400 cursor-not-allowed" : "bg-[#0832DE] hover:bg-[#0729bb]"
+        }`}
+      >
+        Save Details
+      </button>
+
+      {/* Block/Unblock Button */}
+    {(editingCategoryId || subCat) && (
+  <button
+    onClick={(e) => {
+      e.preventDefault();
+      const isCategory = !!editingCategoryId;
+      const itemId = isCategory ? editingCategoryId : subCat.id;
+      const currentStatus = isCategory
+        ? categories.find(cat => cat.id === editingCategoryId)?.isActive
+        : subCat?.isActive;
+      setIsVisible(false);
+      setShowForm(false);
+      // Show confirmation popup
+      setCurrentCardIndex(itemId);
+      setIsCategoryToggle(isCategory);
+      setShowDisablePopup(true);
+    }}
+    className={`w-full font-normal text-base mt-4 py-2 rounded-[10px] flex justify-center items-center gap-2 transition-colors ${
+      (editingCategoryId
+        ? categories.find(cat => cat.id === editingCategoryId)?.isActive
+        : subCat?.isActive)
+        ? "bg-[#e70000] text-white hover:bg-[#c50000]"
+        : "bg-green-500 text-white hover:bg-green-600"
+    }`}
+  >
+    {(editingCategoryId
+      ? categories.find(cat => cat.id === editingCategoryId)?.isActive
+      : subCat?.isActive) ? (
+      <>
+        <DisableRedicon />
+        Block {editingCategoryId ? "Service" : "Subservice"}
+      </>
+    ) : (
+      <>
+        <EnableRedIcon />
+        Unblock {editingCategoryId ? "Service" : "Subservice"}
+      </>
+    )}
+  </button>
+)}
+    </div>
+  </div>
+)}
           </div>
         </>
       )}
