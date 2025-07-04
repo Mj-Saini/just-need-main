@@ -585,7 +585,7 @@ const CustomerData = () => {
                 </td>
               </tr>
             ) : (
-                  paginatedData.map((customer) => {
+                  paginatedData?.map((customer) => {
                 return (
                   <tr key={customer.id}>
                     {/* <td className="px-[19px] md:px-[24px]">
@@ -639,14 +639,15 @@ const CustomerData = () => {
                     </td> */}
                     <td>
                       <div className="flex justify-center items-center">
-                        <span
-                          className={`px-[10px] py-[4px] text-sm font-normal text-center ${customer?.accountStatus?.toLowerCase() === "active"
-                            ? "bg-[#00800012] text-[#008000] rounded-[90px]"
-                            : "text-[#800000] rounded-[90px] bg-[#FF000012]"
-                            }`}
-                        >
-                          {customer.accountStatus?.toLowerCase() === "active" ? "Active" : "Inactive"}
-                        </span>
+                      <span
+  className={`px-[10px] py-[4px] text-sm font-normal text-center ${
+    customer?.accountStatus?.isBlocked === true
+      ? "text-[#800000] rounded-[90px] bg-[#FF000012]"
+      : "bg-[#00800012] text-[#008000] rounded-[90px]"
+  }`}
+>
+  {customer?.accountStatus?.isBlocked === true ? "Inactive" : "Active"}
+</span>
                       </div>
                     </td>
                     <td>
