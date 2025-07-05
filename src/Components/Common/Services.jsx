@@ -464,35 +464,35 @@ function Services() {
     },
     [toggleCategoryStatus, toggleSubcategoryStatus, getCategoriesWithSubcategories, showForm, toggle, activeTab, categories]
   );
-  
+
 
   const handleCategoryClick = useCallback(
-  (item) => {
-    const sourceArray = searchQuery.trim()
-      ? filteredCategoriesData
-      : categories;
+    (item) => {
+      const sourceArray = searchQuery.trim()
+        ? filteredCategoriesData
+        : categories;
 
-    const foundItem = sourceArray.find((cat) => cat.id === item.id);
+      const foundItem = sourceArray.find((cat) => cat.id === item.id);
 
-    if (foundItem?.isActive) {
-      const updatedArray = [
-        foundItem,
-        ...sourceArray.filter((cat) => cat.id !== item.id),
-      ];
+      if (foundItem?.isActive) {
+        const updatedArray = [
+          foundItem,
+          ...sourceArray.filter((cat) => cat.id !== item.id),
+        ];
 
-      const newIndex = sourceArray.findIndex((cat) => cat.id === item.id);
+        const newIndex = sourceArray.findIndex((cat) => cat.id === item.id);
 
-      setActiveTab(newIndex !== -1 ? newIndex : 0);
-      setSelectedSubcategories(foundItem.subcategory || []);
-      setSelectedCategoryId(foundItem.id);
-      setActiveCategoryId(foundItem.id); // ✅ THIS is important for UI
-      setIsVertical(false);
+        setActiveTab(newIndex !== -1 ? newIndex : 0);
+        setSelectedSubcategories(foundItem.subcategory || []);
+        setSelectedCategoryId(foundItem.id);
+        setActiveCategoryId(foundItem.id); // ✅ THIS is important for UI
+        setIsVertical(false);
 
-      localStorage.setItem("activeCategoryId", foundItem.id);
-    }
-  },
-  [categories, filteredCategoriesData, searchQuery]
-);
+        localStorage.setItem("activeCategoryId", foundItem.id);
+      }
+    },
+    [categories, filteredCategoriesData, searchQuery]
+  );
 
 
 
@@ -564,7 +564,7 @@ function Services() {
     };
   }, [categories]);
 
- 
+
   const popupRef = useRef();
 
   useEffect(() => {
@@ -634,36 +634,36 @@ function Services() {
   const [activeCategoryId, setActiveCategoryId] = useState(null);
 
   useEffect(() => {
-  const sorted = [...filteredCategoriesData].sort((a, b) => {
-    const aCount = a.subcategory?.filter(sub => sub.isActive).length || 0;
-    const bCount = b.subcategory?.filter(sub => sub.isActive).length || 0;
-    return bCount - aCount;
-  });
+    const sorted = [...filteredCategoriesData].sort((a, b) => {
+      const aCount = a.subcategory?.filter(sub => sub.isActive).length || 0;
+      const bCount = b.subcategory?.filter(sub => sub.isActive).length || 0;
+      return bCount - aCount;
+    });
 
-  setSortedData(sorted);
+    setSortedData(sorted);
 
-  // ✅ Get saved ID from localStorage
-  const savedId = localStorage.getItem("activeCategoryId");
+    // ✅ Get saved ID from localStorage
+    const savedId = localStorage.getItem("activeCategoryId");
 
-  if (savedId) {
-    const newIndex = sorted.findIndex((item) => item.id === savedId);
-    if (newIndex !== -1) {
-      setActiveTab(newIndex);
-      setActiveCategoryId(savedId); // ensure styling works
-      setSelectedSubcategories(sorted[newIndex]?.subcategory || []);
-      setSelectedCategoryId(savedId);
+    if (savedId) {
+      const newIndex = sorted.findIndex((item) => item.id === savedId);
+      if (newIndex !== -1) {
+        setActiveTab(newIndex);
+        setActiveCategoryId(savedId); // ensure styling works
+        setSelectedSubcategories(sorted[newIndex]?.subcategory || []);
+        setSelectedCategoryId(savedId);
+      } else {
+        setActiveTab(0);
+        setActiveCategoryId(sorted[0]?.id || null);
+      }
     } else {
       setActiveTab(0);
       setActiveCategoryId(sorted[0]?.id || null);
     }
-  } else {
-    setActiveTab(0);
-    setActiveCategoryId(sorted[0]?.id || null);
-  }
-}, [filteredCategoriesData]);
+  }, [filteredCategoriesData]);
 
   return (
-    <div className="p-[14px] rounded-[10px] shadow-md bg-white">
+    <div className="p-[14px]  bg-white border border-black rounded-xl pe-5">
       {!categories && (
         <div className="flex items-center justify-center min-h-[200px]">
           <div className="text-center">
@@ -674,7 +674,7 @@ function Services() {
       {!loading && categories.length === 0 && <p>No categories available.</p>}
       {!loading && categories.length >= 0 && (
         <>
-          <div className="xl:flex-row flex-col flex xl:items-center justify-between">
+          <div className="xl:flex-row flex-col flex xl:items-center justify-between p-3 rounded-xl border border-[#333]/30 shadow-xl">
             <h1 className="font-medium text-[22px]">{categories[activeTab]?.categoryName}</h1>
             <div className="flex items-center justify-between mt-[20px] xl:mt-[0px]">
               <div className="bg-[#F1F1F1] w-[337px] px-[16px] py-2.5 h-[42px] rounded-[10px]">
@@ -724,57 +724,58 @@ function Services() {
           </div>
 
 
-          <div className="flex h-[calc(100vh-215px)]">
-            <div className="mt-8 relative w-[400px] overflow-auto ">
+          <div className="flex h-[calc(100vh-215px)] ">
+            <div className="mt-6 relative w-[400px] overflow-auto ">
               <div className={`flex w-full ${isVertical ? "border-b border-[rgb(128,128,128)]" : ""}`}>
                 <div
-                  className={`gap-4 flex flex-col w-full cursor-pointer scrollRemove border-b-2 shadow-2xl px-4 ${isVertical ? "flex-wrap" : ""}`}
+                  className={`gap-4 flex flex-col w-full cursor-pointer scrollRemove border-b-2 shadow-2xl pe-4  ${isVertical ? "flex-wrap" : ""}`}
                 >
 
                   {sortedData.map((items, index) => {
-                    console.log(items,"items")
-                    return(
-                    <div
-                      key={items.id}
-                      className={`flex items-center pb-2 justify-between 
-      ${!isVertical ? "border-b-2" : ""} 
+                    console.log(items, "items")
+                    return (
+                      <div
+                        key={items.id}
+                        className={`flex items-center p-2 rounded-xl justify-between 
+      ${!isVertical ? "border-2 " : ""} 
       hover:text-blue-500 hover:border-blue-500
-      ${activeCategoryId === items.id  ? "border-blue-500 text-blue-500" : "border-transparent text-gray-700"}
+      ${activeCategoryId === items.id ? "border-blue-500 text-blue-500" : "border-transparent text-gray-700"}
       ${!items.isActive ? "opacity-50" : ""}`}
-                      onClick={() => {
-                        if (items.isActive) {
-          handleCategoryClick(items); // ✅ send full item
-        }
-                      }}
-                    >
-                      <div className="flex gap-2">
-                        <img
-                          className="h-[30px] w-[30px] object-cover rounded-full"
-                          src={items.image}
-                          alt=""
-                        />
-                        <p className="font-normal text-base transition mx-[5px]">
-                          {highlightText(items?.categoryName)}
-                        </p>
-                        <span className="font-normal text-xs flex justify-center items-center w-[25px] h-[17px] bg-[#0000000F] rounded-[60px] py-1 px-1.5 -ms-5">
-                          {items?.subcategory?.filter(sub => sub.isActive).length || 0}
-                        </span>
-                      </div>
+                        onClick={() => {
+                          if (items.isActive) {
+                            handleCategoryClick(items); // ✅ send full item
+                          }
+                        }}
+                      >
+                        <div className="flex gap-2">
+                          <img
+                            className="h-[30px] w-[30px] object-cover rounded-full"
+                            src={items.image}
+                            alt=""
+                          />
+                          <p className="font-normal text-base transition mx-[5px] mt-0.5">
+                            {highlightText(items?.categoryName)}
+                          </p>
+                          <span className="font-normal text-xs flex justify-center items-center w-[25px] h-[17px] bg-[#0000000F] rounded-[60px] py-1 px-1.5 -ms-5">
+                            {items?.subcategory?.filter(sub => sub.isActive).length || 0}
+                          </span>
+                        </div>
 
-                      <div className="flex gap-2">
-                        {items.isActive && (
-                          <div
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCategoryEdit(items.id, items.categoryName, e);
-                            }}
-                          >
-                            <Editicon />
-                          </div>
-                        )}
+                        <div className="flex gap-2">
+                          {items.isActive && (
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCategoryEdit(items.id, items.categoryName, e);
+                              }}
+                            >
+                              <Editicon />
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )})}
+                    )
+                  })}
                 </div>
 
 
@@ -782,14 +783,14 @@ function Services() {
             </div>
 
             <div className="ps-5 flex flex-col items-center w-full overflow-auto ">
-              <div className="flex justify-between gap-[18px] mt-6 flex-wrap w-full bg-[#6C4DEF1A] ">
+              <div className="flex justify-between gap-[18px] mt-6 flex-wrap w-full ">
                 {selectedSubcategories?.length > 0 &&
                   selectedSubcategories?.filter((sub) => sub?.isActive).map((sub, index) => {
 
                     return (
                       <div
                         key={index}
-                        className="group hover:bg-[#6C4DEF1A] hover:border-[#6CDEF1A] border border-[#0000001A] lg:p-5 p-3 rounded-[10px] transition w-full"
+                        className="group hover:bg-[#6C4DEF1A] bg-[#6C4DEF1A] hover:border-[#6CDEF1A] border border-[#0000001A] lg:p-5 p-3 rounded-[10px] transition w-full"
                       >
                         <div className="flex items-center justify-between">
                           {editIndex === index ? (

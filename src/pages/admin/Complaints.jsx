@@ -8,6 +8,8 @@ import Filters from '../../Components/Popups/Filters';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { supabase } from '../../store/supabaseCreateClient';
 import { useComplaintProvider } from '../../store/RaiseComplaintData';
+import { SearchIcon } from '../../assets/icon/Icon';
+import { BsThreeDots, BsThreeDotsVertical } from 'react-icons/bs';
 
 export const Complaints = () => {
   const location = useLocation();
@@ -206,64 +208,81 @@ export const Complaints = () => {
                 </tr>
               </thead>
               <tbody>
-                  {currentItems.map((item) => {
-                    
-          
+                {currentItems.map((item) => {
 
-                    return (
-                      <tr key={item.id} className="align-top">
-                    <td className="text-black text-sm font-normal py-[4px] px-4">
-                      <input
-                        type="checkbox"
-                        checked={checkedItems[item.complaintId] || false}
-                        onChange={handleItemCheckboxChange(item.complaintId)}
-                      />
-                    </td>
-                    <td className="text-[#6C4DEF] ext-sm font-normal px-4">
-                      {/* <Link to={`/dashboard/complaints/complaintsDetails/${item.id}`}  onClick={() => setVal(item.id)}>
+                  console.log(item.status, 'items')
+
+                  return (
+                    <tr key={item.id} className="align-top">
+                      <td className="text-black text-sm font-normal py-[4px] px-4">
+                        <input
+                          type="checkbox"
+                          checked={checkedItems[item.complaintId] || false}
+                          onChange={handleItemCheckboxChange(item.complaintId)}
+                        />
+                      </td>
+                      <td className="text-[#6C4DEF] ext-sm font-normal px-4">
+                        {/* <Link to={`/dashboard/complaints/complaintsDetails/${item.id}`}  onClick={() => setVal(item.id)}>
                         {item.id}
                       </Link> */}
-                      <Link
-                        to={`/dashboard/complaints/complaintsDetails/${item.complaintId}`}
-                        state={{ complaint: item }} // Pass the entire complaint object as state
-                        onClick={() => setVal(item.complaintId)}
-                      >
-                        {item.complaintId}
-                      </Link>
+                        <Link
+                          to={`/dashboard/complaints/complaintsDetails/${item.complaintId}`}
+                          state={{ complaint: item }} // Pass the entire complaint object as state
+                          onClick={() => setVal(item.complaintId)}
+                        >
+                          {item.complaintId}
+                        </Link>
 
-                    </td>
-                    <td className="text-black text-sm font-normal px-4">{item.complaintType}</td>
-                    <td className="text-black text-sm font-normal px-4">{item.subject}</td>
-                    <td className="text-black text-sm font-normal px-4 max-w-[279px] overflow-hidden whitespace-pre-wrap">
-                      <div className="w-[279px] max-h-[60px] overflow-hidden whitespace-pre-wrap">
-                        {item.description}
-                      </div>
-                    </td>
-                    <td className="text-black text-sm font-normal px-4">
-                      {new Date(item.created_at).toLocaleDateString('en-GB', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric'
-                      })}{' '}
-                      |{' '}
-                      {new Date(item.created_at).toLocaleTimeString('en-US', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: true
-                      })}
-                    </td>
-                    <td className=" text-black text-sm font-normal px-4">{item.userdetails?.useremail}</td>
-                    <td className="text-center">
-                      <span className={`px-2.5 py-[4px] rounded-full ${item.userdetails?.verificationStatus === 'Pending'
-                        ? 'bg-[#FFA50029] text-[#FFA500]'
-                        : 'bg-[#0080001A] text-[#008000]'
-                        }`}>
-                        {item?.status}
-                      </span>
-                    </td>
-                    <td className="text-black text-sm font-normal px-4 text_center"><ActionIcon /></td>
-                  </tr>
-                )
+                      </td>
+                      <td className="text-black text-sm font-normal px-4">{item.complaintType}</td>
+                      <td className="text-black text-sm font-normal px-4">{item.subject}</td>
+                      <td className="text-black text-sm font-normal px-4 max-w-[279px] overflow-hidden whitespace-pre-wrap">
+                        <div className="w-[279px] max-h-[60px] overflow-hidden whitespace-pre-wrap">
+                          {item.description}
+                        </div>
+                      </td>
+                      <td className="text-black text-sm font-normal px-4">
+                        {new Date(item.created_at).toLocaleDateString('en-GB', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric'
+                        })}{' '}
+                        |{' '}
+                        {new Date(item.created_at).toLocaleTimeString('en-US', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true
+                        })}
+                      </td>
+                      <td className=" text-black text-sm font-normal px-4">{item.userdetails?.useremail}</td>
+                      <td className="text-center">
+                        <span className={`px-2.5 py-[4px] rounded-full`}
+                          style={{
+                            backgroundColor:
+                              item.status === 'Pending'
+                                ? '#FFA50029'
+                                : item.status === 'Process'
+                                  ? '#FF8C0029'
+                                  : item.status === 'Done'
+                                    ? '#0080001A'
+                                    : '#E5E7EB', 
+                            color:
+                              item.status === 'Pending'
+                                ? '#FFA500'
+                                : item.status === 'Process'
+                                  ? '#FF8C00'
+                                  : item.status === 'Done'
+                                    ? '#008000'
+                                    : '#4B5563',
+                          }}>
+                          {item?.status}
+                        </span>
+                      </td>
+
+
+                      <td className="text-black text-sm font-normal px-4 text_center"> <BsThreeDotsVertical /></td>
+                    </tr>
+                  )
                 })}
               </tbody>
             </table>
