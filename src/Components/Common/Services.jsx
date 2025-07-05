@@ -464,108 +464,38 @@ function Services() {
     },
     [toggleCategoryStatus, toggleSubcategoryStatus, getCategoriesWithSubcategories, showForm, toggle, activeTab, categories]
   );
-
-
-
-  // // Your final function
-  // const toggleDisableCard = useCallback(
-  //   async (itemId, currentStatus, action, isCategory = false) => {
-  //     console.log("🔥 toggleDisableCard called with", { itemId, currentStatus, action, isCategory });
-  //     if (action === "confirm") {
-  //       setShowDisablePopup(false);
-  //       setCurrentCardIndex(null);
-  //       if (showForm) toggle();
-
-  //       const newStatus = !currentStatus;
-
-  //       try {
-  //         if (isCategory) {
-  //           await toggleCategoryStatus(itemId, newStatus);
-
-  //           const updatedCategories = categories.map((cat) =>
-  //             cat.id === itemId ? { ...cat, isActive: newStatus } : cat
-  //           );
-
-  //           const activeCategoryIndex = updatedCategories.findIndex((cat) => cat.isActive);
-
-  //           if (newStatus) {
-  //             const enabledIndex = updatedCategories.findIndex((cat) => cat.id === itemId);
-  //             setActiveTab(enabledIndex);
-  //             setSelectedSubcategories(updatedCategories[enabledIndex]?.subcategory || []);
-  //             setSelectedCategoryId(updatedCategories[enabledIndex]?.id || null);
-  //           } else if (activeTab === categories.findIndex((cat) => cat.id === itemId)) {
-  //             setActiveTab(activeCategoryIndex !== -1 ? activeCategoryIndex : 0);
-  //             setSelectedSubcategories(
-  //               activeCategoryIndex !== -1
-  //                 ? updatedCategories[activeCategoryIndex]?.subcategory || []
-  //                 : []
-  //             );
-  //             setSelectedCategoryId(
-  //               activeCategoryIndex !== -1
-  //                 ? updatedCategories[activeCategoryIndex]?.id || null
-  //                 : null
-  //             );
-  //           }
-  //         } else {
-  //           await toggleSubcategoryStatus(itemId, newStatus);
-  //           setSelectedSubcategories((prev) =>
-  //             prev.map((sub) =>
-  //               sub.id === itemId ? { ...sub, isActive: newStatus } : sub
-  //             )
-  //           );
-  //         }
-
-  //         await getCategoriesWithSubcategories(); // Refresh all data
-
-  //         toast.success(
-  //           newStatus
-  //             ? `${isCategory ? "Category" : "Subcategory"} enabled successfully!`
-  //             : `${isCategory ? "Category" : "Subcategory"} disabled successfully!`
-  //         );
-  //       } catch (error) {
-  //         console.error(
-  //           `Error toggling ${isCategory ? "category" : "subcategory"} status:`,
-  //           error
-  //         );
-  //         toast.error(
-  //           `Failed to toggle ${isCategory ? "category" : "subcategory"} status: ${error.message}`
-  //         );
-  //       }
-  //     } else {
-  //       setShowDisablePopup(false);
-  //       setCurrentCardIndex(null);
-  //     }
-  //   },
-  //   [
-  //     showForm,
-  //     toggle,
-  //     categories,
-  //     activeTab,
-  //     getCategoriesWithSubcategories,
-  //   ]
-  // );
+  
 
   const handleCategoryClick = useCallback(
-    (index) => {
-      const sourceArray = searchQuery.trim()
-        ? filteredCategoriesData
-        : categories;
+  (item) => {
+    const sourceArray = searchQuery.trim()
+      ? filteredCategoriesData
+      : categories;
 
-      if (sourceArray[index]?.isActive) {
-        const updatedArray = [
-          sourceArray[index],
-          ...sourceArray.filter((_, i) => i !== index),
-        ];
+    const foundItem = sourceArray.find((cat) => cat.id === item.id);
 
-        setActiveTab(index);
-        setSelectedSubcategories(sourceArray[index]?.subcategory || []);
-        setSelectedCategoryId(sourceArray[index]?.id || null);
+    if (foundItem?.isActive) {
+      const updatedArray = [
+        foundItem,
+        ...sourceArray.filter((cat) => cat.id !== item.id),
+      ];
 
-        setIsVertical(false);
-      }
-    },
-    [categories, filteredCategoriesData, searchQuery]
-  );
+      const newIndex = sourceArray.findIndex((cat) => cat.id === item.id);
+
+      setActiveTab(newIndex !== -1 ? newIndex : 0);
+      setSelectedSubcategories(foundItem.subcategory || []);
+      setSelectedCategoryId(foundItem.id);
+      setActiveCategoryId(foundItem.id); // ✅ THIS is important for UI
+      setIsVertical(false);
+
+      localStorage.setItem("activeCategoryId", foundItem.id);
+    }
+  },
+  [categories, filteredCategoriesData, searchQuery]
+);
+
+
+
 
   const handleCategoryEdit = useCallback((categoryId, currentName, e) => {
     e.stopPropagation();
@@ -601,32 +531,6 @@ function Services() {
 
 
 
-  const handleCategoryDisable = useCallback(
-    (categoryId) => {
-      console.log("Clicked Disable for ID:", categoryId);
-      setCurrentCardIndex(categoryId);
-      setIsCategoryToggle(true);
-      setShowDisablePopup(true);
-      if (showForm) toggle();
-    },
-    [showForm, toggle]
-  );
-  const confirmUnblock = () => {
-    const updatedCategories = categories.map((category) => {
-      return {
-        ...category,
-        subcategory: category.subcategory?.map((sub) => {
-          if (sub.id === currentCardIndex) {
-            return { ...sub, isActive: true }; // 👈 unblocking
-          }
-          return sub;
-        }),
-      };
-    });
-
-    setCategories(updatedCategories); // 👈 this updates the UI
-    setShowDisablePopup(false); // close the popup
-  };
 
 
   const toggleOptionsVisibility = useCallback(() => {
@@ -660,12 +564,7 @@ function Services() {
     };
   }, [categories]);
 
-  // const blockedSubcategories = useMemo(() => {
-  //   return categories
-  //     .flatMap((category) => category.subcategory || [])
-  //     .filter((sub) => sub.isActive === false);
-  // }, [categories]);
-
+ 
   const popupRef = useRef();
 
   useEffect(() => {
@@ -732,27 +631,34 @@ function Services() {
 
   //   const handleUnblockBoth = async (itemId, isCategory = false) => {
   const [sortedData, setSortedData] = useState([]);
- const [activeCategoryId, setActiveCategoryId] = useState(null);
+  const [activeCategoryId, setActiveCategoryId] = useState(null);
 
-// Ye effect sortedData update hone par active tab reset karega
-useEffect(() => {
+  useEffect(() => {
   const sorted = [...filteredCategoriesData].sort((a, b) => {
     const aCount = a.subcategory?.filter(sub => sub.isActive).length || 0;
     const bCount = b.subcategory?.filter(sub => sub.isActive).length || 0;
     return bCount - aCount;
   });
+
   setSortedData(sorted);
 
-  // ✅ Jab specific category ID set ho, usko active bnao
-  if (activeCategoryId) {
-    const newIndex = sorted.findIndex((item) => item.id === activeCategoryId);
+  // ✅ Get saved ID from localStorage
+  const savedId = localStorage.getItem("activeCategoryId");
+
+  if (savedId) {
+    const newIndex = sorted.findIndex((item) => item.id === savedId);
     if (newIndex !== -1) {
       setActiveTab(newIndex);
+      setActiveCategoryId(savedId); // ensure styling works
+      setSelectedSubcategories(sorted[newIndex]?.subcategory || []);
+      setSelectedCategoryId(savedId);
     } else {
-      setActiveTab(0); // fallback if not found
+      setActiveTab(0);
+      setActiveCategoryId(sorted[0]?.id || null);
     }
   } else {
-    setActiveTab(0); // default first tab
+    setActiveTab(0);
+    setActiveCategoryId(sorted[0]?.id || null);
   }
 }, [filteredCategoriesData]);
 
@@ -825,18 +731,20 @@ useEffect(() => {
                   className={`gap-4 flex flex-col w-full cursor-pointer scrollRemove border-b-2 shadow-2xl px-4 ${isVertical ? "flex-wrap" : ""}`}
                 >
 
-                  {sortedData.map((items, index) => (
+                  {sortedData.map((items, index) => {
+                    console.log(items,"items")
+                    return(
                     <div
                       key={items.id}
                       className={`flex items-center pb-2 justify-between 
       ${!isVertical ? "border-b-2" : ""} 
       hover:text-blue-500 hover:border-blue-500
-      ${activeTab === index ? "border-blue-500 text-blue-500" : "border-transparent text-gray-700"}
+      ${activeCategoryId === items.id  ? "border-blue-500 text-blue-500" : "border-transparent text-gray-700"}
       ${!items.isActive ? "opacity-50" : ""}`}
                       onClick={() => {
                         if (items.isActive) {
-                          handleCategoryClick(index);
-                        }
+          handleCategoryClick(items); // ✅ send full item
+        }
                       }}
                     >
                       <div className="flex gap-2">
@@ -866,7 +774,7 @@ useEffect(() => {
                         )}
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
 
 
