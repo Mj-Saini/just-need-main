@@ -18,6 +18,7 @@ import { supabase } from "../store/supabaseCreateClient";
 import { toast } from "react-toastify";
 import { useCustomerContext } from "../store/CustomerContext";
 import { DeleteRedIcon, EyeIcon } from "../assets/icon/Icon";
+import BlockedUserPopups from "./Popups/BlockedUserPopups";
 
 const CustomerData = () => {
   const [showPopup, setShowPopup] = useState(false);
@@ -32,6 +33,7 @@ const CustomerData = () => {
   const [selectedFilters, setSelectedFilters] = useState(["name"]);
   const [searchPlaceholder, setSearchPlaceholder] = useState("Search");
   const [selectAll, setSelectAll] = useState(false);
+  const [showBlockedOnly, setShowBlockedOnly] = useState(false);
 
 
   const formatDate = (milliseconds) => {
@@ -47,7 +49,7 @@ const CustomerData = () => {
     return `${day} ${month} ${year} | ${formattedHours}:${formattedMinutes} ${ampm}`;
   };
 
-  const { users, setUsers, loading } = useCustomerContext();
+  const { users, setUsers, loading ,fetchUsers} = useCustomerContext();
   const [filteredUsers, setFilteredUsers] = useState(users);
   // Filter logic based on selected fields
   const filteredData = users?.filter((customer) => {
@@ -83,6 +85,7 @@ const CustomerData = () => {
     });
   });
 
+ 
 
   // Pagination logic
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -172,145 +175,80 @@ const CustomerData = () => {
     setShowDeletePopup(true);
   };
 
-  // Confirm delete handler (works for both single and multiple users)
-  // const handleConfirmDelete = async () => {
-  //   try {
-  //     const { error } = await supabase
-  //       .from("Users")
-  //       .delete()
-  //       .in("id", selectItem);
-
-  //     if (error) throw error;
-
-  //     setUsers((prevUsers) =>
-  //       prevUsers.filter((user) => !selectItem.includes(user.id))
-  //     );
-  //     setSelectItem([]);
-  //     setMainCheckbox(false);
-  //     setShowDeletePopup(false);
-  //     toast.success(
-  //       `Successfully deleted.`
-  //     );
-  //   } catch (err) {
-  //     console.error("Error deleting users:", err);
-  //     toast.error("Failed to delete users. Please try again.");
-  //   }
-  // };
 
 
-//   const handleConfirmDelete = async () => {
-//   try {
-//     // Fetch the businessIds of users being deleted
-//     const usersToDelete = users.filter((user) => selectItem.includes(user.id));
-//     const businessIdsToDelete = usersToDelete
-//       .map((user) => user.businessDetail?.businessId)
-//       .filter(Boolean); // Remove undefined/null
-
-//     // Step 1: Delete from BusinessDetailsView
-//     if (businessIdsToDelete.length > 0) {
-//       const { error: businessError } = await supabase
-//         .from("BusinessDetailsView")
-//         .delete()
-//         .in("businessId", businessIdsToDelete);
-
-//       if (businessError) throw businessError;
-//     }
-
-//     // Step 2: Delete users
-//     const { error: userError } = await supabase
-//       .from("Users")
-//       .delete()
-//       .in("id", selectItem);
-
-//     if (userError) throw userError;
-
-//     // Step 3: Update local state
-//     setUsers((prevUsers) =>
-//       prevUsers.filter((user) => !selectItem.includes(user.id))
-//     );
-//     setSelectItem([]);
-//     setMainCheckbox(false);
-//     setShowDeletePopup(false);
-
-//     toast.success("Successfully deleted users.");
-//   } catch (err) {
-//     console.error("Error deleting users", err);
-//     toast.error("Failed to delete users. Please try again.");
-//   }
-  // };
-  
   const handleConfirmDelete = async () => {
-  try {
-    const usersToDelete = users.filter((user) => selectItem.includes(user.id));
-    const userIds = usersToDelete.map((user) => user.id);
-    const businessIdsToDelete = usersToDelete
-      .map((user) => user.businessDetail?.businessId)
-      .filter(Boolean);
+    try {
+      const usersToDelete = users.filter((user) => selectItem.includes(user.id));
+      const userIds = usersToDelete.map((user) => user.id);
+      const businessIdsToDelete = usersToDelete
+        .map((user) => user.businessDetail?.businessId)
+        .filter(Boolean);
 
-    // Step 1: Delete Business Details
-    if (businessIdsToDelete.length > 0) {
-      const { error: businessError } = await supabase
-        .from("BusinessDetailsView")
+      // Step 1: Delete Business Details
+      if (businessIdsToDelete.length > 0) {
+        const { error: businessError } = await supabase
+          .from("BusinessDetailsView")
+          .delete()
+          .in("businessId", businessIdsToDelete);
+        if (businessError) throw businessError;
+      }
+
+      // Step 2: Delete Chatrooms
+      const { error: chatroomError } = await supabase
+        .from("Chatrooms")
         .delete()
-        .in("businessId", businessIdsToDelete);
-      if (businessError) throw businessError;
+        .in("userId", userIds);
+      if (chatroomError) throw chatroomError;
+
+      // Step 3: Delete ChatMessages
+      const { error: messagesError } = await supabase
+        .from("ChatMessages")
+        .delete()
+        .or(`senderId.in.(${userIds.join(",")}),receiverId.in.(${userIds.join(",")})`);
+      if (messagesError) throw messagesError;
+
+      // Step 4: Delete Service Listings
+      const { error: listingsError } = await supabase
+        .from("ServiceListings")
+        .delete()
+        .in("userId", userIds); // or use user_detail.id depending on schema
+      if (listingsError) throw listingsError;
+
+      // Step 5: Delete Complaints
+      const { error: complaintsError } = await supabase
+        .from("RaiseComplaint")
+        .delete()
+        .or(`complainBy.in.(${userIds.join(",")}),complainOn.in.(${userIds.join(",")})`);
+      if (complaintsError) throw complaintsError;
+
+      // Step 6: Delete Users
+      const { error: userError } = await supabase
+        .from("Users")
+        .delete()
+        .in("id", userIds);
+      if (userError) throw userError;
+
+      // Update local state
+      setUsers((prevUsers) =>
+        prevUsers.filter((user) => !selectItem.includes(user.id))
+      );
+      setSelectItem([]);
+      setMainCheckbox(false);
+      setShowDeletePopup(false);
+
+      toast.success("Successfully deleted users and all related data.");
+    } catch (err) {
+      console.error("Error deleting users and related data:", err);
+      toast.error("Failed to delete users. Please try again.");
     }
-
-    // Step 2: Delete Chatrooms
-    const { error: chatroomError } = await supabase
-      .from("Chatrooms")
-      .delete()
-      .in("userId", userIds); 
-    if (chatroomError) throw chatroomError;
-
-    // Step 3: Delete ChatMessages
-    const { error: messagesError } = await supabase
-      .from("ChatMessages")
-      .delete()
-      .or(`senderId.in.(${userIds.join(",")}),receiverId.in.(${userIds.join(",")})`);
-    if (messagesError) throw messagesError;
-
-    // Step 4: Delete Service Listings
-    const { error: listingsError } = await supabase
-      .from("ServiceListings")
-      .delete()
-      .in("userId", userIds); // or use user_detail.id depending on schema
-    if (listingsError) throw listingsError;
-
-    // Step 5: Delete Complaints
-    const { error: complaintsError } = await supabase
-      .from("RaiseComplaint")
-      .delete()
-      .or(`complainBy.in.(${userIds.join(",")}),complainOn.in.(${userIds.join(",")})`);
-    if (complaintsError) throw complaintsError;
-
-    // Step 6: Delete Users
-    const { error: userError } = await supabase
-      .from("Users")
-      .delete()
-      .in("id", userIds);
-    if (userError) throw userError;
-
-    // Update local state
-    setUsers((prevUsers) =>
-      prevUsers.filter((user) => !selectItem.includes(user.id))
-    );
-    setSelectItem([]);
-    setMainCheckbox(false);
-    setShowDeletePopup(false);
-
-    toast.success("Successfully deleted users and all related data.");
-  } catch (err) {
-    console.error("Error deleting users and related data:", err);
-    toast.error("Failed to delete users. Please try again.");
-  }
-};
+  };
 
 
 
   const handleCancelDelete = () => {
     setShowDeletePopup(false);
-    setSelectItem([]); 
+    setSelectItem([]);
   };
 
   const dropdownRef = useRef(null);
@@ -377,92 +315,74 @@ const CustomerData = () => {
 
   const showActionButtons = selectItem.length >= 2;
 
-  // const applyFilters = (filters) => {
-  //   let updatedUsers = users;
-  //   console.log(filters,"::::")
-
-
-  //   // **Filter by User Type (Seller / Consumer)**
-  //   if (filters.selectedUserType) {
-  //     updatedUsers = updatedUsers.filter(user => {
-  //       if (filters.selectedUserType === "Seller") {
-  //         return user.IsSeller === true;
-  //       } else if (filters.selectedUserType === "Consumer") {
-  //         return user.IsSeller === false;
-  //       }
-  //       return true;
-  //     });
-  //   }
-
-  //   // **Filter by Profile Status**
-  //   if (filters.selectedProfileStatus) {
-  //     updatedUsers = updatedUsers.filter(user => user.accountStatus === filters.selectedProfileStatus);
-  //   }
-
-  //   // **Filter by Business Status**
-  //   if (filters.selectedBusinessStatus) {
-  //     updatedUsers = updatedUsers.filter(user => user.businessDetail?.status === filters.selectedBusinessStatus);
-  //   }
-
-  //   // **Filter by Subscription Status**
-  //   if (filters.subscriptionStatus) {
-  //     updatedUsers = updatedUsers.filter(user => user.verificationStatus === filters.selectedStatus);
-  //   }
-
-  //   console.log(users,"users")
-  //   // **Update States**
-  //   setFilteredUsers(updatedUsers);
-  //   setCurrentPage(1); // Pagination reset
-
-  //   // **Paginate Data**
-  //   const startIndex = 0;
-  //   const endIndex = Math.min(itemsPerPage, updatedUsers.length);
-  //   setPaginatedData(updatedUsers.slice(startIndex, endIndex));
-  // };
-
 
 
   const applyFilters = (filters) => {
-  let updatedUsers = users;
-  console.log(filters, "::::");
-  console.log(users, "users");
+    let updatedUsers = users;
+    console.log(filters, "::::");
+    console.log(users, "users");
 
-  // Filter by User Type (Seller / Consumer)
-  if (filters.selectedUserType) {
-    updatedUsers = updatedUsers.filter(user => {
-      if (filters.selectedUserType === "Seller") {
-        return user.IsSeller === true;
-      } else if (filters.selectedUserType === "Consumer") {
-        return user.IsSeller === false;
-      }
-      return true;
-    });
+    // Filter by User Type (Seller / Consumer)
+    if (filters.selectedUserType) {
+      updatedUsers = updatedUsers.filter(user => {
+        if (filters.selectedUserType === "Seller") {
+          return user.IsSeller === true;
+        } else if (filters.selectedUserType === "Consumer") {
+          return user.IsSeller === false;
+        }
+        return true;
+      });
+    }
+
+    // Filter by Profile Status
+    if (filters.selectedProfileStatus) {
+      updatedUsers = updatedUsers.filter(user => user.accountStatus === filters.selectedProfileStatus);
+    }
+
+    // Filter by Business Status
+    if (filters.selectedBusinessStatus) {
+      updatedUsers = updatedUsers.filter(user => user.businessDetail?.status === filters.selectedBusinessStatus);
+    }
+
+    // Filter by Subscription Status
+    if (filters.selectedStatus) {
+      updatedUsers = updatedUsers.filter(user => user.verificationStatus === filters.selectedStatus);
+    }
+
+    // Update States
+    setFilteredUsers(updatedUsers);
+    setCurrentPage(1);
+
+    const startIndex = 0;
+    const endIndex = Math.min(itemsPerPage, updatedUsers.length);
+    setPaginatedData(updatedUsers.slice(startIndex, endIndex));
+  };
+const blockedUsers = users?.filter(
+  (user) => user?.accountStatus?.isBlocked === true
+);
+const handleUnblockUser = async (userId) => {
+  try {
+    const { error } = await supabase
+      .from("Users")
+      .update({
+        accountStatus: {
+          isBlocked: false,
+          reason: null,
+          timestamp: Date.now(),
+        },
+        updated_at: Date.now(),
+      })
+      .eq("id", userId);
+
+    if (error) throw error;
+
+    toast.success("User unblocked successfully!");
+     fetchUsers(); // 👈 refresh users list
+  } catch (err) {
+    toast.error("Failed to unblock user");
+    console.error(err);
   }
-
-  // Filter by Profile Status
-  if (filters.selectedProfileStatus) {
-    updatedUsers = updatedUsers.filter(user => user.accountStatus === filters.selectedProfileStatus);
-  }
-
-  // Filter by Business Status
-  if (filters.selectedBusinessStatus) {
-    updatedUsers = updatedUsers.filter(user => user.businessDetail?.status === filters.selectedBusinessStatus);
-  }
-
-  // Filter by Subscription Status
-  if (filters.selectedStatus) {
-    updatedUsers = updatedUsers.filter(user => user.verificationStatus === filters.selectedStatus);
-  }
-
-  // Update States
-  setFilteredUsers(updatedUsers);
-  setCurrentPage(1);
-
-  const startIndex = 0;
-  const endIndex = Math.min(itemsPerPage, updatedUsers.length);
-  setPaginatedData(updatedUsers.slice(startIndex, endIndex));
 };
-
 
 
   return (
@@ -520,6 +440,13 @@ const CustomerData = () => {
             </span>
             Filter
           </button>
+          <button
+            className="bg-[#0832DE] text-white px-[15px] py-2 rounded-[10px] flex items-center"
+          onClick={()=>setShowBlockedOnly(true)}
+          >
+           
+            Block list
+          </button>
         </div>
       </div>
       <div className="overflow-x-auto  mt-5">
@@ -556,7 +483,7 @@ const CustomerData = () => {
                 Updated At
               </th> */}
               <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
-               Is Seller Online
+                Is Seller Online
               </th>
               <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                 Business Profile
@@ -585,7 +512,7 @@ const CustomerData = () => {
                 </td>
               </tr>
             ) : (
-                  paginatedData?.map((customer) => {
+              paginatedData?.filter((customer) => customer?.accountStatus?.isBlocked !== true).map((customer) => {
                 return (
                   <tr key={customer.id}>
                     {/* <td className="px-[19px] md:px-[24px]">
@@ -617,7 +544,7 @@ const CustomerData = () => {
                       {customer.mobile_number}
                     </td>
                     <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000] w-[120px] truncate">
-                         {customer.address.city }/{customer.address.state} 
+                      {customer.address.city}/{customer.address.state}
                     </td>
                     <td
                       className={`px-[19px] text-sm font-normal truncate ${customer.IsSeller == true
@@ -639,15 +566,14 @@ const CustomerData = () => {
                     </td> */}
                     <td>
                       <div className="flex justify-center items-center">
-                      <span
-  className={`px-[10px] py-[4px] text-sm font-normal text-center ${
-    customer?.accountStatus?.isBlocked === true
-      ? "text-[#800000] rounded-[90px] bg-[#FF000012]"
-      : "bg-[#00800012] text-[#008000] rounded-[90px]"
-  }`}
->
-  {customer?.accountStatus?.isBlocked === true ? "Inactive" : "Active"}
-</span>
+                        <span
+                          className={`px-[10px] py-[4px] text-sm font-normal text-center ${customer?.accountStatus?.isBlocked === true
+                              ? "text-[#800000] rounded-[90px] bg-[#FF000012]"
+                              : "bg-[#00800012] text-[#008000] rounded-[90px]"
+                            }`}
+                        >
+                          {customer?.accountStatus?.isBlocked === true ? "Inactive" : "Active"}
+                        </span>
                       </div>
                     </td>
                     <td>
@@ -887,6 +813,13 @@ const CustomerData = () => {
             </div>
           </div>
         </div>
+      )}
+      {showBlockedOnly && (
+        <BlockedUserPopups
+          blockedUsers={blockedUsers}
+          onClose={() => setShowBlockedOnly(false)}
+          onUnblock={handleUnblockUser}
+        />
       )}
     </div>
   );

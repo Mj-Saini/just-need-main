@@ -12,25 +12,26 @@ export function CustomerContext({ children }) {
   const [loading, setLoading] = useState(true);
 
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase.from("userview").select("*").order("created_at", { ascending: false });;
 
-        if (error) throw error;
-        setUsers(data || []);
-      } catch (err) {
-        console.error("Error fetching users:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.from("userview").select("*").order("created_at", { ascending: false });;
+
+      if (error) throw error;
+      setUsers(data || []);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchUsers();
   }, []);
 
   return (
-    <customerProvider.Provider value={{ users, setUsers, loading, setLoading }}>
+    <customerProvider.Provider value={{ users, setUsers, loading, setLoading, fetchUsers }}>
       {children}
     </customerProvider.Provider>
   );

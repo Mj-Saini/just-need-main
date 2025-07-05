@@ -53,20 +53,45 @@ function TopBar() {
     };
   }, []);
 
+  // const goBack = () => {
+  //   if (location.pathname.startsWith("/dashboard/setting/")) {
+  //     navigate("/dashboard/setting");
+  //   } else if (location.pathname.includes("/dashboard/usersList/userDetails/")) {
+  //     navigate(-1);
+  //   } else if (location.pathname.includes("/dashboard/complaints/complaintsDetails/")) {
+  //     navigate("/dashboard/complaints");
+  //   } else if (location.pathname.includes("/dashboard/listings/")) {
+  //     navigate(-1);
+  //   } else {
+  //     navigate(-1);
+  //   }
+  // };
+
   const goBack = () => {
-    if (location.pathname.startsWith("/dashboard/setting/")) {
-      navigate("/dashboard/setting");
-    } else if (location.pathname.includes("/dashboard/usersList/userDetails/")) {
-      navigate(-1);
-    } else if (location.pathname.includes("/dashboard/complaints/complaintsDetails/")) {
-      navigate("/dashboard/complaints");
-    } else if (location.pathname.includes("/dashboard/listings/")) {
+  if (location.pathname.startsWith("/dashboard/setting/")) {
+    navigate("/dashboard/setting");
+  } else if (location.pathname.includes("/dashboard/usersList/userDetails/")) {
+    if (window.history.length > 2) {
       navigate(-1);
     } else {
-      navigate(-1);
+      navigate("/dashboard/usersList");
     }
-  };
-
+  } else if (location.pathname.includes("/dashboard/complaints/complaintsDetails/")) {
+    navigate("/dashboard/complaints");
+  } else if (location.pathname.includes("/dashboard/listings/")) {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate("/dashboard/listings");
+    }
+  } else {
+    if (window.history.length > 2) {
+      navigate(-1);
+    } else {
+      navigate("/dashboard");
+    }
+  }
+};
 
   const showArrowButton =
     location.pathname.includes("/dashboard/usersList/userDetails/") ||
