@@ -663,7 +663,7 @@ function Services() {
   }, [filteredCategoriesData]);
 
   return (
-    <div className="p-[14px]  bg-white border border-black rounded-xl pe-5">
+    <div className="p-[14px]  bg-white">
       {!categories && (
         <div className="flex items-center justify-center min-h-[200px]">
           <div className="text-center">
@@ -674,7 +674,7 @@ function Services() {
       {!loading && categories.length === 0 && <p>No categories available.</p>}
       {!loading && categories.length >= 0 && (
         <>
-          <div className="xl:flex-row flex-col flex xl:items-center justify-between p-3 rounded-xl border border-[#333]/30 shadow-xl">
+          <div className="xl:flex-row flex-col flex xl:items-center justify-between">
             <h1 className="font-medium text-[22px]">{categories[activeTab]?.categoryName}</h1>
             <div className="flex items-center justify-between mt-[20px] xl:mt-[0px]">
               <div className="bg-[#F1F1F1] w-[337px] px-[16px] py-2.5 h-[42px] rounded-[10px]">
@@ -724,11 +724,11 @@ function Services() {
           </div>
 
 
-          <div className="flex h-[calc(100vh-215px)] ">
+          <div className="flex h-[calc(100vh-215px)] mt-5">
             <div className="mt-6 relative w-[400px] overflow-auto ">
               <div className={`flex w-full ${isVertical ? "border-b border-[rgb(128,128,128)]" : ""}`}>
                 <div
-                  className={`gap-4 flex flex-col w-full cursor-pointer scrollRemove border-b-2 shadow-2xl pe-4  ${isVertical ? "flex-wrap" : ""}`}
+                  className={`gap-4 flex flex-col w-full cursor-pointer scrollRemove  pe-4  ${isVertical ? "flex-wrap" : ""}`}
                 >
 
                   {sortedData.map((items, index) => {
@@ -782,7 +782,7 @@ function Services() {
               </div>
             </div>
 
-            <div className="ps-5 flex flex-col items-center w-full overflow-auto ">
+            <div className="ps-5 flex flex-col items-center w-full overflow-auto  bg-[#ccc]/50 rounded-xl">
               <div className="flex justify-between gap-[18px] mt-6 flex-wrap w-full ">
                 {selectedSubcategories?.length > 0 &&
                   selectedSubcategories?.filter((sub) => sub?.isActive).map((sub, index) => {
@@ -790,7 +790,7 @@ function Services() {
                     return (
                       <div
                         key={index}
-                        className="group hover:bg-[#6C4DEF1A] bg-[#6C4DEF1A] hover:border-[#6CDEF1A] border border-[#0000001A] lg:p-5 p-3 rounded-[10px] transition w-full"
+                        className="group hover:bg-[#6C4DEF1A] bg-[#6b4def07] hover:border-[#6CDEF1A] border border-[#0000001A] lg:p-5 p-3 rounded-[10px] transition w-full"
                       >
                         <div className="flex items-center justify-between">
                           {editIndex === index ? (
