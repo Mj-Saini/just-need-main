@@ -32,31 +32,6 @@ function UserDetails() {
   const { setUserName } = useUserContext()
 const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
-  // // Fetch user details and listings
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     if (users && users.length > 0) {
-  //       const foundUser = users.find((user) => user.id === id);
-  //       if (foundUser) {
-  //         setUser(foundUser);
-  //         if (setUser) {
-  //           setUserName(foundUser?.firstName)
-  //         }
-
-  //         const listingVal = await fetchlisting();
-  //         const filteredListings = listingVal?.filter(
-  //           (item) => item?.user_detail?.id === id
-  //         );
-  //         setListings(filteredListings || []);
-  //       } else {
-  //         console.error("User not found");
-  //       }
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, [users, id, setLoading, fetchlisting]);
 
 const fetchData = async () => {
   setLoading(true);
@@ -87,13 +62,44 @@ const fetchData = async () => {
   setLoading(false);
 };
 
+const [userbusinessDetails,setUserBusinessDetails]=useState([])
+
+const fetchBusinessData = async () => {
+  setLoading(true);
+
+  try {
+    // Step 1: Directly get full data from BusinessDetailsView
+    const { data: businessUser, } = await supabase
+      .from("BusinessDetailsView")
+      .select("*")
+      .eq("userId", id)
+      .single();
+
+    
+
+    // Step 2: Set user & context
+    setUserBusinessDetails(businessUser);
+
+    // Step 3: Listings fetch karo
+    const listingVal = await fetchlisting();
+    const filteredListings = listingVal?.filter(
+      (item) => item?.user_detail?.id === id
+    );
+    setListings(filteredListings || []);
+  } catch (err) {
+    console.error("❌ Unexpected error:", err);
+    toast.error("Something went wrong");
+  } finally {
+    setLoading(false);
+  }
+};
+  
 
 // Run it on mount
 useEffect(() => {
   fetchData();
+  fetchBusinessData()
 }, [ id]);
-
-
 
   // Handle disable/enable provider popup
   const handlePopupDisable = () => {
@@ -149,7 +155,7 @@ const isActive = user?.accountStatus?.isBlocked !== true;
     const { data, error } = await supabase
       .from("BusinessDetailsView")
       .update({ status: "Rejected" })
-      .eq("businessId", user.businessDetail.businessId)
+      .eq("businessId", userbusinessDetails.businessId)
       .select();
 
     if (error) {
@@ -197,16 +203,22 @@ const isActive = user?.accountStatus?.isBlocked !== true;
     const confirmApprove = window.confirm("Are you sure you want to approve this user?");
     if (!confirmApprove) return;
 
-    if (!user || !user.businessDetail.businessId) {
+
+    if (!userbusinessDetails || !userbusinessDetails?.businessId) {
       toast.error("User data not found or invalid Business ID");
       return;
     }
+  
 
     try {
+
+
+
+          
       const { error } = await supabase
         .from('BusinessDetailsView')
         .update({ status: 'Approved' })
-        .eq('businessId', user.businessDetail.businessId)
+        .eq('businessId', userbusinessDetails.businessId)
         .select();
 
       if (error) {
@@ -230,15 +242,16 @@ const isActive = user?.accountStatus?.isBlocked !== true;
     }
   };
 
-
+  console.log(user)
 
   return (
     <div className="px-4">
 
       <div className="flex items-center justify-end">
-  {user.IsSeller ? (
-    user.businessDetail?.status === "Approved" ? (
-      // Approved seller - show block/unblock toggle
+        <div className="flex items-center justify-end">
+  {userbusinessDetails?.IsSeller ? (
+    userbusinessDetails.status === "Approved" ? (
+      // ✅ Approved seller: Only show block/unblock button
       <button
         onClick={handlePopupDisable}
         className="flex items-center gap-3 py-2.5 h-[42px] px-3 xl:px-[15px] rounded-[10px]"
@@ -255,8 +268,8 @@ const isActive = user?.accountStatus?.isBlocked !== true;
           </>
         )}
       </button>
-    ) : user.businessDetail?.status === "Rejected" ? (
-      // Rejected seller - show disabled "Rejected" button
+    ) : userbusinessDetails.status === "Rejected" ? (
+      // ❌ Rejected seller: Show disabled Rejected button
       <button
         className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] text-[#FF0000] cursor-not-allowed"
         disabled
@@ -265,7 +278,7 @@ const isActive = user?.accountStatus?.isBlocked !== true;
         Rejected
       </button>
     ) : (
-      // Pending approval - show all three buttons
+      // ⏳ Pending seller: Show Approve + Deny + Block buttons
       <div className="flex gap-4">
         <button
           onClick={handlePopupDisable}
@@ -288,7 +301,7 @@ const isActive = user?.accountStatus?.isBlocked !== true;
       </div>
     )
   ) : (
-    // Regular user (not seller) - show block/unblock toggle
+    // 🧑‍🦰 Normal User: Show block/unblock toggle
     <button
       onClick={handlePopupDisable}
       className="flex items-center gap-3 py-2.5 h-[42px] px-3 xl:px-[15px] rounded-[10px]"
@@ -306,6 +319,9 @@ const isActive = user?.accountStatus?.isBlocked !== true;
       )}
     </button>
   )}
+</div>
+
+ 
 </div>
 
     
@@ -345,12 +361,36 @@ const isActive = user?.accountStatus?.isBlocked !== true;
                 <div className="flex gap-2.5 items-center mt-2.5">
                   <LocationIcon />
                   <h3 className="text-sm font-normal text-white">
-                    <h3 className="text-sm font-normal text-white">
+                   
                       {user?.address?.city && user?.address?.state
                         ? `${user.address.city} ${user.address.state}`
                         : "N/A"}
-                    </h3>
+                   
 
+                  </h3>
+                </div>
+                <div className="flex gap-2.5 items-center mt-2.5">
+                 
+                  <h3 className="text-sm font-normal text-white">
+                  Seller:   {user.IsSeller === "Approved" ? "Approved" : user.IsSeller === "Pending" ? "Not Yet" :"Rejected" }
+                  </h3>
+                </div>
+                <div className="flex gap-2.5 items-center mt-2.5">
+                 
+                  <h3 className="text-sm font-normal text-white">
+                  Subscription:   {user.subscription === "null" ? "N/A" : "Yes" }
+                  </h3>
+                </div>
+                <div className="flex gap-2.5 items-center mt-2.5">
+                 
+                  <h3 className="text-sm font-normal text-white">
+                  Balance:   {user.balance }
+                  </h3>
+                </div>
+                <div className="flex gap-2.5 items-center mt-2.5">
+                 
+                  <h3 className="text-sm font-normal text-white">
+                  Upi:   {user.upi_id  === "null" ? "N/A" : user.upi_id}
                   </h3>
                 </div>
               </div>
