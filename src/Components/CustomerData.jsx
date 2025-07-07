@@ -49,7 +49,7 @@ const CustomerData = () => {
     return `${day} ${month} ${year} | ${formattedHours}:${formattedMinutes} ${ampm}`;
   };
 
-  const { users, setUsers, loading ,fetchUsers} = useCustomerContext();
+  const { users, setUsers, loading, fetchUsers } = useCustomerContext();
   const [filteredUsers, setFilteredUsers] = useState(users);
   // Filter logic based on selected fields
   const filteredData = users?.filter((customer) => {
@@ -85,7 +85,7 @@ const CustomerData = () => {
     });
   });
 
- 
+
 
   // Pagination logic
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -357,32 +357,32 @@ const CustomerData = () => {
     const endIndex = Math.min(itemsPerPage, updatedUsers.length);
     setPaginatedData(updatedUsers.slice(startIndex, endIndex));
   };
-const blockedUsers = users?.filter(
-  (user) => user?.accountStatus?.isBlocked === true
-);
-const handleUnblockUser = async (userId) => {
-  try {
-    const { error } = await supabase
-      .from("Users")
-      .update({
-        accountStatus: {
-          isBlocked: false,
-          reason: null,
-          timestamp: Date.now(),
-        },
-        updated_at: Date.now(),
-      })
-      .eq("id", userId);
+  const blockedUsers = users?.filter(
+    (user) => user?.accountStatus?.isBlocked === true
+  );
+  const handleUnblockUser = async (userId) => {
+    try {
+      const { error } = await supabase
+        .from("Users")
+        .update({
+          accountStatus: {
+            isBlocked: false,
+            reason: null,
+            timestamp: Date.now(),
+          },
+          updated_at: Date.now(),
+        })
+        .eq("id", userId);
 
-    if (error) throw error;
+      if (error) throw error;
 
-    toast.success("User unblocked successfully!");
-     fetchUsers(); // 👈 refresh users list
-  } catch (err) {
-    toast.error("Failed to unblock user");
-    console.error(err);
-  }
-};
+      toast.success("User unblocked successfully!");
+      fetchUsers(); // 👈 refresh users list
+    } catch (err) {
+      toast.error("Failed to unblock user");
+      console.error(err);
+    }
+  };
 
 
   return (
@@ -442,9 +442,9 @@ const handleUnblockUser = async (userId) => {
           </button>
           <button
             className="bg-[#0832DE] text-white px-[15px] py-2 rounded-[10px] flex items-center"
-          onClick={()=>setShowBlockedOnly(true)}
+            onClick={() => setShowBlockedOnly(true)}
           >
-           
+
             Block list
           </button>
         </div>
@@ -513,6 +513,7 @@ const handleUnblockUser = async (userId) => {
               </tr>
             ) : (
               paginatedData?.filter((customer) => customer?.accountStatus?.isBlocked !== true).map((customer) => {
+                console.log(customer)
                 return (
                   <tr key={customer.id}>
                     {/* <td className="px-[19px] md:px-[24px]">
@@ -568,11 +569,16 @@ const handleUnblockUser = async (userId) => {
                       <div className="flex justify-center items-center">
                         <span
                           className={`px-[10px] py-[4px] text-sm font-normal text-center ${customer?.accountStatus?.isBlocked === true
-                              ? "text-[#800000] rounded-[90px] bg-[#FF000012]"
-                              : "bg-[#00800012] text-[#008000] rounded-[90px]"
+                            ? "text-[#800000] rounded-[90px] bg-[#FF000012]"
+                            : "bg-[#00800012] text-[#008000] rounded-[90px]"
                             }`}
                         >
-                          {customer?.accountStatus?.isBlocked === true ? "Inactive" : "Active"}
+                          {customer?.IsSeller
+                            ? customer?.isSellerOnline
+                              ? "Online"
+                              : "Offline"
+                            : "-"}
+                          {/* {customer?.accountStatus?.isBlocked === true ? "Inactive" : "Active"} */}
                         </span>
                       </div>
                     </td>

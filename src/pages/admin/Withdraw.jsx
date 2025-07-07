@@ -91,7 +91,7 @@ const Withdraw = () => {
             <table className="min-w-full">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">ID</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">S.No</th>
                   <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">User Name</th>
                   <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">UPI ID</th>
                   <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Amount</th>
@@ -103,16 +103,16 @@ const Withdraw = () => {
               </thead>
               <tbody>
                 {filteredRequests.length > 0 ? (
-                  filteredRequests.map((req) => (
+                  filteredRequests.map((req,index) => (
                     <tr key={req.id} className="border-t">
-                      <td className="px-4 py-2">{req.id}</td>
+                      <td className="px-4 py-2">{index +1}</td>
                       <td
                         onClick={() => navigate(`/dashboard/usersList/userDetails/${req.userId}`)}
                         className="px-4 py-2 cursor-pointer text-blue-600 hover:underline"
                       >
                         {req.user_name}
                       </td>
-                      <td className="px-4 py-2 flex items-center justify-between space-x-2">
+                      <td className="px-4 py-2 flex items-center  space-x-2">
                         <span>{req.upi_id}</span>
                         <button
                           onClick={() => handleCopy(req.upi_id)}

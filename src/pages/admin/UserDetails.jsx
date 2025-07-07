@@ -30,76 +30,76 @@ function UserDetails() {
   const { fetchlisting } = useListingContext();
 
   const { setUserName } = useUserContext()
-const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
 
-const fetchData = async () => {
-  setLoading(true);
+  const fetchData = async () => {
+    setLoading(true);
 
-  // 🔁 Step 1: Supabase se fresh user data lo
-  const { data: freshUser, error } = await supabase
-    .from("Users")
-    .select("*")
-    .eq("id", id)
-    .single();
-
-  if (error) {
-    console.error("Error fetching user:", error);
-    setLoading(false);
-    return;
-  }
-
-  setUser(freshUser);
-  setUserName(freshUser?.firstName);
-
-  // 🔁 Step 2: Listing fetch karo
-  const listingVal = await fetchlisting();
-  const filteredListings = listingVal?.filter(
-    (item) => item?.user_detail?.id === id
-  );
-  setListings(filteredListings || []);
-
-  setLoading(false);
-};
-
-const [userbusinessDetails,setUserBusinessDetails]=useState([])
-
-const fetchBusinessData = async () => {
-  setLoading(true);
-
-  try {
-    // Step 1: Directly get full data from BusinessDetailsView
-    const { data: businessUser, } = await supabase
-      .from("BusinessDetailsView")
+    // 🔁 Step 1: Supabase se fresh user data lo
+    const { data: freshUser, error } = await supabase
+      .from("Users")
       .select("*")
-      .eq("userId", id)
+      .eq("id", id)
       .single();
 
-    
+    if (error) {
+      console.error("Error fetching user:", error);
+      setLoading(false);
+      return;
+    }
 
-    // Step 2: Set user & context
-    setUserBusinessDetails(businessUser);
+    setUser(freshUser);
+    setUserName(freshUser?.firstName);
 
-    // Step 3: Listings fetch karo
+    // 🔁 Step 2: Listing fetch karo
     const listingVal = await fetchlisting();
     const filteredListings = listingVal?.filter(
       (item) => item?.user_detail?.id === id
     );
     setListings(filteredListings || []);
-  } catch (err) {
-    console.error("❌ Unexpected error:", err);
-    toast.error("Something went wrong");
-  } finally {
-    setLoading(false);
-  }
-};
-  
 
-// Run it on mount
-useEffect(() => {
-  fetchData();
-  fetchBusinessData()
-}, [ id]);
+    setLoading(false);
+  };
+
+  const [userbusinessDetails, setUserBusinessDetails] = useState([])
+
+  const fetchBusinessData = async () => {
+    setLoading(true);
+
+    try {
+      // Step 1: Directly get full data from BusinessDetailsView
+      const { data: businessUser, } = await supabase
+        .from("BusinessDetailsView")
+        .select("*")
+        .eq("userId", id)
+        .single();
+
+
+
+      // Step 2: Set user & context
+      setUserBusinessDetails(businessUser);
+
+      // Step 3: Listings fetch karo
+      const listingVal = await fetchlisting();
+      const filteredListings = listingVal?.filter(
+        (item) => item?.user_detail?.id === id
+      );
+      setListings(filteredListings || []);
+    } catch (err) {
+      console.error("❌ Unexpected error:", err);
+      toast.error("Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  // Run it on mount
+  useEffect(() => {
+    fetchData();
+    fetchBusinessData()
+  }, [id]);
 
   // Handle disable/enable provider popup
   const handlePopupDisable = () => {
@@ -141,7 +141,7 @@ useEffect(() => {
   if (loading) return <div>Loading...</div>;
   if (!user) return <div>User not found</div>;
 
-const isActive = user?.accountStatus?.isBlocked !== true;
+  const isActive = user?.accountStatus?.isBlocked !== true;
 
 
 
@@ -208,13 +208,10 @@ const isActive = user?.accountStatus?.isBlocked !== true;
       toast.error("User data not found or invalid Business ID");
       return;
     }
-  
+
 
     try {
 
-
-
-          
       const { error } = await supabase
         .from('BusinessDetailsView')
         .update({ status: 'Approved' })
@@ -242,89 +239,89 @@ const isActive = user?.accountStatus?.isBlocked !== true;
     }
   };
 
-  console.log(user)
+  console.log(userbusinessDetails)
 
   return (
     <div className="px-4">
 
       <div className="flex items-center justify-end">
         <div className="flex items-center justify-end">
-  {userbusinessDetails?.IsSeller ? (
-    userbusinessDetails.status === "Approved" ? (
-      // ✅ Approved seller: Only show block/unblock button
-      <button
-        onClick={handlePopupDisable}
-        className="flex items-center gap-3 py-2.5 h-[42px] px-3 xl:px-[15px] rounded-[10px]"
-      >
-        {isActive ? (
-          <>
-            <DisableRedicon />
-            <span className="text-black font-normal text-base">Block Provider</span>
-          </>
-        ) : (
-          <>
-            <EnableRedIcon />
-            <span className="text-black font-normal text-base">Unblock Provider</span>
-          </>
-        )}
-      </button>
-    ) : userbusinessDetails.status === "Rejected" ? (
-      // ❌ Rejected seller: Show disabled Rejected button
-      <button
-        className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] text-[#FF0000] cursor-not-allowed"
-        disabled
-      >
-        <DisableRedicon />
-        Rejected
-      </button>
-    ) : (
-      // ⏳ Pending seller: Show Approve + Deny + Block buttons
-      <div className="flex gap-4">
-        <button
-          onClick={handlePopupDisable}
-          className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] border border-black text-black"
-        >
-          Block
-        </button>
-        <button
-          onClick={approveUser}
-          className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-green-500 text-white"
-        >
-          Approve
-        </button>
-        <button
-          onClick={userDenied}
-          className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-red-500 text-white"
-        >
-          Deny
-        </button>
+          {userbusinessDetails?.IsSeller ? (
+            userbusinessDetails.status === "Approved" ? (
+              // ✅ Approved seller: Only show block/unblock button
+              <button
+                onClick={handlePopupDisable}
+                className="flex items-center gap-3 py-2.5 h-[42px] px-3 xl:px-[15px] rounded-[10px]"
+              >
+                {isActive ? (
+                  <>
+                    <DisableRedicon />
+                    <span className="text-black font-normal text-base">Block Provider</span>
+                  </>
+                ) : (
+                  <>
+                    <EnableRedIcon />
+                    <span className="text-black font-normal text-base">Unblock Provider</span>
+                  </>
+                )}
+              </button>
+            ) : userbusinessDetails.status === "Rejected" ? (
+              // ❌ Rejected seller: Show disabled Rejected button
+              <button
+                className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] text-[#FF0000] cursor-not-allowed"
+                disabled
+              >
+                <DisableRedicon />
+                Rejected
+              </button>
+            ) : (
+              // ⏳ Pending seller: Show Approve + Deny + Block buttons
+              <div className="flex gap-4">
+                <button
+                  onClick={handlePopupDisable}
+                  className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] border border-black text-black"
+                >
+                  Block
+                </button>
+                <button
+                  onClick={approveUser}
+                  className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-green-500 text-white"
+                >
+                  Approve
+                </button>
+                <button
+                  onClick={userDenied}
+                  className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-red-500 text-white"
+                >
+                  Deny
+                </button>
+              </div>
+            )
+          ) : (
+            // 🧑‍🦰 Normal User: Show block/unblock toggle
+            <button
+              onClick={handlePopupDisable}
+              className="flex items-center gap-3 py-2.5 h-[42px] px-3 xl:px-[15px] rounded-[10px]"
+            >
+              {isActive ? (
+                <>
+                  <DisableRedicon />
+                  <span className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] border border-black text-black">Block User</span>
+                </>
+              ) : (
+                <>
+                  <EnableRedIcon />
+                  <span className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] border border-black text-black">Unblock User</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+
+
       </div>
-    )
-  ) : (
-    // 🧑‍🦰 Normal User: Show block/unblock toggle
-    <button
-      onClick={handlePopupDisable}
-      className="flex items-center gap-3 py-2.5 h-[42px] px-3 xl:px-[15px] rounded-[10px]"
-    >
-      {isActive ? (
-        <>
-          <DisableRedicon />
-          <span className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] border border-black text-black">Block User</span>
-        </>
-      ) : (
-        <>
-          <EnableRedIcon />
-          <span className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] border border-black text-black">Unblock User</span>
-        </>
-      )}
-    </button>
-  )}
-</div>
 
- 
-</div>
 
-    
 
 
       <div className="xl:flex mt-[30px]">
@@ -361,36 +358,41 @@ const isActive = user?.accountStatus?.isBlocked !== true;
                 <div className="flex gap-2.5 items-center mt-2.5">
                   <LocationIcon />
                   <h3 className="text-sm font-normal text-white">
-                   
-                      {user?.address?.city && user?.address?.state
-                        ? `${user.address.city} ${user.address.state}`
-                        : "N/A"}
-                   
+
+                    {user?.address?.city && user?.address?.state
+                      ? `${user.address.city} ${user.address.state}`
+                      : "N/A"}
+
 
                   </h3>
                 </div>
-                <div className="flex gap-2.5 items-center mt-2.5">
-                 
+
+                {user?.IsSeller && (<div className="flex gap-2.5 items-center mt-2.5">
                   <h3 className="text-sm font-normal text-white">
-                  Seller:   {user.IsSeller === "Approved" ? "Approved" : user.IsSeller === "Pending" ? "Not Yet" :"Rejected" }
+                    Seller: {userbusinessDetails?.status}
+                  </h3>
+                </div>
+                )}
+
+
+
+
+                <div className="flex gap-2.5 items-center mt-2.5">
+
+                  <h3 className="text-sm font-normal text-white">
+                    Subscription:   {user.subscription === "null" ? "N/A" : "Yes"}
                   </h3>
                 </div>
                 <div className="flex gap-2.5 items-center mt-2.5">
-                 
+
                   <h3 className="text-sm font-normal text-white">
-                  Subscription:   {user.subscription === "null" ? "N/A" : "Yes" }
+                    Balance:   {user.balance}
                   </h3>
                 </div>
                 <div className="flex gap-2.5 items-center mt-2.5">
-                 
+
                   <h3 className="text-sm font-normal text-white">
-                  Balance:   {user.balance }
-                  </h3>
-                </div>
-                <div className="flex gap-2.5 items-center mt-2.5">
-                 
-                  <h3 className="text-sm font-normal text-white">
-                  Upi:   {user.upi_id  === "null" ? "N/A" : user.upi_id}
+                    Upi:   {user.upi_id === "null" ? "N/A" : user.upi_id}
                   </h3>
                 </div>
               </div>
@@ -407,12 +409,12 @@ const isActive = user?.accountStatus?.isBlocked !== true;
               <div className="flex items-center mt-3 xl:mt-[15px]">
                 <div className="w-4/12">
                   <h2 className="font-medium text-sm xl:text-base text-black">
-                    Business Name:
+                    Business Name: 
                   </h2>
                 </div>
                 <div className="w-10/12">
                   <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
-                    {user?.businessDetail?.businessName}
+                    {userbusinessDetails.businessName}
                   </h2>
                 </div>
               </div>
@@ -424,7 +426,7 @@ const isActive = user?.accountStatus?.isBlocked !== true;
                 </div>
                 <div className="w-10/12">
                   <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
-                    {user?.businessDetail?.description}
+                    {/* {userbusinessDetails?.categories?.map((category)=>category.categoryName)} */}
                   </h2>
                 </div>
               </div>
@@ -436,10 +438,9 @@ const isActive = user?.accountStatus?.isBlocked !== true;
                 </div>
                 <div className="w-10/12">
                   <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
-                    {user?.businessDetail?.categories?.map((item, index) => (
-                      <span key={index}>
-                        {item.categoryName}
-                        {index < user.businessDetail.categories.length - 1 && ', '}
+                    {userbusinessDetails?.categories?.map((category)=> (
+                      <span key={category.id}>
+                        {category.categoryName}
                       </span>
                     ))}
                   </h2>
@@ -552,29 +553,29 @@ const isActive = user?.accountStatus?.isBlocked !== true;
       )}
 
       {isImageModalOpen && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
-    <div className="relative max-w-4xl max-h-screen p-4">
-      <button 
-        onClick={() => setIsImageModalOpen(false)}
-        className="absolute top-4 right-4 text-white text-2xl bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center"
-      >
-        &times;
-      </button>
-      <img 
-        src={user?.image || MechanicImage} 
-        alt="Profile Preview" 
-        className="max-w-full max-h-screen object-contain"
-      />
-    </div>
-  </div>
-)}
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+          <div className="relative max-w-4xl max-h-screen p-4">
+            <button
+              onClick={() => setIsImageModalOpen(false)}
+              className="absolute top-4 right-4 text-white text-2xl bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center"
+            >
+              &times;
+            </button>
+            <img
+              src={user?.image || MechanicImage}
+              alt="Profile Preview"
+              className="max-w-full max-h-screen object-contain"
+            />
+          </div>
+        </div>
+      )}
 
       {showPopupDisable && (
         <DisableProviderPopUp
           handlePopupDisable={handlePopupDisable}
           userId={id}
           currentStatus={user?.accountStatus?.isBlocked ? "blocked" : "active"}
-          refetchUser={fetchData} 
+          refetchUser={fetchData}
         />
       )}
     </div>

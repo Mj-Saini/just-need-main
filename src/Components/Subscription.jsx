@@ -66,9 +66,9 @@ const Subscription = () => {
                 <h1 className="text-xl xl:text-[26px] font-semibold text-black uppercase">
                   {item.planName}
                 </h1>
-                <button onClick={() => handleEditPlan(item)} className="">
+                {/* <button onClick={() => handleEditPlan(item)} className="">
                   <EditiconSubscription />
-                </button>
+                </button> */}
                 {/* <div className="flex items-center gap-[15px] opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <button onClick={() => handleDeleteClick(item.id)}>
                     <RedDeleteIcon />
