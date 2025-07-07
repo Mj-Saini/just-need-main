@@ -28,6 +28,7 @@ import BannerDetails from "../../pages/admin/BannerDetails";
 import Listing from "../../pages/admin/Listing";
 import ListingDetails from "../../pages/admin/ListingDetails";
 import DeleteAccount from "../../Components/DeleteAccount";
+import Withdraw from "../../pages/admin/Withdraw";
 
 function AdminRoutes() {
   return (
@@ -62,6 +63,8 @@ function AdminRoutes() {
         </Route>
         <Route path="serviceRequest" element={<ServiceRequest />} />
         <Route path="services" element={<Services />} />
+
+        <Route path="withdraw" element={<Withdraw />} />
 
 
         <Route path="listings" element={<Listing />} />

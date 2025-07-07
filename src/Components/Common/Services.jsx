@@ -782,7 +782,7 @@ function Services() {
               </div>
             </div>
 
-            <div className="ps-5 flex flex-col items-center w-full overflow-auto  bg-[#ccc]/50 rounded-xl">
+            <div className="px-5  flex flex-col items-center w-full overflow-auto  bg-[#f7f7f780]/50 rounded-xl">
               <div className="flex justify-between gap-[18px] mt-6 flex-wrap w-full ">
                 {selectedSubcategories?.length > 0 &&
                   selectedSubcategories?.filter((sub) => sub?.isActive).map((sub, index) => {
@@ -790,7 +790,7 @@ function Services() {
                     return (
                       <div
                         key={index}
-                        className="group hover:bg-[#6C4DEF1A] bg-[#6b4def07] hover:border-[#6CDEF1A] border border-[#0000001A] lg:p-5 p-3 rounded-[10px] transition w-full"
+                        className="group w-full lg:w-[48%] xl:w-[48.5%] hover:bg-[#6C4DEF1A] bg-[#6b4def07] hover:border-[#6CDEF1A] border border-[#0000001A] lg:p-5 p-3 rounded-[10px] transition"
                       >
                         <div className="flex items-center justify-between">
                           {editIndex === index ? (
@@ -804,11 +804,7 @@ function Services() {
                             />
                           ) : (
                             <p className="font-normal text-sm text-[#00000099] lg:mx-[5px] transition group-hover:text-[#6C4DEF] flex items-center lg:gap-4 gap-2">
-                              <img
-                                className="w-[25px] h-[25px] object-cover rounded-full"
-                                src={sub.image}
-                                alt=""
-                              />
+                          
                               {highlightText(sub?.categoryName, searchQuery)}
                             </p>
                           )}

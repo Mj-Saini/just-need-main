@@ -104,14 +104,14 @@ function SideBar() {
           </NavLink>
         </div>
 
-        {/* <div className="flex items-center mt-3 xl:mt-5 group_hover">
+        <div className="flex items-center mt-3 xl:mt-5 group_hover">
           <VerticalVilotSettingSvg
             pathName={pathName}
             checkpath="/dashboard/serviceRequest"
           />
           <NavLink
             state={"Plan, prioritize, and accomplish your tasks with ease."}
-            to="/dashboard/serviceRequest"
+            to="/dashboard/withdraw"
             className="flex items-center py-2.5 px-2 xl:px-[15px] gap-3 xl:gap-5 ms-[5px] w-full"
           >
             <ServiceRequestSvg pathName={pathName} />
@@ -121,10 +121,10 @@ function SideBar() {
                 : "text-[#00000099]"
                 }`}
             >
-              Service Request
+            Withdraw
             </span>
           </NavLink>
-        </div> */}
+        </div>
 
         {/*  */}
 

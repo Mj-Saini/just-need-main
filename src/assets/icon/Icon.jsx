@@ -100,6 +100,23 @@ export const ServiceRequestSvg = ({ pathName }) => {
     </svg>
   );
 };
+export const WitdrawSvg = ({ pathName }) => {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M18 16H16V15H8V16H6V15H2V20H22V15H18V16ZM20 8H17V6C17 4.9 16.1 4 15 4H9C7.9 4 7 4.9 7 6V8H4C2.9 8 2 8.9 2 10V14H6V12H8V14H16V12H18V14H22V10C22 8.9 21.1 8 20 8ZM15 8H9V6H15V8Z"
+        fill={pathName == "/dashboard/serviceRequest" ? "#6c4def" : "black"}
+        fillOpacity={pathName == "/dashboard/serviceRequest" ? "1" : "0.6"}
+      />
+    </svg>
+  );
+};
 export const RightSvg = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48"><path fill="#43a047" d="M40.6 12.1L17 35.7l-9.6-9.6L4.6 29L17 41.3l26.4-26.4z" /></svg>
