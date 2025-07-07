@@ -5,7 +5,6 @@ import {
   CustomerSvg,
   DasboardSvg,
   LogoutSvg,
-  ServiceRequestSvg,
   ServicesSvg,
   SettingSvg,
   SubsciptionSvg,
@@ -15,6 +14,7 @@ import {
   BannerSvg,
   ListingSvg,
   MessageIcon,
+  WitdrawSvg,
 } from "../../assets/icon/Icon";
 import LogOutPopUp from "../Popups/LogOutPopUp";
 
@@ -114,9 +114,9 @@ function SideBar() {
             to="/dashboard/withdraw"
             className="flex items-center py-2.5 px-2 xl:px-[15px] gap-3 xl:gap-5 ms-[5px] w-full"
           >
-            <ServiceRequestSvg pathName={pathName} />
+            <WitdrawSvg pathName={pathName} />
             <span
-              className={`font-normal text-sm xl:text-base ${pathName == "/dashboard/serviceRequest"
+              className={`font-normal text-sm xl:text-base ${pathName == "/dashboard/withdraw"
                 ? "text-[#6c4def]"
                 : "text-[#00000099]"
                 }`}
