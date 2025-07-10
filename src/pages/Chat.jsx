@@ -50,123 +50,119 @@ const Chat = () => {
   };
 
 
-const handleImgChange = (event) => {
-  const file = event.target.files[0];
-  if (!file) return;
+  const handleImgChange = (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
 
-  // Validate file type
-  if (!file.type.startsWith('image/')) {
-    alert('Please upload an image file');
-    return;
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    // Validate file size (e.g., 5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+
+    setUploadImg(file);
   }
-
-  // Validate file size (e.g., 5MB limit)
-  if (file.size > 5 * 1024 * 1024) {
-    alert('Image size should be less than 5MB');
-    return;
-  }
-
-  setUploadImg(file);
-}
   const handleSendMessage = async (e) => {
-  if (e) {
-    e.preventDefault(); // Prevent default form behavior if called from form submit
-  }
-
-  if (!selectedRoomId) return;
-
-  const senderId = localStorage.getItem("senderId");
-  const timestamp = Date.now();
-
-  // Skip if no content to send
-  if (!messageInput.trim() && !uploadImg) {
-    console.warn("No message or image to send. Skipping...");
-    return;
-  }
-
-  try {
-    let messageData;
-    const isImageUpload = !!uploadImg;
-
-    if (uploadImg) {
-      // Upload image to just_need bucket in ChatImages folder
-      const fileExt = uploadImg.name.split('.').pop();
-      const fileName = `${timestamp}_${uploadImg.name}`;
-      const filePath = `ChatImages/${fileName}`;
-
-      // Upload the file
-      const { error: uploadError } = await supabase
-        .storage
-        .from('just_need')
-        .upload(filePath, uploadImg, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase
-        .storage
-        .from('just_need')
-        .getPublicUrl(filePath);
-
-      // Insert image message
-      const { data, error: messageError } = await supabase
-        .from("AdminChatMessages")
-        .insert([{
-          chatRoomId: selectedRoomId,
-          message: publicUrl,
-          senderId: senderId,
-          messageType: "image",
-          createdAt: timestamp,
-        }])
-        .select();
-
-      if (messageError) throw messageError;
-      messageData = data;
+    if (e) {
+      e.preventDefault();
     }
 
-    // Only send text message if no image was uploaded
-    if (!isImageUpload && messageInput.trim()) {
-      const { data, error: messageError } = await supabase
-        .from("AdminChatMessages")
-        .insert([{
-          chatRoomId: selectedRoomId,
-          message: messageInput.trim(),
-          senderId: senderId,
-          messageType: "text",
-          createdAt: timestamp,
-        }])
-        .select();
+    if (!selectedRoomId) return;
 
-      if (messageError) throw messageError;
-      messageData = data;
+    const senderId = localStorage.getItem("senderId");
+    const timestamp = Date.now();
+
+    // Skip if no content to send
+    if (!messageInput.trim() && !uploadImg) {
+      console.warn("No message or image to send. Skipping...");
+      return;
     }
 
-    // Update chat room
-    await supabase
-      .from("AdminChatRooms")
-      .update({
-        lastMessage: isImageUpload ? "📷 Image" : messageInput.trim(),
-        lastMessageCreatedAt: timestamp,
-      })
-      .eq("chatRoomId", selectedRoomId.toString());
+    try {
+      let messageData;
+      const isImageUpload = !!uploadImg;
 
-    // Update state
-    if (messageData) {
-      setChatMassages((prev) => [...prev, ...(Array.isArray(messageData) ? messageData : [messageData])]);
+      if (uploadImg) {
+        // Upload image to just_need bucket in ChatImages folder
+        const fileExt = uploadImg.name.split('.').pop();
+        const fileName = `${timestamp}_${uploadImg.name}`;
+        const filePath = `ChatImages/${fileName}`;
+
+        // Upload the file
+        const { error: uploadError } = await supabase
+          .storage
+          .from('just_need')
+          .upload(filePath, uploadImg, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) throw uploadError;
+
+        // Get public URL
+        const { data: { publicUrl } } = supabase
+          .storage
+          .from('just_need')
+          .getPublicUrl(filePath);
+
+        // Insert image message
+        const { data, error: messageError } = await supabase
+          .from("AdminChatMessages")
+          .insert([{
+            chatRoomId: selectedRoomId,
+            message: publicUrl,
+            senderId: senderId,
+            messageType: "image",
+            createdAt: timestamp,
+          }])
+          .select();
+
+        if (messageError) throw messageError;
+        messageData = data;
+      }
+
+      // Only send text message if no image was uploaded
+      if (!isImageUpload && messageInput.trim()) {
+        const { data, error: messageError } = await supabase
+          .from("AdminChatMessages")
+          .insert([{
+            chatRoomId: selectedRoomId,
+            message: messageInput.trim(),
+            senderId: senderId,
+            messageType: "text",
+            createdAt: timestamp,
+          }])
+          .select();
+
+        if (messageError) throw messageError;
+        messageData = data;
+      }
+
+      // Update chat room
+      await supabase
+        .from("AdminChatRooms")
+        .update({
+          lastMessage: isImageUpload ? "📷 Image" : messageInput.trim(),
+          lastMessageCreatedAt: timestamp,
+        })
+        .eq("chatRoomId", selectedRoomId.toString());
+
+
+      setMessageInput("");
+      setUploadImg(null);
+
+    } catch (error) {
+      console.error("Error in handleSendMessage:", error);
+      // Show error to user
+      alert('Message sending failed. Please try again.');
     }
-    
-    setMessageInput("");
-    setUploadImg(null);
-
-  } catch (error) {
-    console.error("Error in handleSendMessage:", error);
-    // Show error to user
-    alert('Message sending failed. Please try again.');
-  }
-};
+  };
 
   // const handleSendMessage = async () => {
   //   if (!selectedRoomId) return;
@@ -392,18 +388,24 @@ const handleImgChange = (event) => {
                         )}
                         <div
                           className={`p-2 text-black rounded-t-xl relative min-w-20 ${isSender
-                              ? "bg-blue-500 text-white rounded-bl-xl self-end"
-                              : "bg-gray-300 rounded-br-lg"
+                            ? "bg-blue-500 text-white rounded-bl-xl self-end"
+                            : "bg-gray-300 rounded-br-lg"
                             }`}
                         >
                           {
                             chat.messageType === "image" ? (
                               <div className="max-w-xs pb-2.5">
-                                <img
-                                  src={chat.message}
-                                  alt="Chat image"
-                                  className="max-w-full h-auto rounded-lg border border-gray-200"
-                                />
+                                <div className="w-[250px] h-[200px] bg-gray-200 flex items-center justify-center rounded-lg border border-gray-300 overflow-hidden">
+                                  <img
+                                    src={chat.message}
+                                    alt="Chat image"
+                                    className="object-cover w-full h-full"
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = "/fallback-image.png"; // optional fallback image
+                                    }}
+                                  />
+                                </div>
                               </div>
                             ) : (
                               <p className="font-normal text-base pb-1">
@@ -415,7 +417,7 @@ const handleImgChange = (event) => {
                             {extractTime(chat.createdAt)}
                           </p>
                         </div>
-                        
+
                       </div>
                     </div>
                   );
@@ -426,51 +428,51 @@ const handleImgChange = (event) => {
                 </p>
               )}
               <div ref={messagesEndRef} />
-              
-            </div>
-{uploadImg && (
-                <div className="absolute top-0 left-0 p-10 w-full h-full bg-black/70 flex items-center justify-center">
-                  <img
-                    src={URL.createObjectURL(uploadImg)}
-                    alt="Preview"
-                    className="w-[500px] h-auto rounded-lg"
-                  />
-                  <button onClick={() => setUploadImg(null)} className="absolute top-3 right-5 text-white text-3xl z-10">
-                    x
-                  </button>
 
-                </div>
-              )}
+            </div>
+            {uploadImg && (
+              <div className="absolute top-0 left-0 p-10 w-full h-full bg-black/70 flex items-center justify-center">
+                <img
+                  src={URL.createObjectURL(uploadImg)}
+                  alt="Preview"
+                  className="w-[500px] h-auto rounded-lg"
+                />
+                <button onClick={() => setUploadImg(null)} className="absolute top-12 right-5 text-white text-3xl z-10">
+                  x
+                </button>
+
+              </div>
+            )}
 
 
             {/* Message Input */}
-        {/* Message Input */}
-<form onSubmit={handleSendMessage} className="flex items-center gap-3 sticky top-full bg-white py-4 px-5">
-  <div className="flex-grow bg-gray-300 rounded-full px-4">
-    <input
-      type="text"
-      placeholder="Enter your message"
-      className="w-full outline-none bg-transparent py-4 placeholder:text-black text-sm"
-      value={messageInput}
-      onChange={(e) => setMessageInput(e.target.value)}
-    />
-  </div>
-  <label htmlFor="fileImg">
-    <input 
-      id="fileImg" 
-      hidden 
-      type="file" 
-      accept="image/*" 
-      onChange={handleImgChange} 
-    />
-    <span className="relative">
-      <PepaerClikupIcon className="cursor-pointer" />
-    </span>
-  </label>
-  <button type="submit" className="cursor-pointer">
-    <MessageSendIcon />
-  </button>
-</form>
+            {/* Message Input */}
+            <form onSubmit={handleSendMessage} className="flex items-center gap-3 sticky top-full bg-white py-4 px-5">
+              <div className="flex-grow bg-gray-300 rounded-full px-4">
+                <input
+                  type="text"
+                  placeholder="Enter your message"
+                  className="w-full outline-none bg-transparent py-4 placeholder:text-black text-sm"
+                  value={messageInput}
+                  onChange={(e) => setMessageInput(e.target.value)}
+                />
+              </div>
+              <label htmlFor="fileImg">
+                <input
+                  id="fileImg"
+                  hidden
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImgChange}
+                />
+                <span className="relative">
+                  <PepaerClikupIcon className="cursor-pointer" />
+                </span>
+              </label>
+              <button type="submit" className="cursor-pointer">
+                <MessageSendIcon />
+              </button>
+            </form>
           </>
         ) : (
           <div className="h-full flex items-center justify-center text-gray-500 bg-[#f7eeee] text-xl font-medium">

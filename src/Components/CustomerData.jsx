@@ -345,10 +345,17 @@ const CustomerData = () => {
     });
   }
 
-  // Filter by Subscription Status (Active / Expired / Trial Users)
-  if (filters.selectedStatus) {
+  // Filter by Subscription Status ("free" / "paid")
+  if (filters.selectedSubscriptionStatus) {
     updatedUsers = updatedUsers.filter(user => {
-      return user.verificationStatus === filters.selectedStatus;
+      if (filters.selectedSubscriptionStatus === "paid") {
+        // If subscription exists and is active (you might need to adjust this based on your subscription data structure)
+        return user.subscription !== null && user.subscription.status === "active";
+      } else if (filters.selectedSubscriptionStatus === "free") {
+        // Either no subscription or inactive subscription
+        return user.subscription === null || user.subscription.status !== "active";
+      }
+      return true;
     });
   }
 
