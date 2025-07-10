@@ -239,14 +239,14 @@ function UserDetails() {
     }
   };
 
-  console.log(userbusinessDetails)
+  console.log(user)
 
   return (
     <div className="px-4">
 
       <div className="flex items-center justify-end">
-        <div className="flex items-center justify-end">
-          {userbusinessDetails?.IsSeller ? (
+        {/* <div className="flex items-center justify-end">
+          {user?.IsSeller ? (
             userbusinessDetails.status === "Approved" ? (
               // ✅ Approved seller: Only show block/unblock button
               <button
@@ -283,7 +283,7 @@ function UserDetails() {
                 >
                   Block
                 </button>
-                <button
+                {/* <button
                   onClick={approveUser}
                   className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-green-500 text-white"
                 >
@@ -294,11 +294,11 @@ function UserDetails() {
                   className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-red-500 text-white"
                 >
                   Deny
-                </button>
+                </button> 
               </div>
             )
           ) : (
-            // 🧑‍🦰 Normal User: Show block/unblock toggle
+          
             <button
               onClick={handlePopupDisable}
               className="flex items-center gap-3 py-2.5 h-[42px] px-3 xl:px-[15px] rounded-[10px]"
@@ -316,8 +316,25 @@ function UserDetails() {
               )}
             </button>
           )}
-        </div>
-
+        </div> */}
+<div className="flex items-center justify-end">
+  <button
+    onClick={handlePopupDisable}
+    className="flex items-center gap-3 py-2.5 h-[42px] px-3 xl:px-[15px] rounded-[10px]"
+  >
+    {isActive ? (
+      <>
+        <DisableRedicon />
+        <span className="text-black font-normal text-base">Block</span>
+      </>
+    ) : (
+      <>
+        <EnableRedIcon />
+        <span className="text-black font-normal text-base">Unblock</span>
+      </>
+    )}
+  </button>
+</div>
 
       </div>
 
@@ -367,12 +384,6 @@ function UserDetails() {
                   </h3>
                 </div>
 
-                {user?.IsSeller && (<div className="flex gap-2.5 items-center mt-2.5">
-                  <h3 className="text-sm font-normal text-white">
-                    Seller: {userbusinessDetails?.status}
-                  </h3>
-                </div>
-                )}
 
 
 
@@ -403,9 +414,33 @@ function UserDetails() {
         {user?.IsSeller && (
           <div className="w-full lg:w-7/12 xl:w-[646px] xl:ps-2.5 mt-3 xl:mt-0 flex">
             <div className="bg-[#F1F1F1] rounded-[10px] p-[15px] pb-7 flex-grow flex flex-col">
-              <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066]">
-                Business details
-              </p>
+              <div className="flex items-center justify-between">
+                 <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066]">
+                Business details 
+                </p>
+                
+                {userbusinessDetails.status === "Pending" ?
+
+                  <div className="flex gap-4 items-center">
+                    <button
+                      onClick={approveUser}
+                      className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-green-500 text-white"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={userDenied}
+                      className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-red-500 text-white"
+                    >
+                      Deny
+                    </button>
+
+                  </div> :<span
+                          className={`px-2 py-1 rounded-full text-xs bg-red-100 text-red-700`}
+                        >
+                          {userbusinessDetails.status}
+                        </span>}
+             </div>
               <div className="flex items-center mt-3 xl:mt-[15px]">
                 <div className="w-4/12">
                   <h2 className="font-medium text-sm xl:text-base text-black">
@@ -576,6 +611,7 @@ function UserDetails() {
           userId={id}
           currentStatus={user?.accountStatus?.isBlocked ? "blocked" : "active"}
           refetchUser={fetchData}
+          setUsers={setUsers}
         />
       )}
     </div>

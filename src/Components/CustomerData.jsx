@@ -52,11 +52,12 @@ const CustomerData = () => {
   const { users, setUsers, loading, fetchUsers } = useCustomerContext();
   const [filteredUsers, setFilteredUsers] = useState(users);
   // Filter logic based on selected fields
-  const filteredData = users?.filter((customer) => {
+  const nonBlockedUsers = users?.filter(user => user?.accountStatus?.isBlocked !== true);
+  const filteredData = nonBlockedUsers?.filter((customer) => {
     if (selectedFilters.length === 0) {
       return (customer.firstName + " " + customer.lastName)
         ?.toLowerCase()
-        .includes(searchTerm.toLowerCase()); // Default to name search when no filters
+        .includes(searchTerm.toLowerCase());
     }
 
     return selectedFilters.some((filter) => {
@@ -87,12 +88,12 @@ const CustomerData = () => {
 
 
 
+  const [paginatedData, setPaginatedData] = useState([]);
   // Pagination logic
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = Math.min(startIndex + itemsPerPage, filteredData.length);
 
-  const [paginatedData, setPaginatedData] = useState([]);
   useEffect(() => {
     setPaginatedData(filteredData.slice(startIndex, endIndex)); // 🔹 Update when filteredData or pagination changes
   }, [startIndex, endIndex]);
@@ -315,52 +316,95 @@ const CustomerData = () => {
 
   const showActionButtons = selectItem.length >= 2;
 
-
-
+  console.log(users)
   const applyFilters = (filters) => {
-    let updatedUsers = users;
-    console.log(filters, "::::");
-    console.log(users, "users");
+  console.log(filters)
+  let updatedUsers = users;
 
-    // Filter by User Type (Seller / Consumer)
-    if (filters.selectedUserType) {
-      updatedUsers = updatedUsers.filter(user => {
-        if (filters.selectedUserType === "Seller") {
-          return user.IsSeller === true;
-        } else if (filters.selectedUserType === "Consumer") {
-          return user.IsSeller === false;
-        }
-        return true;
-      });
-    }
+  // Filter by User Type (Seller / Consumer)
+  if (filters.selectedUserType) {
+    updatedUsers = updatedUsers.filter(user => {
+      if (filters.selectedUserType === "Seller") {
+        return user.IsSeller === true;
+      } else if (filters.selectedUserType === "Consumer") {
+        return user.IsSeller === false;
+      }
+      return true;
+    });
+  }
 
-    // Filter by Profile Status
-    if (filters.selectedProfileStatus) {
-      updatedUsers = updatedUsers.filter(user => user.accountStatus === filters.selectedProfileStatus);
-    }
+   // Profile Status (isSellerOnline)
+  if (typeof filters.selectedProfileStatus === "boolean") {
+    updatedUsers = updatedUsers.filter(user => user.isSellerOnline === filters.selectedProfileStatus);
+  }
 
-    // Filter by Business Status
-    if (filters.selectedBusinessStatus) {
-      updatedUsers = updatedUsers.filter(user => user.businessDetail?.status === filters.selectedBusinessStatus);
-    }
+  // Filter by Business Status ("Approved" / "Pending")
+  if (filters.selectedBusinessStatus) {
+    updatedUsers = updatedUsers.filter(user => {
+      return user.businessDetail?.status === filters.selectedBusinessStatus;
+    });
+  }
 
-    // Filter by Subscription Status
-    if (filters.selectedStatus) {
-      updatedUsers = updatedUsers.filter(user => user.verificationStatus === filters.selectedStatus);
-    }
+  // Filter by Subscription Status (Active / Expired / Trial Users)
+  if (filters.selectedStatus) {
+    updatedUsers = updatedUsers.filter(user => {
+      return user.verificationStatus === filters.selectedStatus;
+    });
+  }
 
-    // Update States
-    setFilteredUsers(updatedUsers);
-    setCurrentPage(1);
+  // Final updates
+  setFilteredUsers(updatedUsers);
+  setCurrentPage(1);
+  setPaginatedData(updatedUsers.slice(0, itemsPerPage));
+};
 
-    const startIndex = 0;
-    const endIndex = Math.min(itemsPerPage, updatedUsers.length);
-    setPaginatedData(updatedUsers.slice(startIndex, endIndex));
-  };
-  const blockedUsers = users?.filter(
-    (user) => user?.accountStatus?.isBlocked === true
-  );
+
+
+
+  // const applyFilters = (filters) => {
+  //   let updatedUsers = users;
+  //   console.log(filters, "::::");
+  //   console.log(users, "users");
+
+  //   // Filter by User Type (Seller / Consumer)
+  //   if (filters.selectedUserType) {
+  //     updatedUsers = updatedUsers.filter(user => {
+  //       if (filters.selectedUserType === "Seller") {
+  //         return user.IsSeller === true;
+  //       } else if (filters.selectedUserType === "Consumer") {
+  //         return user.IsSeller === false;
+  //       }
+  //       return true;
+  //     });
+  //   }
+
+  //   // Filter by Profile Status
+  //   if (filters.selectedProfileStatus) {
+  //     updatedUsers = updatedUsers.filter(user => user.accountStatus === filters.selectedProfileStatus);
+  //   }
+
+  //   // Filter by Business Status
+  //   if (filters.selectedBusinessStatus) {
+  //     updatedUsers = updatedUsers.filter(user => user.businessDetail?.status === filters.selectedBusinessStatus);
+  //   }
+
+  //   // Filter by Subscription Status
+  //   if (filters.selectedStatus) {
+  //     updatedUsers = updatedUsers.filter(user => user.verificationStatus === filters.selectedStatus);
+  //   }
+
+  //   // Update States
+  //   setFilteredUsers(updatedUsers);
+  //   setCurrentPage(1);
+
+  //   const startIndex = 0;
+  //   const endIndex = Math.min(itemsPerPage, updatedUsers.length);
+  //   setPaginatedData(updatedUsers.slice(startIndex, endIndex));
+  // };
+
   const handleUnblockUser = async (userId) => {
+    console.log("Unblocking user:", userId);
+
     try {
       const { error } = await supabase
         .from("Users")
@@ -375,14 +419,30 @@ const CustomerData = () => {
         .eq("id", userId);
 
       if (error) throw error;
-
+      setUsers((prevUsers) =>
+        prevUsers.map((user) =>
+          user.id === userId
+            ? {
+              ...user,
+              accountStatus: {
+                isBlocked: false,
+                reason: null,
+                timestamp: Date.now(),
+              },
+            }
+            : user
+        )
+      );
       toast.success("User unblocked successfully!");
-      fetchUsers(); // 👈 refresh users list
+
     } catch (err) {
       toast.error("Failed to unblock user");
       console.error(err);
     }
   };
+
+
+
 
 
   return (
@@ -512,8 +572,8 @@ const CustomerData = () => {
                 </td>
               </tr>
             ) : (
-              paginatedData?.filter((customer) => customer?.accountStatus?.isBlocked !== true).map((customer) => {
-                console.log(customer)
+              paginatedData?.map((customer) => {
+
                 return (
                   <tr key={customer.id}>
                     {/* <td className="px-[19px] md:px-[24px]">
@@ -568,18 +628,21 @@ const CustomerData = () => {
                     <td>
                       <div className="flex justify-center items-center">
                         <span
-                          className={`px-[10px] py-[4px] text-sm font-normal text-center ${customer?.accountStatus?.isBlocked === true
-                            ? "text-[#800000] rounded-[90px] bg-[#FF000012]"
-                            : "bg-[#00800012] text-[#008000] rounded-[90px]"
-                            }`}
-                        >
-                          {customer?.IsSeller
-                            ? customer?.isSellerOnline
-                              ? "Online"
-                              : "Offline"
-                            : "-"}
-                          {/* {customer?.accountStatus?.isBlocked === true ? "Inactive" : "Active"} */}
-                        </span>
+  className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${
+    !customer?.IsSeller
+      ? "text-[#9ca3af]" // not seller = gray
+      : customer?.isSellerOnline
+      ? "text-[#008000] bg-[#00800012]" // online = green
+      : "text-[#FF0000] bg-[#ff000012]" // offline = red
+  }`}
+>
+  {!customer?.IsSeller
+    ? "-"
+    : customer?.isSellerOnline
+    ? "Online"
+    : "Offline"}
+</span>
+
                       </div>
                     </td>
                     <td>
@@ -822,7 +885,7 @@ const CustomerData = () => {
       )}
       {showBlockedOnly && (
         <BlockedUserPopups
-          blockedUsers={blockedUsers}
+          blockedUsers={users.filter(user => user?.accountStatus?.isBlocked === true)}
           onClose={() => setShowBlockedOnly(false)}
           onUnblock={handleUnblockUser}
         />

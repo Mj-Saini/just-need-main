@@ -7,7 +7,7 @@ import { PopupsArrowBlock, StatusCloseIcon } from "../../assets/icon/Icons";
 import { supabase } from "../../store/supabaseCreateClient";
 import { toast } from "react-toastify";
 
-function DisableProviderPopUp({ handlePopupDisable, userId, currentStatus,refetchUser }) {
+function DisableProviderPopUp({ handlePopupDisable, userId, currentStatus,refetchUser,setUsers, }) {
   const isCurrentlyBlocked = currentStatus === "blocked";
 
   const [popUpData, setPopUpData] = useState({
@@ -56,7 +56,17 @@ function DisableProviderPopUp({ handlePopupDisable, userId, currentStatus,refetc
         .select();
 
       if (supabaseError) throw supabaseError;
-
+if (setUsers) {
+        setUsers((prevUsers) =>
+          Array.isArray(prevUsers)
+            ? prevUsers.map((u) =>
+                u.id === userId
+                  ? { ...u, accountStatus: statusData }
+                  : u
+              )
+            : prevUsers
+        );
+      }
       toast.success(`User ${isBlocked ? "blocked" : "unblocked"} successfully!`);
       if (refetchUser) await refetchUser();
       handlePopupDisable();

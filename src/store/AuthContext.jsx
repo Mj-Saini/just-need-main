@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from "react";
+/* eslint-disable react/prop-types */
+import { createContext, useContext } from "react";
 import { supabase } from "./supabaseCreateClient";
 const AuthContext = createContext();
 
@@ -12,7 +13,8 @@ function AuthProvider({ children }) {
       email: email,
       password: password,
     });
-
+localStorage.setItem('senderId', data.user?.id);
+    
     if (error) {
       return { success: false, response: error };
     }
