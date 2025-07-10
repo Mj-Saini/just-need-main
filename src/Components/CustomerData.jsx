@@ -34,6 +34,7 @@ const CustomerData = () => {
   const [searchPlaceholder, setSearchPlaceholder] = useState("Search");
   const [selectAll, setSelectAll] = useState(false);
   const [showBlockedOnly, setShowBlockedOnly] = useState(false);
+  const [userActiveTabs, setuserActiveTabs] = useState("userlist");
 
 
   const formatDate = (milliseconds) => {
@@ -318,97 +319,61 @@ const CustomerData = () => {
 
   console.log(users)
   const applyFilters = (filters) => {
-  console.log(filters)
-  let updatedUsers = users;
+    console.log(filters)
+    let updatedUsers = users;
 
-  // Filter by User Type (Seller / Consumer)
-  if (filters.selectedUserType) {
-    updatedUsers = updatedUsers.filter(user => {
-      if (filters.selectedUserType === "Seller") {
-        return user.IsSeller === true;
-      } else if (filters.selectedUserType === "Consumer") {
-        return user.IsSeller === false;
-      }
-      return true;
-    });
-  }
+    // Filter by User Type (Seller / Consumer)
+    if (filters.selectedUserType) {
+      updatedUsers = updatedUsers.filter(user => {
+        if (filters.selectedUserType === "Seller") {
+          return user.IsSeller === true;
+        } else if (filters.selectedUserType === "Consumer") {
+          return user.IsSeller === false;
+        }
+        return true;
+      });
+    }
 
-   // Profile Status (isSellerOnline)
-  if (typeof filters.selectedProfileStatus === "boolean") {
-    updatedUsers = updatedUsers.filter(user => user.isSellerOnline === filters.selectedProfileStatus);
-  }
+    // Profile Status (isSellerOnline)
+    if (typeof filters.selectedProfileStatus === "boolean") {
+      updatedUsers = updatedUsers.filter(user => user.isSellerOnline === filters.selectedProfileStatus);
+    }
 
-  // Filter by Business Status ("Approved" / "Pending")
-  if (filters.selectedBusinessStatus) {
-    updatedUsers = updatedUsers.filter(user => {
-      return user.businessDetail?.status === filters.selectedBusinessStatus;
-    });
-  }
+    // Filter by Business Status ("Approved" / "Pending")
+    if (filters.selectedBusinessStatus) {
+      updatedUsers = updatedUsers.filter(user => {
+        return user.businessDetail?.status === filters.selectedBusinessStatus;
+      });
+    }
 
-  // Filter by Subscription Status ("free" / "paid")
-  if (filters.selectedSubscriptionStatus) {
-    updatedUsers = updatedUsers.filter(user => {
-      if (filters.selectedSubscriptionStatus === "paid") {
-        // If subscription exists and is active (you might need to adjust this based on your subscription data structure)
-        return user.subscription !== null && user.subscription.status === "active";
-      } else if (filters.selectedSubscriptionStatus === "free") {
-        // Either no subscription or inactive subscription
-        return user.subscription === null || user.subscription.status !== "active";
-      }
-      return true;
-    });
-  }
+    // Filter by Subscription Status ("free" / "paid")
+    if (filters.selectedSubscriptionStatus) {
+      updatedUsers = updatedUsers.filter(user => {
+        if (filters.selectedSubscriptionStatus === "paid") {
+          // If subscription exists and is active (you might need to adjust this based on your subscription data structure)
+          return user.subscription !== null && user.subscription.status === "active";
+        } else if (filters.selectedSubscriptionStatus === "free") {
+          // Either no subscription or inactive subscription
+          return user.subscription === null || user.subscription.status !== "active";
+        }
+        return true;
+      });
+    }
 
-  // Final updates
-  setFilteredUsers(updatedUsers);
-  setCurrentPage(1);
-  setPaginatedData(updatedUsers.slice(0, itemsPerPage));
-};
-
-
+    // Final updates
+    setFilteredUsers(updatedUsers);
+    setCurrentPage(1);
+    setPaginatedData(updatedUsers.slice(0, itemsPerPage));
+  };
 
 
-  // const applyFilters = (filters) => {
-  //   let updatedUsers = users;
-  //   console.log(filters, "::::");
-  //   console.log(users, "users");
+const pendingBusinessUsers = users.filter(user => 
+  user.IsSeller === true && 
+  user.businessDetail?.status === "Pending"
+);
 
-  //   // Filter by User Type (Seller / Consumer)
-  //   if (filters.selectedUserType) {
-  //     updatedUsers = updatedUsers.filter(user => {
-  //       if (filters.selectedUserType === "Seller") {
-  //         return user.IsSeller === true;
-  //       } else if (filters.selectedUserType === "Consumer") {
-  //         return user.IsSeller === false;
-  //       }
-  //       return true;
-  //     });
-  //   }
-
-  //   // Filter by Profile Status
-  //   if (filters.selectedProfileStatus) {
-  //     updatedUsers = updatedUsers.filter(user => user.accountStatus === filters.selectedProfileStatus);
-  //   }
-
-  //   // Filter by Business Status
-  //   if (filters.selectedBusinessStatus) {
-  //     updatedUsers = updatedUsers.filter(user => user.businessDetail?.status === filters.selectedBusinessStatus);
-  //   }
-
-  //   // Filter by Subscription Status
-  //   if (filters.selectedStatus) {
-  //     updatedUsers = updatedUsers.filter(user => user.verificationStatus === filters.selectedStatus);
-  //   }
-
-  //   // Update States
-  //   setFilteredUsers(updatedUsers);
-  //   setCurrentPage(1);
-
-  //   const startIndex = 0;
-  //   const endIndex = Math.min(itemsPerPage, updatedUsers.length);
-  //   setPaginatedData(updatedUsers.slice(startIndex, endIndex));
-  // };
-
+  console.log(pendingBusinessUsers)
+ 
   const handleUnblockUser = async (userId) => {
     console.log("Unblocking user:", userId);
 
@@ -456,9 +421,12 @@ const CustomerData = () => {
     <div className="bg-[#FFFFFF] p-5 rounded-[10px]">
       <div className="flex justify-between items-center mt-[15px]">
         <div className="flex items-center gap-6">
-          <h2 className="text-base xl:text-[20px] font-medium text-[#000000] opacity-70">
+          <button onClick={()=>setuserActiveTabs('userlist')} className="text-base xl:text-[20px] font-medium text-[#fff] py-2 px-4 rounded-[10px] bg-[#0832DE]">
             Users List
-          </h2>
+          </button>
+          <button onClick={()=>setuserActiveTabs('pendingRequest')} className="text-base xl:text-[20px] font-medium text-[#fff] py-2 px-4 rounded-[10px] bg-[#0832DE]">
+           Pending Request
+          </button>
           {showActionButtons && (
             <>
               <button
@@ -516,11 +484,12 @@ const CustomerData = () => {
           </button>
         </div>
       </div>
-      <div className="overflow-x-auto  mt-5">
-        <table className="w-full text-left border-separate border-spacing-4 whitespace-nowrap rounded-[10px]">
-          <thead>
-            <tr className="py-[8px]">
-              {/* <th className="px-[19px] py-[8px] md:px-[24px]">
+      {userActiveTabs === "userlist" &&
+        <div className="overflow-x-auto  mt-5">
+          <table className="w-full text-left border-separate border-spacing-4 whitespace-nowrap rounded-[10px]">
+            <thead>
+              <tr className="py-[8px]">
+                {/* <th className="px-[19px] py-[8px] md:px-[24px]">
                 <input
                   className="w-[16px] h-[16px]"
                   type="checkbox"
@@ -528,62 +497,62 @@ const CustomerData = () => {
                   onChange={handleMainCheckboxChange}
                 />
               </th> */}
-              <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
-                Full Name
-              </th>
-              <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
-                Email
-              </th>
-              <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
-                Mobile
-              </th>
-              <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[250px]">
-                Address
-              </th>
-              <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[100px]">
-                User Type
-              </th>
-              <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[200px]">
-                Created At
-              </th>
-              {/* <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[200px]">
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                  Full Name
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                  Email
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
+                  Mobile
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[250px]">
+                  Address
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[100px]">
+                  User Type
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[200px]">
+                  Created At
+                </th>
+                {/* <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[200px]">
                 Updated At
               </th> */}
-              <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
-                Is Seller Online
-              </th>
-              <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
-                Business Profile
-              </th>
-              <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base  bg-white">
-                Action
-              </th>
-            </tr>
-            <tr>
-              <td colSpan="12">
-                <div className="w-full border border-dashed border-[#00000066]"></div>
-              </td>
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                  Is Seller Online
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                  Business Profile
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base  bg-white">
+                  Action
+                </th>
+              </tr>
               <tr>
-                <td colSpan="11" className="text-center py-4">
-                  Loading...
+                <td colSpan="12">
+                  <div className="w-full border border-dashed border-[#00000066]"></div>
                 </td>
               </tr>
-            ) : paginatedData.length === 0 ? (
-              <tr>
-                <td colSpan="11" className="text-center py-4">
-                  No users found
-                </td>
-              </tr>
-            ) : (
-              paginatedData?.map((customer) => {
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="11" className="text-center py-4">
+                    Loading...
+                  </td>
+                </tr>
+              ) : paginatedData.length === 0 ? (
+                <tr>
+                  <td colSpan="11" className="text-center py-4">
+                    No users found
+                  </td>
+                </tr>
+              ) : (
+                paginatedData?.map((customer) => {
 
-                return (
-                  <tr key={customer.id}>
-                    {/* <td className="px-[19px] md:px-[24px]">
+                  return (
+                    <tr key={customer.id}>
+                      {/* <td className="px-[19px] md:px-[24px]">
                       <input
                         className="w-[16px] h-[16px]"
                         type="checkbox"
@@ -592,107 +561,265 @@ const CustomerData = () => {
                         value={customer.id}
                       />
                     </td> */}
-                    <td className="px-[19px] md:px-[24px] text-[#6C4DEF] flex items-center gap-2 min-w-[160px]">
-                      <Link
-                        className="flex gap-2"
-                        to={`/dashboard/usersList/userDetails/${customer.id}`}
+                      <td className="px-[19px] md:px-[24px] text-[#6C4DEF] flex items-center gap-2 min-w-[160px]">
+                        <Link
+                          className="flex gap-2"
+                          to={`/dashboard/usersList/userDetails/${customer.id}`}
+                        >
+                          <img
+                            src={customer.image || avatar}
+                            alt="avatar"
+                            className="!w-8 h-8 aspect-[1/1] rounded-full object-cover img_user"
+                          />
+                          {customer.firstName} {customer.lastName}
+                        </Link>
+                      </td>
+                      <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                        {customer.useremail}
+                      </td>
+                      <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                        {customer.mobile_number}
+                      </td>
+                      <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000] w-[120px] truncate">
+                        {customer.address.city}/{customer.address.state}
+                      </td>
+                      <td
+                        className={`px-[19px] text-sm font-normal truncate ${customer.IsSeller == true
+                          ? "bg-[#0000FF12] text-[#0000FF] rounded-[90px]"
+                          : "text-[#FFA500] bg-[#FFA50024] rounded-[90px]"
+                          }`}
                       >
-                        <img
-                          src={customer.image || avatar}
-                          alt="avatar"
-                          className="!w-8 h-8 aspect-[1/1] rounded-full object-cover img_user"
-                        />
-                        {customer.firstName} {customer.lastName}
-                      </Link>
-                    </td>
-                    <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
-                      {customer.useremail}
-                    </td>
-                    <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
-                      {customer.mobile_number}
-                    </td>
-                    <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000] w-[120px] truncate">
-                      {customer.address.city}/{customer.address.state}
-                    </td>
-                    <td
-                      className={`px-[19px] text-sm font-normal truncate ${customer.IsSeller == true
-                        ? "bg-[#0000FF12] text-[#0000FF] rounded-[90px]"
-                        : "text-[#FFA500] bg-[#FFA50024] rounded-[90px]"
-                        }`}
-                    >
-                      <div className="flex justify-center">
-                        <span>
-                          {customer.IsSeller === true ? "Seller" : "Consumer"}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
-                      {formatDate(customer.created_at)}
-                    </td>
-                    {/* <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                        <div className="flex justify-center">
+                          <span>
+                            {customer.IsSeller === true ? "Seller" : "Consumer"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                        {formatDate(customer.created_at)}
+                      </td>
+                      {/* <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
                       {formatDate(customer.updated_at)}
                     </td> */}
-                    <td>
-                      <div className="flex justify-center items-center">
-                        <span
-  className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${
-    !customer?.IsSeller
-      ? "text-[#9ca3af]" // not seller = gray
-      : customer?.isSellerOnline
-      ? "text-[#008000] bg-[#00800012]" // online = green
-      : "text-[#FF0000] bg-[#ff000012]" // offline = red
-  }`}
->
-  {!customer?.IsSeller
-    ? "-"
-    : customer?.isSellerOnline
-    ? "Online"
-    : "Offline"}
-</span>
-
-                      </div>
-                    </td>
-                    <td>
-                      <div className="flex justify-center items-center">
-                        {customer.IsSeller ? (
+                      <td>
+                        <div className="flex justify-center items-center">
                           <span
-                            className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${!customer?.businessDetail?.status
-                              ? "bg-gray-100 text-gray-500"
-                              : customer.businessDetail.status === "Pending"
-                                ? "bg-[#6C4DEF1A] text-[#6C4DEF]"
-                                : customer.businessDetail.status === "Rejected"
-                                  ? "bg-[#FF00001A] text-[#800000]"
-                                  : customer.businessDetail.status === "Approved"
-                                    ? "bg-[#00800012] text-[#008000]"
-                                    : "bg-gray-100 text-gray-500"
+                            className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${!customer?.IsSeller
+                              ? "text-[#9ca3af]" // not seller = gray
+                              : customer?.isSellerOnline
+                                ? "text-[#008000] bg-[#00800012]" // online = green
+                                : "text-[#FF0000] bg-[#ff000012]" // offline = red
                               }`}
                           >
-                            {customer?.businessDetail?.status || "N/A"}
+                            {!customer?.IsSeller
+                              ? "-"
+                              : customer?.isSellerOnline
+                                ? "Online"
+                                : "Offline"}
                           </span>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-[19px] md:px-[24px] text-center bg-white">
-                      <Link to={`/dashboard/usersList/userDetails/${customer.id}`}>
-                        <button className="text-2xl font-medium">
-                          <EyeIcon />
-                        </button></Link>
-                      {/* <button
+
+                        </div>
+                      </td>
+                      <td>
+                        <div className="flex justify-center items-center">
+                          {customer.IsSeller ? (
+                            <span
+                              className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${!customer?.businessDetail?.status
+                                ? "bg-gray-100 text-gray-500"
+                                : customer.businessDetail.status === "Pending"
+                                  ? "bg-[#6C4DEF1A] text-[#6C4DEF]"
+                                  : customer.businessDetail.status === "Rejected"
+                                    ? "bg-[#FF00001A] text-[#800000]"
+                                    : customer.businessDetail.status === "Approved"
+                                      ? "bg-[#00800012] text-[#008000]"
+                                      : "bg-gray-100 text-gray-500"
+                                }`}
+                            >
+                              {customer?.businessDetail?.status || "N/A"}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-[19px] md:px-[24px] text-center bg-white">
+                        <Link to={`/dashboard/usersList/userDetails/${customer.id}`}>
+                          <button className="text-2xl font-medium">
+                            <EyeIcon />
+                          </button></Link>
+                        {/* <button
                         className="text-2xl font-medium ms-[6px]"
                         onClick={() => handleSingleDeleteClick(customer.id)}
                       >
                         <DeleteRedIcon />
                       </button> */}
-                    </td>
-                  </tr>
-                )
-              })
-            )}
-          </tbody>
-        </table>
-      </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>}
+      {userActiveTabs === "pendingRequest" &&
+        <div className="overflow-x-auto  mt-5">
+          <table className="w-full text-left border-separate border-spacing-4 whitespace-nowrap rounded-[10px]">
+            <thead>
+              <tr className="py-[8px]">
+               
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                  Full Name
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                  Email
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
+                  Mobile
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[250px]">
+                  Address
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[100px]">
+                  User Type
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[200px]">
+                  Created At
+                </th>
+               
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                  Is Seller Online
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                  Business Profile
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base  bg-white">
+                  Action
+                </th>
+              </tr>
+              <tr>
+                <td colSpan="12">
+                  <div className="w-full border border-dashed border-[#00000066]"></div>
+                </td>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan="11" className="text-center py-4">
+                    Loading...
+                  </td>
+                </tr>
+              ) : pendingBusinessUsers.length === 0 ? (
+                <tr>
+                  <td colSpan="11" className="text-center py-4">
+                    No users found
+                  </td>
+                </tr>
+              ) : (
+                pendingBusinessUsers?.map((customer) => {
+
+                  return (
+                    <tr key={customer.id}>
+                    
+                      <td className="px-[19px] md:px-[24px] text-[#6C4DEF] flex items-center gap-2 min-w-[160px]">
+                        <Link
+                          className="flex gap-2"
+                          to={`/dashboard/usersList/userDetails/${customer.id}`}
+                        >
+                          <img
+                            src={customer.image || avatar}
+                            alt="avatar"
+                            className="!w-8 h-8 aspect-[1/1] rounded-full object-cover img_user"
+                          />
+                          {customer.firstName} {customer.lastName}
+                        </Link>
+                      </td>
+                      <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                        {customer.useremail}
+                      </td>
+                      <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                        {customer.mobile_number}
+                      </td>
+                      <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000] w-[120px] truncate">
+                        {customer.address.city}/{customer.address.state}
+                      </td>
+                      <td
+                        className={`px-[19px] text-sm font-normal truncate ${customer.IsSeller == true
+                          ? "bg-[#0000FF12] text-[#0000FF] rounded-[90px]"
+                          : "text-[#FFA500] bg-[#FFA50024] rounded-[90px]"
+                          }`}
+                      >
+                        <div className="flex justify-center">
+                          <span>
+                            {customer.IsSeller === true ? "Seller" : "Consumer"}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                        {formatDate(customer.created_at)}
+                      </td>
+                   
+                      <td>
+                        <div className="flex justify-center items-center">
+                          <span
+                            className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${!customer?.IsSeller
+                              ? "text-[#9ca3af]" // not seller = gray
+                              : customer?.isSellerOnline
+                                ? "text-[#008000] bg-[#00800012]" // online = green
+                                : "text-[#FF0000] bg-[#ff000012]" // offline = red
+                              }`}
+                          >
+                            {!customer?.IsSeller
+                              ? "-"
+                              : customer?.isSellerOnline
+                                ? "Online"
+                                : "Offline"}
+                          </span>
+
+                        </div>
+                      </td>
+                      <td>
+                        <div className="flex justify-center items-center">
+                          {customer.IsSeller ? (
+                            <span
+                              className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${!customer?.businessDetail?.status
+                                ? "bg-gray-100 text-gray-500"
+                                : customer.businessDetail.status === "Pending"
+                                  ? "bg-[#6C4DEF1A] text-[#6C4DEF]"
+                                  : customer.businessDetail.status === "Rejected"
+                                    ? "bg-[#FF00001A] text-[#800000]"
+                                    : customer.businessDetail.status === "Approved"
+                                      ? "bg-[#00800012] text-[#008000]"
+                                      : "bg-gray-100 text-gray-500"
+                                }`}
+                            >
+                              {customer?.businessDetail?.status || "N/A"}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-[19px] md:px-[24px] text-center bg-white">
+                        <Link to={`/dashboard/usersList/userDetails/${customer.id}`}>
+                          <button className="text-2xl font-medium">
+                            <EyeIcon />
+                          </button></Link>
+                        {/* <button
+                        className="text-2xl font-medium ms-[6px]"
+                        onClick={() => handleSingleDeleteClick(customer.id)}
+                      >
+                        <DeleteRedIcon />
+                      </button> */}
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>}
+      
       <div className="p-4 bg-white rounded-[10px]">
         <div className="flex justify-end">
           <div className="flex items-center">
