@@ -436,7 +436,11 @@ function UserDetails() {
                     </button>
 
                   </div> :<span
-                          className={`px-2 py-1 rounded-full text-xs bg-red-100 text-red-700`}
+                         className={`px-2 py-1 rounded-full text-xs ${
+    userbusinessDetails.status === "Approved"
+      ? "bg-green-100 text-green-700"
+      : "bg-red-100 text-red-700"
+  }`}
                         >
                           {userbusinessDetails.status}
                         </span>}

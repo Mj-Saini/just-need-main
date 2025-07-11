@@ -317,7 +317,7 @@ const CustomerData = () => {
 
   const showActionButtons = selectItem.length >= 2;
 
-  console.log(users)
+
   const applyFilters = (filters) => {
     console.log(filters)
     let updatedUsers = users;
@@ -346,19 +346,20 @@ const CustomerData = () => {
       });
     }
 
-    // Filter by Subscription Status ("free" / "paid")
-    if (filters.selectedSubscriptionStatus) {
-      updatedUsers = updatedUsers.filter(user => {
-        if (filters.selectedSubscriptionStatus === "paid") {
-          // If subscription exists and is active (you might need to adjust this based on your subscription data structure)
-          return user.subscription !== null && user.subscription.status === "active";
-        } else if (filters.selectedSubscriptionStatus === "free") {
-          // Either no subscription or inactive subscription
-          return user.subscription === null || user.subscription.status !== "active";
-        }
-        return true;
-      });
+ // Filter by Subscription Status ("free" / "paid")
+if (filters.selectedSubscriptionStatus) {
+  updatedUsers = updatedUsers.filter(user => {
+    const isSubscribed = user.subscription?.isSubscribe;
+
+    if (filters.selectedSubscriptionStatus === "paid") {
+      return isSubscribed === true;
+    } else if (filters.selectedSubscriptionStatus === "free") {
+      return !isSubscribed;
     }
+
+    return true;
+  });
+}
 
     // Final updates
     setFilteredUsers(updatedUsers);

@@ -26,6 +26,8 @@ const Chat = () => {
   const [messageInput, setMessageInput] = useState("");
   const [chatRoomInfo, setChatRoomInfo] = useState([]);
   const [uploadImg, setUploadImg] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+
 
   const currentUserInfo = chatRoomInfo.find(
     (info) => info.chatRoomId === selectedRoomId
@@ -300,7 +302,48 @@ const Chat = () => {
       }
     };
   }, [uploadImg]);
-  console.log(uploadImg)
+
+
+  const handleEndChat = async () => {
+  if (!selectedRoomId) return;
+
+  const confirmDelete = window.confirm(
+    "Are you sure you want to end this chat? This will permanently delete all messages."
+  );
+
+  if (!confirmDelete) return;
+
+  try {
+    // Step 1: Delete all messages in this chat room
+    const { error: deleteMessagesError } = await supabase
+      .from("AdminChatMessages")
+      .delete()
+      .eq("chatRoomId", selectedRoomId);
+
+    if (deleteMessagesError) throw deleteMessagesError;
+
+    // Step 2: Delete the chat room itself
+    const { error: deleteRoomError } = await supabase
+      .from("AdminChatRooms")
+      .delete()
+      .eq("chatRoomId", selectedRoomId);
+
+    if (deleteRoomError) throw deleteRoomError;
+
+    // Step 3: Clear selected state
+    setSelectedChat(null);
+    setSelectedRoomId(null);
+    setChatMassages([]);
+    setChatRoomInfo((prev) =>
+      prev.filter((info) => info.chatRoomId !== selectedRoomId)
+    );
+
+    alert("Chat ended and removed successfully.");
+  } catch (error) {
+    console.error("Error ending chat:", error);
+    alert("Failed to end chat. Please try again.");
+  }
+};
 
   return (
     <div className="flex flex-col lg:flex-row p-5 bg-white rounded-[10px]">
@@ -312,6 +355,7 @@ const Chat = () => {
         <AllChatRooms
           handleChatSelect={handleChatSelect}
           getUserInfo={getUserInfo}
+          selectedRoomId={selectedRoomId}
         />
       </div>
 
@@ -347,6 +391,12 @@ const Chat = () => {
                 </Link>
               </div>
               <div className="flex items-center">
+                 <button
+    onClick={handleEndChat}
+    className="text-sm text-white bg-red-500 px-3 py-1 rounded hover:bg-red-600 transition"
+  >
+    End Chat
+  </button>
                 <a className="pe-3 ps-3" href="#">
                   <SearchIconChat />
                 </a>
@@ -400,6 +450,7 @@ const Chat = () => {
                                     src={chat.message}
                                     alt="Chat image"
                                     className="object-cover w-full h-full"
+                                    onClick={() => setPreviewImage(chat.message)}
                                     onError={(e) => {
                                       e.target.onerror = null;
                                       e.target.src = "/fallback-image.png"; // optional fallback image
@@ -430,6 +481,21 @@ const Chat = () => {
               <div ref={messagesEndRef} />
 
             </div>
+            {previewImage && (
+              <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center">
+                <img
+                  src={previewImage}
+                  alt="Full Preview"
+                  className="max-w-full max-h-full rounded-lg"
+                />
+                <button
+                  onClick={() => setPreviewImage(null)}
+                  className="absolute top-5 right-5 text-white text-3xl font-bold"
+                >
+                  ×
+                </button>
+              </div>
+            )}
             {uploadImg && (
               <div className="absolute top-0 left-0 p-10 w-full h-full bg-black/70 flex items-center justify-center">
                 <img
@@ -457,7 +523,7 @@ const Chat = () => {
                   onChange={(e) => setMessageInput(e.target.value)}
                 />
               </div>
-              <label htmlFor="fileImg">
+              <label htmlFor="fileImg" className="cursor-pointer">
                 <input
                   id="fileImg"
                   hidden

@@ -7,7 +7,7 @@ import React, { useEffect, useState } from "react";
 import { UserIcon } from "../../assets/icon/Icons";
 import { supabase } from "../../store/supabaseCreateClient";
 
-const AllChatRooms = ({ handleChatSelect,getUserInfo }) => {
+const AllChatRooms = ({ handleChatSelect,getUserInfo,selectedRoomId }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [chatRooms, setChatRooms] = useState([]);
   const [activeButton, setActiveButton] = useState("All");
@@ -105,7 +105,9 @@ useEffect(() => {
         <div
           key={chat.id}
           onClick={() => handleChatSelect(chat)}
-          className="flex items-center mt-4 w-full ps-3 pe-5 hover:bg-purple-100 py-1 cursor-pointer rounded-lg"
+          className={`flex items-center mt-4 w-full ps-3 pe-5 hover:bg-blue-100 py-1 cursor-pointer rounded-lg ${
+    selectedRoomId === chat.chatRoomId ? "bg-blue-100" : ""
+  }`}
         >
           {/* Avatar */}
           <div className="w-[40px] h-[40px] flex-shrink-0 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
