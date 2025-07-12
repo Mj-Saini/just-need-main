@@ -25,6 +25,7 @@ function UserDetails() {
   const [user, setUser] = useState(null);
   const [showPopupDisable, setShowPopupDisable] = useState(false);
   const [listings, setListings] = useState([]);
+  const [riderDetails, setRiderDetails] = useState(null);
 
   const { setUsers, loading, setLoading } = useCustomerContext();
   const { fetchlisting } = useListingContext();
@@ -32,6 +33,18 @@ function UserDetails() {
   const { setUserName } = useUserContext()
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const day = date.getDate();
+    const month = date.toLocaleString("default", { month: "short" });
+    const year = date.getFullYear();
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const formattedHours = hours % 12 || 12;
+    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+    return `${day} ${month} ${year} | ${formattedHours}:${formattedMinutes} ${ampm}`;
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -75,8 +88,6 @@ function UserDetails() {
         .eq("userId", id)
         .single();
 
-
-
       // Step 2: Set user & context
       setUserBusinessDetails(businessUser);
 
@@ -94,11 +105,29 @@ function UserDetails() {
     }
   };
 
+  const fetchRiderData = async () => {
+    try {
+      const { data: riderData, error } = await supabase
+        .from('RiderDetailsView')
+        .select('*')
+        .eq('userId', id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching rider details:", error);
+      } else {
+        setRiderDetails(riderData);
+      }
+    } catch (err) {
+      console.error("❌ Unexpected error fetching rider:", err);
+    }
+  };
 
   // Run it on mount
   useEffect(() => {
     fetchData();
-    fetchBusinessData()
+    fetchBusinessData();
+    fetchRiderData();
   }, [id]);
 
   // Handle disable/enable provider popup
@@ -143,13 +172,9 @@ function UserDetails() {
 
   const isActive = user?.accountStatus?.isBlocked !== true;
 
-
-
   const userDenied = async () => {
     const confirmDeny = window.confirm("Are you sure you want to deny this user?");
     if (!confirmDeny) return;
-
-
 
     // Step 2: Update status in BusinessDetailsView and use .select() to return updated data
     const { data, error } = await supabase
@@ -179,7 +204,6 @@ function UserDetails() {
 
     }));
 
-
     // ✅ Update context user list
     setUsers(prevUsers =>
       Array.isArray(prevUsers)
@@ -203,12 +227,10 @@ function UserDetails() {
     const confirmApprove = window.confirm("Are you sure you want to approve this user?");
     if (!confirmApprove) return;
 
-
     if (!userbusinessDetails || !userbusinessDetails?.businessId) {
       toast.error("User data not found or invalid Business ID");
       return;
     }
-
 
     try {
 
@@ -235,6 +257,25 @@ function UserDetails() {
     } catch (err) {
       console.error("🚨 Unexpected Error:", err);
       toast.error("An unexpected error occurred.");
+    }
+  };
+
+  const handleRiderStatusUpdate = async (newStatus) => {
+    try {
+      const { error } = await supabase
+        .from('RiderDetailsView')
+        .update({ status: newStatus })
+        .eq('userId', id);
+
+      if (error) {
+        toast.error("Failed to update rider status");
+      } else {
+        setRiderDetails(prev => ({ ...prev, status: newStatus }));
+        toast.success(`Rider ${newStatus.toLowerCase()} successfully`);
+      }
+    } catch (err) {
+      console.error("Error updating rider status:", err);
+      toast.error("Something went wrong");
     }
   };
 
@@ -266,72 +307,82 @@ function UserDetails() {
 
       </div>
 
-
-
-
       <div className="xl:flex mt-[30px]">
         <div className="w-full lg:w-7/12 xl:w-[399px] xl:pe-2.5 lg:flex">
-          <div className="bg-[#6C4DEF] px-[30px] py-5 rounded-[10px] flex-grow flex">
-            <div className="flex items-center">
-              <div className="pe-5 border-e-[1px] border-[#FFFFFF66]">
-                <img
-                  onClick={() => setIsImageModalOpen(true)}
-                  className="w-[78px] h-[78px] rounded-full object-cover"
-                  src={user?.image || MechanicImage}
-                  alt="user"
-                />
-                <h1 className="font-medium lg:text-base xl:text-lg text-white mt-2.5 text-center">
-                  {user?.firstName}
-                </h1>
-                <h2 className="text-sm font-normal text-white mt-1 text-center">
-                  {user?.category}
-                </h2>
-              </div>
-              <div className="ps-5">
-                <div className="flex gap-2.5 items-center">
+          <div className="bg-[#6C4DEF] px-[30px] py-5 rounded-[10px] flex-grow flex flex-col">
+            {/* Profile Section */}
+            <div className="flex flex-col items-center mb-6">
+              <img
+                onClick={() => setIsImageModalOpen(true)}
+                className="w-[78px] h-[78px] rounded-full object-cover cursor-pointer"
+                src={user?.image || MechanicImage}
+                alt="user"
+              />
+              <h1 className="font-medium lg:text-base xl:text-lg text-white mt-2.5 text-center">
+                {user?.firstName} {user?.lastName}
+              </h1>
+              <h2 className="text-sm font-normal text-white mt-1 text-center">
+                {user?.category}
+              </h2>
+            </div>
+
+            {/* Information Tiles */}
+            <div className="grid grid-cols-1 gap-3">
+              {/* Phone Tile */}
+              <div className="bg-white bg-opacity-10 rounded-lg p-3">
+                <div className="flex items-center gap-2.5">
                   <PhoneIcon />
                   <h3 className="text-sm font-normal text-white">
-                    {user?.mobile_number}
+                    {user?.mobile_number || "N/A"}
                   </h3>
                 </div>
-                <div className="flex gap-2.5 items-center mt-2.5">
+              </div>
+
+              {/* Email Tile */}
+              <div className="bg-white bg-opacity-10 rounded-lg p-3">
+                <div className="flex items-center gap-2.5">
                   <EmailIcon />
                   <h3 className="text-sm font-normal text-white">
-                    {user?.useremail}
+                    {user?.useremail || "N/A"}
                   </h3>
                 </div>
-                <div className="flex gap-2.5 items-center mt-2.5">
+              </div>
+
+              {/* Location Tile */}
+              <div className="bg-white bg-opacity-10 rounded-lg p-3">
+                <div className="flex items-center gap-2.5">
                   <LocationIcon />
                   <h3 className="text-sm font-normal text-white">
-
                     {user?.address?.city && user?.address?.state
-                      ? `${user.address.city} ${user.address.state}`
+                      ? `${user.address.city}, ${user.address.state}`
                       : "N/A"}
-
-
                   </h3>
                 </div>
+              </div>
 
-
-
-
-
-                <div className="flex gap-2.5 items-center mt-2.5">
-
+              {/* Subscription Tile */}
+              <div className="bg-white bg-opacity-10 rounded-lg p-3">
+                <div className="flex items-center gap-2.5">
                   <h3 className="text-sm font-normal text-white">
-                    Subscription:   {user.subscription === "null" ? "N/A" : "Yes"}
+                    Subscription: {user?.subscription === "null" ? "N/A" : "Yes"}
                   </h3>
                 </div>
-                <div className="flex gap-2.5 items-center mt-2.5">
+              </div>
 
+              {/* Balance Tile */}
+              <div className="bg-white bg-opacity-10 rounded-lg p-3">
+                <div className="flex items-center gap-2.5">
                   <h3 className="text-sm font-normal text-white">
-                    Balance:   {user.balance}
+                    Balance: ₹{user?.balance || "0"}
                   </h3>
                 </div>
-                <div className="flex gap-2.5 items-center mt-2.5">
+              </div>
 
+              {/* UPI Tile */}
+              <div className="bg-white bg-opacity-10 rounded-lg p-3">
+                <div className="flex items-center gap-2.5">
                   <h3 className="text-sm font-normal text-white">
-                    Upi:   {user.upi_id === "null" ? "N/A" : user.upi_id}
+                    UPI: {user?.upi_id === "null" ? "N/A" : user?.upi_id || "N/A"}
                   </h3>
                 </div>
               </div>
@@ -339,6 +390,7 @@ function UserDetails() {
           </div>
         </div>
 
+        {/* Business Details for Seller */}
         {user?.userType === "Seller" && (
           <div className="w-full lg:w-7/12 xl:w-[646px] xl:ps-2.5 mt-3 xl:mt-0 flex">
             <div className="bg-[#F1F1F1] rounded-[10px] p-[15px] pb-7 flex-grow flex flex-col">
@@ -415,9 +467,130 @@ function UserDetails() {
             </div>
           </div>
         )}
+
+        {/* Rider Details for Rider */}
+        {user?.userType === "Rider" && riderDetails && (
+          <div className="w-full lg:w-7/12 xl:w-[646px] xl:ps-2.5 mt-3 xl:mt-0 flex">
+            <div className="bg-[#F1F1F1] rounded-[10px] p-[15px] pb-7 flex-grow flex flex-col">
+              <div className="flex items-center justify-between">
+                <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066]">
+                  Rider Details
+                </p>
+
+                {riderDetails?.status === "Pending" ? (
+                  <div className="flex gap-4 items-center">
+                    <button
+                      onClick={() => handleRiderStatusUpdate("Active")}
+                      className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-green-500 text-white"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleRiderStatusUpdate("Inactive")}
+                      className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-red-500 text-white"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                ) : (
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs ${
+                      riderDetails?.status === "Active"
+                        ? "bg-green-100 text-green-700"
+                        : riderDetails?.status === "Inactive"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {riderDetails?.status}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center mt-3 xl:mt-[15px]">
+                <div className="w-4/12">
+                  <h2 className="font-medium text-sm xl:text-base text-black">
+                    Vehicle Type:
+                  </h2>
+                </div>
+                <div className="w-10/12">
+                  <h2 className="text-[#000000B2] text-sm xl:text-base font-normal capitalize">
+                    {riderDetails?.vehicleType}
+                  </h2>
+                </div>
+              </div>
+
+              <div className="flex items-center mt-3 xl:mt-[15px]">
+                <div className="w-4/12">
+                  <h2 className="font-medium text-sm xl:text-base text-black">
+                    Vehicle Number:
+                  </h2>
+                </div>
+                <div className="w-10/12">
+                  <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
+                    {riderDetails?.vehicleRegistrationNumber}
+                  </h2>
+                </div>
+              </div>
+
+              <div className="flex items-center mt-3 xl:mt-[15px]">
+                <div className="w-4/12">
+                  <h2 className="font-medium text-sm xl:text-base text-black">
+                    License Number:
+                  </h2>
+                </div>
+                <div className="w-10/12">
+                  <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
+                    {riderDetails?.drivingLicenseNumber}
+                  </h2>
+                </div>
+              </div>
+
+              <div className="flex items-center mt-3 xl:mt-[15px]">
+                <div className="w-4/12">
+                  <h2 className="font-medium text-sm xl:text-base text-black">
+                    Experience:
+                  </h2>
+                </div>
+                <div className="w-10/12">
+                  <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
+                    {riderDetails?.drivingExperience} years
+                  </h2>
+                </div>
+              </div>
+
+              <div className="flex items-center mt-3 xl:mt-[15px]">
+                <div className="w-4/12">
+                  <h2 className="font-medium text-sm xl:text-base text-black">
+                    Offer Parcel:
+                  </h2>
+                </div>
+                <div className="w-10/12">
+                  <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
+                    {riderDetails?.offerParcel ? "Yes" : "No"}
+                  </h2>
+                </div>
+              </div>
+
+              <div className="flex items-center mt-3 xl:mt-[15px]">
+                <div className="w-4/12">
+                  <h2 className="font-medium text-sm xl:text-base text-black">
+                    Created At:
+                  </h2>
+                </div>
+                <div className="w-10/12">
+                  <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
+                    {formatDate(riderDetails?.created_at)}
+                  </h2>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
-      {user?.IsSeller && (
+      {/* Show listings only for Seller userType */}
+      {user?.userType === "Seller" && (
         <>
           <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066] mt-[30px]">
             Posted Listing

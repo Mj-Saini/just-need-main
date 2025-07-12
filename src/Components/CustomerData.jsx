@@ -322,13 +322,13 @@ const CustomerData = () => {
     console.log(filters)
     let updatedUsers = users;
 
-    // Filter by User Type (Seller / Consumer)
+    // Filter by User Type (Seller / Rider)
     if (filters.selectedUserType) {
       updatedUsers = updatedUsers.filter(user => {
         if (filters.selectedUserType === "Seller") {
-          return user.IsSeller === true;
-        } else if (filters.selectedUserType === "Consumer") {
-          return user.IsSeller === false;
+          return user.userType === "Seller";
+        } else if (filters.selectedUserType === "Rider") {
+          return user.userType === "Rider";
         }
         return true;
       });
@@ -369,7 +369,7 @@ if (filters.selectedSubscriptionStatus) {
 
 
 const pendingBusinessUsers = users.filter(user => 
-  user.IsSeller === true && 
+  user.userType === "Seller" && 
   user.businessDetail?.status === "Pending"
 );
 
@@ -602,14 +602,14 @@ const pendingBusinessUsers = users.filter(user =>
                       <td>
                         <div className="flex justify-center items-center">
                           <span
-                            className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${!customer?.IsSeller
+                            className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${customer?.userType !== "Seller"
                               ? "text-[#9ca3af]" // not seller = gray
                               : customer?.isSellerOnline
                                 ? "text-[#008000] bg-[#00800012]" // online = green
                                 : "text-[#FF0000] bg-[#ff000012]" // offline = red
                               }`}
                           >
-                            {!customer?.IsSeller
+                            {customer?.userType !== "Seller"
                               ? "-"
                               : customer?.isSellerOnline
                                 ? "Online"
@@ -742,14 +742,14 @@ const pendingBusinessUsers = users.filter(user =>
                         {customer.address.city}/{customer.address.state}
                       </td>
                       <td
-                        className={`px-[19px] text-sm font-normal truncate ${customer.IsSeller == true
+                        className={`px-[19px] text-sm font-normal truncate ${customer.userType === "Seller"
                           ? "bg-[#0000FF12] text-[#0000FF] rounded-[90px]"
                           : "text-[#FFA500] bg-[#FFA50024] rounded-[90px]"
                           }`}
                       >
                         <div className="flex justify-center">
                           <span>
-                            {customer.IsSeller === true ? "Seller" : "Consumer"}
+                            {customer.userType === "Seller" ? "Seller" : "Rider"}
                           </span>
                         </div>
                       </td>
@@ -760,14 +760,14 @@ const pendingBusinessUsers = users.filter(user =>
                       <td>
                         <div className="flex justify-center items-center">
                           <span
-                            className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${!customer?.IsSeller
+                            className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${customer?.userType !== "Seller"
                               ? "text-[#9ca3af]" // not seller = gray
                               : customer?.isSellerOnline
                                 ? "text-[#008000] bg-[#00800012]" // online = green
                                 : "text-[#FF0000] bg-[#ff000012]" // offline = red
                               }`}
                           >
-                            {!customer?.IsSeller
+                            {customer?.userType !== "Seller"
                               ? "-"
                               : customer?.isSellerOnline
                                 ? "Online"
@@ -778,7 +778,7 @@ const pendingBusinessUsers = users.filter(user =>
                       </td>
                       <td>
                         <div className="flex justify-center items-center">
-                          {customer.IsSeller ? (
+                          {customer.userType === "Seller" ? (
                             <span
                               className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${!customer?.businessDetail?.status
                                 ? "bg-gray-100 text-gray-500"
