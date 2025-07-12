@@ -1,11 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import {
-  DisableRedicon,
-  EnableRedIcon,
-} from "../../assets/icon/Icons";
 import MechanicImage from "../../assets/png/user-profile-icon.png";
 import DisableProviderPopUp from "../../Components/Popups/DisableProviderPopUp";
+import DenialReasonPopUp from "../../Components/Popups/DenialReasonPopUp";
 import { supabase } from "../../store/supabaseCreateClient";
 import { toast } from "react-toastify";
 
@@ -13,6 +10,7 @@ function RiderDetails() {
   const { id } = useParams();
   const [rider, setRider] = useState(null);
   const [showPopupDisable, setShowPopupDisable] = useState(false);
+  const [showDenialPopup, setShowDenialPopup] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -61,23 +59,39 @@ function RiderDetails() {
     setShowPopupDisable(!showPopupDisable);
   };
 
-  const handleStatusUpdate = async (newStatus) => {
+
+
+  const handleApprove = async () => {
     try {
       const { error } = await supabase
         .from('RiderDetailsView')
-        .update({ status: newStatus })
-        .eq('id', id);
+        .update({ 
+          status: "Approved"
+        })
+        .eq('userId', rider?.userId);
 
       if (error) {
-        toast.error("Failed to update rider status");
+        console.error("Error approving rider:", error);
+        toast.error("Failed to approve rider");
       } else {
-        setRider(prev => ({ ...prev, status: newStatus }));
-        toast.success(`Rider ${newStatus.toLowerCase()} successfully`);
+        setRider(prev => ({ 
+          ...prev, 
+          status: "Approved"
+        }));
+        toast.success("Rider approved successfully!");
       }
     } catch (err) {
-      console.error("Error updating rider status:", err);
+      console.error("Error approving rider:", err);
       toast.error("Something went wrong");
     }
+  };
+
+  const handleDeny = () => {
+    setShowDenialPopup(true);
+  };
+
+  const handleDenialClose = () => {
+    setShowDenialPopup(false);
   };
 
   const openImageModal = (imageUrl) => {
@@ -120,7 +134,37 @@ function RiderDetails() {
                 Rider Details
               </p>
 
-             
+              {/* Approve/Deny buttons for pending riders or status display for others */}
+              {rider?.status === "Pending" ? (
+                <div className="flex gap-3">
+                  <button
+                    onClick={handleApprove}
+                    className="bg-green-600 text-white px-4 py-2 rounded-[10px] hover:bg-green-700 transition-colors"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={handleDeny}
+                    className="bg-red-600 text-white px-4 py-2 rounded-[10px] hover:bg-red-700 transition-colors"
+                  >
+                    Deny
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center">
+                  <span
+                    className={`px-3 py-2 rounded-[10px] text-sm font-medium ${
+                      rider?.status === "Approved"
+                        ? "bg-green-100 text-green-700 border border-green-300"
+                        : rider?.status === "Rejected"
+                        ? "bg-red-100 text-red-700 border border-red-300"
+                        : "bg-gray-100 text-gray-700 border border-gray-300"
+                    }`}
+                  >
+                    {rider?.status || "Unknown"}
+                  </span>
+                </div>
+              )}
             </div>
 
             <div className="flex items-center mt-3 xl:mt-[15px]">
@@ -285,6 +329,17 @@ function RiderDetails() {
           userId={id}
           currentStatus={rider?.status === "Inactive" ? "blocked" : "active"}
           refetchUser={fetchRiderData}
+        />
+      )}
+
+      {showDenialPopup && (
+        <DenialReasonPopUp
+          handleClose={handleDenialClose}
+          userId={rider?.userId}
+          type="rider"
+          itemId={rider?.userId}
+          currentStatus={rider?.status}
+          refetchData={fetchRiderData}
         />
       )}
     </div>

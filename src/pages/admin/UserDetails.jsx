@@ -11,6 +11,7 @@ import {
 } from "../../assets/icon/Icons";
 import MechanicImage from "../../assets/png/user-profile-icon.png";
 import DisableProviderPopUp from "../../Components/Popups/DisableProviderPopUp";
+import DenialReasonPopUp from "../../Components/Popups/DenialReasonPopUp";
 import disable_img from "../../assets/png/disable_img.png";
 import enable_img from "../../assets/png/enable_img.png";
 import { useListingContext } from "../../store/ListingContext";
@@ -24,6 +25,8 @@ function UserDetails() {
   const { id } = useParams();
   const [user, setUser] = useState(null);
   const [showPopupDisable, setShowPopupDisable] = useState(false);
+  const [showDenialPopup, setShowDenialPopup] = useState(false);
+  const [denialType, setDenialType] = useState("");
   const [listings, setListings] = useState([]);
   const [riderDetails, setRiderDetails] = useState(null);
 
@@ -138,12 +141,21 @@ function UserDetails() {
   // Handle block/unblock listing
   const handleBlock = async (e, listing) => {
     e.preventDefault();
-    const confirmDelete = window.confirm("Are you sure?");
-    if (confirmDelete) {
+    
+    // If we're blocking (not unblocking), show denial popup
+    if (!listing.blockStatus.isBlocked) {
+      setDenialType("listing");
+      setShowDenialPopup(true);
+      return;
+    }
+
+    // For unblocking, proceed with simple confirmation
+    const confirmUnblock = window.confirm("Are you sure you want to unblock this listing?");
+    if (confirmUnblock) {
       const updatedBlockStatus = {
-        isBlocked: !listing.blockStatus.isBlocked,
-        reason: listing.blockStatus.reason || "",
-        blockedBy: listing.blockStatus.blockedBy || "admin",
+        isBlocked: false,
+        reason: "",
+        blockedBy: "admin",
       };
 
       const { error } = await supabase
@@ -159,7 +171,7 @@ function UserDetails() {
               : item
           )
         );
-        toast.success("Update successful");
+        toast.success("Listing unblocked successfully");
       } else {
         console.error("Error updating block status:", error);
         toast.error("Something went wrong. Please try again.");
@@ -172,55 +184,19 @@ function UserDetails() {
 
   const isActive = user?.accountStatus?.isBlocked !== true;
 
-  const userDenied = async () => {
-    const confirmDeny = window.confirm("Are you sure you want to deny this user?");
-    if (!confirmDeny) return;
+  const handleBusinessDenial = () => {
+    setDenialType("business");
+    setShowDenialPopup(true);
+  };
 
-    // Step 2: Update status in BusinessDetailsView and use .select() to return updated data
-    const { data, error } = await supabase
-      .from("BusinessDetailsView")
-      .update({ status: "Rejected" })
-      .eq("businessId", userbusinessDetails.businessId)
-      .select();
+  const handleRiderDenial = () => {
+    setDenialType("rider");
+    setShowDenialPopup(true);
+  };
 
-    if (error) {
-      console.error("Failed to update business status:", error);
-      toast.error("Failed to reject business.");
-      return;
-    }
-
-    // Step 3: Update local state with returned data
-    toast.success("User denied successfully");
-
-    const updatedStatus = data?.[0]?.status || "Rejected";
-
-    // ✅ Update user detail
-    setUser(prev => ({
-      ...prev,
-      businessDetail: {
-        ...prev.businessDetail,
-        status: updatedStatus,
-      },
-
-    }));
-
-    // ✅ Update context user list
-    setUsers(prevUsers =>
-      Array.isArray(prevUsers)
-        ? prevUsers.map(u =>
-          u.id === user.id
-            ? {
-              ...u,
-              businessDetail: {
-                ...u.businessDetail,
-                status: updatedStatus,
-              },
-            }
-            : u
-        )
-        : prevUsers
-    );
-
+  const handleDenialClose = () => {
+    setShowDenialPopup(false);
+    setDenialType("");
   };
 
   const approveUser = async () => {
@@ -272,6 +248,25 @@ function UserDetails() {
       } else {
         setRiderDetails(prev => ({ ...prev, status: newStatus }));
         toast.success(`Rider ${newStatus.toLowerCase()} successfully`);
+        
+        // Update local state if setUsers is provided
+        if (setUsers) {
+          setUsers((prevUsers) =>
+            Array.isArray(prevUsers)
+              ? prevUsers.map((u) =>
+                  u.id === id
+                    ? {
+                        ...u,
+                        riderDetails: {
+                          ...u.riderDetails,
+                          status: newStatus
+                        }
+                      }
+                    : u
+                )
+              : prevUsers
+          );
+        }
       }
     } catch (err) {
       console.error("Error updating rider status:", err);
@@ -409,7 +404,7 @@ function UserDetails() {
                       Approve
                     </button>
                     <button
-                      onClick={userDenied}
+                      onClick={handleBusinessDenial}
                       className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-red-500 text-white"
                     >
                       Deny
@@ -436,18 +431,7 @@ function UserDetails() {
                   </h2>
                 </div>
               </div>
-              <div className="flex items-center mt-3 xl:mt-[15px]">
-                <div className="w-4/12">
-                  <h2 className="font-medium text-sm xl:text-base text-black">
-                    Service Name:
-                  </h2>
-                </div>
-                <div className="w-10/12">
-                  <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
-                    {/* {userbusinessDetails?.categories?.map((category)=>category.categoryName)} */}
-                  </h2>
-                </div>
-              </div>
+              
               <div className="flex items-center mt-3">
                 <div className="w-4/12">
                   <h2 className="font-medium text-sm xl:text-base text-black">
@@ -486,10 +470,10 @@ function UserDetails() {
                       Approve
                     </button>
                     <button
-                      onClick={() => handleRiderStatusUpdate("Inactive")}
+                      onClick={handleRiderDenial}
                       className="flex items-center gap-3 py-2.5 h-[42px] px-4 xl:px-[15px] rounded-[10px] bg-red-500 text-white"
                     >
-                      Reject
+                      Deny
                     </button>
                   </div>
                 ) : (
@@ -715,6 +699,18 @@ function UserDetails() {
           userId={id}
           currentStatus={user?.accountStatus?.isBlocked ? "blocked" : "active"}
           refetchUser={fetchData}
+          setUsers={setUsers}
+        />
+      )}
+
+      {showDenialPopup && (
+        <DenialReasonPopUp
+          handleClose={handleDenialClose}
+          userId={id}
+          type={denialType}
+          itemId={denialType === "business" ? userbusinessDetails?.businessId : denialType === "listing" ? null : id}
+          currentStatus={user?.status}
+          refetchData={denialType === "business" ? fetchBusinessData : denialType === "rider" ? fetchRiderData : undefined}
           setUsers={setUsers}
         />
       )}

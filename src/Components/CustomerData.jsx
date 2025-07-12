@@ -52,8 +52,11 @@ const CustomerData = () => {
 
   const { users, setUsers, loading, fetchUsers } = useCustomerContext();
   const [filteredUsers, setFilteredUsers] = useState(users);
-  // Filter logic based on selected fields
-  const nonBlockedUsers = users?.filter(user => user?.accountStatus?.isBlocked !== true);
+  // Filter logic based on selected fields - exclude riders, show only sellers and consumers
+  const nonBlockedUsers = users?.filter(user => 
+    user?.accountStatus?.isBlocked !== true && 
+    user?.userType !== "Rider"
+  );
   const filteredData = nonBlockedUsers?.filter((customer) => {
     if (selectedFilters.length === 0) {
       return (customer.firstName + " " + customer.lastName)
@@ -322,13 +325,13 @@ const CustomerData = () => {
     console.log(filters)
     let updatedUsers = users;
 
-    // Filter by User Type (Seller / Rider)
+    // Filter by User Type (Seller / Consumer)
     if (filters.selectedUserType) {
       updatedUsers = updatedUsers.filter(user => {
         if (filters.selectedUserType === "Seller") {
           return user.userType === "Seller";
-        } else if (filters.selectedUserType === "Rider") {
-          return user.userType === "Rider";
+        } else if (filters.selectedUserType === "Consumer") {
+          return user.userType !== "Seller" && user.userType !== "Rider";
         }
         return true;
       });
@@ -589,7 +592,7 @@ const pendingBusinessUsers = users.filter(user =>
                       >
                         <div className="flex justify-center">
                           <span>
-                            {customer.userType === "Seller" ? "Seller" : "Rider"}
+                            {customer?.userType === "Seller" ? "Seller" : "Consumer"}
                           </span>
                         </div>
                       </td>
@@ -749,7 +752,7 @@ const pendingBusinessUsers = users.filter(user =>
                       >
                         <div className="flex justify-center">
                           <span>
-                            {customer.userType === "Seller" ? "Seller" : "Rider"}
+                            {customer.userType === "Seller" ? "Seller" : "Consumer"}
                           </span>
                         </div>
                       </td>

@@ -12,8 +12,8 @@ const Rider = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(10);
   const [showFilterPopup, setShowFilterPopup] = useState(false);
-  const [selectedFilters] = useState(["userId"]);
-  const [searchPlaceholder] = useState("Search");
+  const [selectedFilters] = useState(["name"]);
+  const [searchPlaceholder] = useState("Search by name, email, or ID");
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -28,13 +28,21 @@ const Rider = () => {
     return `${day} ${month} ${year} | ${formattedHours}:${formattedMinutes} ${ampm}`;
   };
 
-  // Fetch Riders data from Supabase
+  // Fetch Riders data from Supabase with user details
   useEffect(() => {
     const fetchRiders = async () => {
       setLoading(true);
       let { data: RiderDetailsView, error } = await supabase
         .from('RiderDetailsView')
-        .select('*');
+        .select(`
+          *,
+          user_detail:Users!RiderDetailsView_userId_fkey(
+            firstName,
+            lastName,
+            useremail,
+            mobile_number
+          )
+        `);
 
       if (error) {
         console.error(error);
@@ -50,13 +58,23 @@ const Rider = () => {
   // Filter logic based on selected fields
   const filteredRiders = riders?.filter((rider) => {
     if (selectedFilters.length === 0) {
-      return rider.userId?.toLowerCase().includes(searchTerm.toLowerCase());
+      const riderName = `${rider.user_detail?.firstName || ''} ${rider.user_detail?.lastName || ''}`.toLowerCase();
+      const riderEmail = rider.user_detail?.useremail?.toLowerCase() || '';
+      return riderName.includes(searchTerm.toLowerCase()) || 
+             riderEmail.includes(searchTerm.toLowerCase()) ||
+             rider.userId?.toLowerCase().includes(searchTerm.toLowerCase());
     }
 
     return selectedFilters.some((filter) => {
+      const riderName = `${rider.user_detail?.firstName || ''} ${rider.user_detail?.lastName || ''}`.toLowerCase();
+      
       switch (filter) {
         case "userId":
           return rider.userId?.toLowerCase().includes(searchTerm.toLowerCase());
+        case "name":
+          return riderName.includes(searchTerm.toLowerCase());
+        case "email":
+          return rider.user_detail?.useremail?.toLowerCase().includes(searchTerm.toLowerCase());
         case "vehicleType":
           return rider.vehicleType?.toLowerCase().includes(searchTerm.toLowerCase());
         case "vehicleRegistrationNumber":
@@ -136,7 +154,10 @@ const Rider = () => {
                                         S.No
                                     </th>
                                     <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
-                                        Rider ID
+                                        Rider Name
+                                    </th>
+                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                                        Email
                                     </th>
                                     <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                                         Vehicle Type
@@ -192,9 +213,11 @@ const Rider = () => {
                                                         className="flex gap-2"
                                                         to={`riderDetails/${rider.id}`}
                                                     >
-                         
-                                                        {rider.userId}
+                                                        {rider.user_detail?.firstName} {rider.user_detail?.lastName}
                                                     </Link>
+                                                </td>
+                                                <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                                                    {rider.user_detail?.useremail || 'N/A'}
                                                 </td>
                                                 <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
                                                     <span className="capitalize">{rider.vehicleType || 'N/A'}</span>
