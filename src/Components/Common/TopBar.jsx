@@ -84,6 +84,8 @@ function TopBar() {
     } else {
       navigate("/dashboard/listings");
     }
+  } else if (location.pathname.includes("/dashboard/rider/riderDetails/")) {
+    navigate("/dashboard/rider");
   } else {
     if (window.history.length > 2) {
       navigate(-1);
@@ -97,7 +99,8 @@ function TopBar() {
     location.pathname.includes("/dashboard/usersList/userDetails/") ||
     location.pathname.includes("/dashboard/listings/") ||
     location.pathname.startsWith("/dashboard/setting/") ||
-    location.pathname.includes("/dashboard/complaints/complaintsDetails/");
+    location.pathname.includes("/dashboard/complaints/complaintsDetails/") ||
+    location.pathname.includes("/dashboard/rider/riderDetails/");
 
   return (
     <div>
@@ -125,6 +128,8 @@ function TopBar() {
                 "Listings Details"
               ) : location.pathname.includes("/dashboard/complaints/complaintsDetails/") ? (
                 `Complaint Details / ${getComplaintUsername()}`
+              ) : location.pathname.includes("/dashboard/rider/riderDetails/") ? (
+                "Rider Details"
               ) : (
                 location.pathname
                   .replace("/dashboard/", "")

@@ -155,6 +155,27 @@ function SideBar() {
         <div className="flex items-center mt-3 xl:mt-5 group_hover">
           <VerticalVilotSettingSvg
             pathName={pathName}
+            checkpath="/dashboard/rider"
+          />
+          <NavLink
+            state={"Plan, prioritize, and accomplish your tasks with ease."}
+            to="/dashboard/rider"
+            className="flex items-center py-2.5 px-2 xl:px-[15px] gap-3 xl:gap-5 ms-[5px] w-full"
+          >
+            <ServicesSvg pathName={pathName} />
+            <span
+              className={`font-normal text-sm xl:text-base ${pathName == "/dashboard/rider"
+                ? "text-[#6c4def]"
+                : "text-[#00000099]"
+                }`}
+            >
+              Rider
+            </span>
+          </NavLink>
+        </div>
+        <div className="flex items-center mt-3 xl:mt-5 group_hover">
+          <VerticalVilotSettingSvg
+            pathName={pathName}
             checkpath="/dashboard/services"
           />
           <NavLink

@@ -373,7 +373,7 @@ const pendingBusinessUsers = users.filter(user =>
   user.businessDetail?.status === "Pending"
 );
 
-  console.log(pendingBusinessUsers)
+
  
   const handleUnblockUser = async (userId) => {
     console.log("Unblocking user:", userId);
@@ -413,8 +413,6 @@ const pendingBusinessUsers = users.filter(user =>
       console.error(err);
     }
   };
-
-
 
 
 
@@ -550,7 +548,6 @@ const pendingBusinessUsers = users.filter(user =>
                 </tr>
               ) : (
                 paginatedData?.map((customer) => {
-
                   return (
                     <tr key={customer.id}>
                       {/* <td className="px-[19px] md:px-[24px]">
@@ -585,14 +582,14 @@ const pendingBusinessUsers = users.filter(user =>
                         {customer.address.city}/{customer.address.state}
                       </td>
                       <td
-                        className={`px-[19px] text-sm font-normal truncate ${customer.IsSeller == true
+                        className={`px-[19px] text-sm font-normal truncate ${customer.userType == "Seller"
                           ? "bg-[#0000FF12] text-[#0000FF] rounded-[90px]"
                           : "text-[#FFA500] bg-[#FFA50024] rounded-[90px]"
                           }`}
                       >
                         <div className="flex justify-center">
                           <span>
-                            {customer.IsSeller === true ? "Seller" : "Consumer"}
+                            {customer.userType === "Seller" ? "Seller" : "Rider"}
                           </span>
                         </div>
                       </td>
@@ -623,7 +620,7 @@ const pendingBusinessUsers = users.filter(user =>
                       </td>
                       <td>
                         <div className="flex justify-center items-center">
-                          {customer.IsSeller ? (
+                          {customer.userType === "Seller" ? (
                             <span
                               className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${!customer?.businessDetail?.status
                                 ? "bg-gray-100 text-gray-500"

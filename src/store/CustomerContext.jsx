@@ -30,6 +30,7 @@ export function CustomerContext({ children }) {
     fetchUsers();
   }, []);
 
+
   return (
     <customerProvider.Provider value={{ users, setUsers, loading, setLoading, fetchUsers }}>
       {children}
