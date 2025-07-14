@@ -29,6 +29,7 @@ function UserDetails() {
   const [denialType, setDenialType] = useState("");
   const [listings, setListings] = useState([]);
   const [riderDetails, setRiderDetails] = useState(null);
+  const [withdrawals, setWithdrawals] = useState([]);
 
   const { setUsers, loading, setLoading } = useCustomerContext();
   const { fetchlisting } = useListingContext();
@@ -126,11 +127,30 @@ function UserDetails() {
     }
   };
 
+  const fetchWithdrawals = async () => {
+    try {
+      const { data: withdrawalData, error } = await supabase
+        .from('Withdraw')
+        .select('*')
+        .eq('userId', id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Error fetching withdrawals:", error);
+      } else {
+        setWithdrawals(withdrawalData || []);
+      }
+    } catch (err) {
+      console.error("❌ Unexpected error fetching withdrawals:", err);
+    }
+  };
+
   // Run it on mount
   useEffect(() => {
     fetchData();
     fetchBusinessData();
     fetchRiderData();
+    fetchWithdrawals();
   }, [id]);
 
   // Handle disable/enable provider popup
@@ -302,8 +322,8 @@ function UserDetails() {
 
       </div>
 
-      <div className="xl:flex mt-[30px]">
-        <div className="w-full lg:w-7/12 xl:w-[399px] xl:pe-2.5 lg:flex">
+      <div className="lg:flex mt-[30px]">
+        <div className="w-full md:w-7/12 lg:w-[399px] xl:pe-2.5 lg:flex">
           <div className="bg-[#6C4DEF] px-[30px] py-5 rounded-[10px] flex-grow flex flex-col">
             {/* Profile Section */}
             <div className="flex flex-col items-center mb-6">
@@ -387,7 +407,7 @@ function UserDetails() {
 
         {/* Business Details for Seller */}
         {user?.userType === "Seller" && (
-          <div className="w-full lg:w-7/12 xl:w-[646px] xl:ps-2.5 mt-3 xl:mt-0 flex">
+          <div className="w-full md:w-7/12 lg:w-[646px] xl:ps-2.5 mt-3 xl:mt-0 flex">
             <div className="bg-[#F1F1F1] rounded-[10px] p-[15px] pb-7 flex-grow flex flex-col">
               <div className="flex items-center justify-between">
                 <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066]">
@@ -571,6 +591,58 @@ function UserDetails() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Withdrawal Transactions Section */}
+      <div className="mt-[30px]">
+        <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066]">
+          Withdrawal Transactions
+        </p>
+
+        <div className="bg-white shadow rounded-lg overflow-x-auto mt-4">
+          {withdrawals.length > 0 ? (
+            <table className="min-w-full">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">S.No</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Amount</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">UPI ID</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Status</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {withdrawals.map((withdrawal, index) => (
+                  <tr key={withdrawal.id} className="border-t">
+                    <td className="px-4 py-2">{index + 1}</td>
+                    <td className="px-4 py-2 font-semibold">₹{withdrawal.amount}</td>
+                    <td className="px-4 py-2">{withdrawal.upi_id}</td>
+                    <td className="px-4 py-2">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          withdrawal.status === 'Pending'
+                            ? 'bg-yellow-100 text-yellow-700'
+                            : withdrawal.status === 'Approved'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-red-100 text-red-700'
+                        }`}
+                      >
+                        {withdrawal.status}
+                      </span>
+                    </td>
+                    <td className="px-4 py-2 text-sm text-gray-600">
+                      {formatDate(withdrawal.created_at)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p className="text-lg">No withdrawal transactions found</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Show listings only for Seller userType */}

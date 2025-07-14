@@ -17,7 +17,7 @@ function AdminLayout() {
           <TopBar />
         </div>
         <div    className={`flex flex-col mt-4 pb-5 ${
-            isServicePage ? "" : "h-[calc(100vh-115px)] overflow-auto scrollRemove"
+            isServicePage ? "" : "h-[calc(100vh-100px)] overflow-auto scrollRemove"
           }`}>
           <Outlet />
         </div>

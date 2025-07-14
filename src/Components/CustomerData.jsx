@@ -30,8 +30,8 @@ const CustomerData = () => {
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [showDeletePopup, setShowDeletePopup] = useState(false);
   const [filterPopupsvg, setFilterPopupSvg] = useState(false);
-  const [selectedFilters, setSelectedFilters] = useState(["name"]);
-  const [searchPlaceholder, setSearchPlaceholder] = useState("Search");
+  const [selectedFilters, setSelectedFilters] = useState(["name", "email"]);
+  const [searchPlaceholder, setSearchPlaceholder] = useState("Search Name, Email");
   const [selectAll, setSelectAll] = useState(false);
   const [showBlockedOnly, setShowBlockedOnly] = useState(false);
   const [userActiveTabs, setuserActiveTabs] = useState("userlist");
@@ -280,8 +280,8 @@ const CustomerData = () => {
       setSelectedFilters(["name", "email", "address", "mobile"]);
       setSearchPlaceholder("Search Name, Email, Address, Mobile");
     } else {
-      setSelectedFilters([]); // Clear filters
-      setSearchPlaceholder("Search Name"); // Revert to "Search Name"
+      setSelectedFilters(["name", "email"]); // Default to name and email
+      setSearchPlaceholder("Search Name, Email");
     }
   };
 
@@ -290,6 +290,16 @@ const CustomerData = () => {
     const updatedFilters = selectedFilters.includes(field)
       ? selectedFilters.filter((f) => f !== field)
       : [...selectedFilters, field];
+    
+    // Ensure at least name and email are always selected
+    if (updatedFilters.length === 0) {
+      updatedFilters.push("name", "email");
+    } else if (!updatedFilters.includes("name")) {
+      updatedFilters.push("name");
+    } else if (!updatedFilters.includes("email")) {
+      updatedFilters.push("email");
+    }
+    
     setSelectedFilters(updatedFilters);
 
     // Update "Select All" state
@@ -297,15 +307,11 @@ const CustomerData = () => {
     setSelectAll(allFilters.every((f) => updatedFilters.includes(f)));
 
     // Update placeholder based on selected filters
-    if (updatedFilters.length === 0) {
-      setSearchPlaceholder("Search Name"); // Always "Search Name" when no filters
-    } else {
-      setSearchPlaceholder(
-        `Search ${updatedFilters
-          .map((f) => f.charAt(0).toUpperCase() + f.slice(1))
-          .join(", ")}`
-      );
-    }
+    setSearchPlaceholder(
+      `Search ${updatedFilters
+        .map((f) => f.charAt(0).toUpperCase() + f.slice(1))
+        .join(", ")}`
+    );
   };
 
   useEffect(() => {

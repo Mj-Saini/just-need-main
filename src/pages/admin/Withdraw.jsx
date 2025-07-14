@@ -61,6 +61,8 @@ const Withdraw = () => {
     (req) => req.status === activeTab
   );
 
+  console.log('requests',filteredRequests);
+
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">Withdraw Requests</h1>

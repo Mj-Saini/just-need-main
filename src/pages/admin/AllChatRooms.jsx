@@ -30,13 +30,21 @@ useEffect(() => {
   fetchChatRooms(); // Initial fetch
 
   const channel = supabase
-    .channel("admin-chat-messages")
+    .channel("admin-chat-updates")
     .on(
       "postgres_changes",
       { event: "*", schema: "public", table: "AdminChatMessages" },
       (payload) => {
         console.log("🔄 Change in messages table:", payload);
         fetchChatRooms(); // Refresh chat room list when a message is inserted/updated
+      }
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "AdminChatRooms" },
+      (payload) => {
+        console.log("🔄 Change in chat rooms table:", payload);
+        fetchChatRooms(); // Refresh chat room list when a chat room is updated
       }
     )
     .subscribe();
@@ -125,9 +133,16 @@ useEffect(() => {
           {/* Chat Info */}
           <div className="flex justify-between w-full ps-4">
             <div className="w-8/12 flex flex-col justify-center">
-              <h2 className="font-medium text-sm text-black capitalize">
-                {chat.userName}
-              </h2>
+              <div className="flex items-center gap-2">
+                <h2 className="font-medium text-sm text-black capitalize">
+                  {chat.userName}
+                </h2>
+                {chat.isChatEnd && (
+                  <span className="text-xs text-red-600 bg-red-100 px-2 py-0.5 rounded">
+                    Ended
+                  </span>
+                )}
+              </div>
               <p className="font-normal text-sm text-gray-600 pt-1 truncate">
                 {chat.lastMessage || "No messages yet"}
               </p>

@@ -27,6 +27,7 @@ const Chat = () => {
   const [chatRoomInfo, setChatRoomInfo] = useState([]);
   const [uploadImg, setUploadImg] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [isChatEnded, setIsChatEnded] = useState(false);
 
 
   const currentUserInfo = chatRoomInfo.find(
@@ -36,6 +37,7 @@ const Chat = () => {
   const handleChatSelect = (chat) => {
     setSelectedChat(chat);
     setSelectedRoomId(chat.chatRoomId);
+    setIsChatEnded(chat.isChatEnd || false);
   };
 
   const getUserInfo = (info) => {
@@ -166,85 +168,7 @@ const Chat = () => {
     }
   };
 
-  // const handleSendMessage = async () => {
-  //   if (!selectedRoomId) return;
-
-  //   const senderId = localStorage.getItem("senderId");
-  //   const timestamp = Date.now();
-
-  //   if (!messageInput.trim() && !uploadImg) {
-  //     console.warn("No message or image to send. Skipping...");
-  //     return;
-  //   }
-
-  //   try {
-  //     let messageData;
-
-  //     if (uploadImg) {
-  //       // Upload image to just_need bucket in ChatImages folder
-  //       const fileExt = uploadImg.name.split('.').pop();
-  //       const fileName = `${timestamp}_${uploadImg.name}`; // Unique filename
-  //       const filePath = `ChatImages/${fileName}`; // Path within bucket
-
-  //       // Upload the file
-  //       const { error: uploadError } = await supabase
-  //         .storage
-  //         .from('just_need') // Your bucket name
-  //         .upload(filePath, uploadImg, {
-  //           cacheControl: '3600', // Cache for 1 hour
-  //           upsert: false // Don't overwrite existing files
-  //         });
-
-  //       if (uploadError) throw uploadError;
-
-  //       // Get public URL of the uploaded image
-  //       const { data: { publicUrl } } = supabase
-  //         .storage
-  //         .from('just_need')
-  //         .getPublicUrl(filePath);
-
-  //       // Insert image message
-  //       const { data, error: messageError } = await supabase
-  //         .from("AdminChatMessages")
-  //         .insert([{
-  //           chatRoomId: selectedRoomId,
-  //           message: publicUrl,
-  //           senderId: senderId,
-  //           messageType: "image",
-  //           createdAt: timestamp,
-  //         }])
-  //         .select();
-
-  //       if (messageError) throw messageError;
-  //       messageData = data;
-  //       setUploadImg(null);
-  //     }
-
-  //     // Update chat room with last message info
-  //     const lastMessageContent = uploadImg
-  //       ? "📷 Image"
-  //       : messageInput.trim();
-
-  //     await supabase
-  //       .from("AdminChatRooms")
-  //       .update({
-  //         lastMessage: lastMessageContent,
-  //         lastMessageCreatedAt: timestamp,
-  //       })
-  //       .eq("chatRoomId", selectedRoomId.toString());
-
-  //     // Update state
-  //     if (messageData) {
-  //       setChatMassages((prev) => [...prev, messageData[0]]);
-  //     }
-  //     setMessageInput("");
-
-  //   } catch (error) {
-  //     console.error("Error in handleSendMessage:", error);
-  //     // You might want to show an error to the user here
-  //   }
-  // };
-
+  
 
   useEffect(() => {
     const fetchChatMessages = async () => {
@@ -305,45 +229,35 @@ const Chat = () => {
 
 
   const handleEndChat = async () => {
-  if (!selectedRoomId) return;
+    if (!selectedRoomId) return;
 
-  const confirmDelete = window.confirm(
-    "Are you sure you want to end this chat? This will permanently delete all messages."
-  );
-
-  if (!confirmDelete) return;
-
-  try {
-    // Step 1: Delete all messages in this chat room
-    const { error: deleteMessagesError } = await supabase
-      .from("AdminChatMessages")
-      .delete()
-      .eq("chatRoomId", selectedRoomId);
-
-    if (deleteMessagesError) throw deleteMessagesError;
-
-    // Step 2: Delete the chat room itself
-    const { error: deleteRoomError } = await supabase
-      .from("AdminChatRooms")
-      .delete()
-      .eq("chatRoomId", selectedRoomId);
-
-    if (deleteRoomError) throw deleteRoomError;
-
-    // Step 3: Clear selected state
-    setSelectedChat(null);
-    setSelectedRoomId(null);
-    setChatMassages([]);
-    setChatRoomInfo((prev) =>
-      prev.filter((info) => info.chatRoomId !== selectedRoomId)
+    const confirmEnd = window.confirm(
+      "Are you sure you want to end this chat? This will prevent further messages from being sent."
     );
 
-    alert("Chat ended and removed successfully.");
-  } catch (error) {
-    console.error("Error ending chat:", error);
-    alert("Failed to end chat. Please try again.");
-  }
-};
+    if (!confirmEnd) return;
+
+    try {
+      // Update the chat room to mark it as ended
+      const { error: updateError } = await supabase
+        .from("AdminChatRooms")
+        .update({
+          isChatEnd: true,
+        })
+        .eq("chatRoomId", selectedRoomId);
+
+      if (updateError) throw updateError;
+
+      // Update local state
+      setIsChatEnded(true);
+      setSelectedChat(prev => prev ? { ...prev, isChatEnd: true } : null);
+
+      alert("Chat ended successfully. No new messages can be sent.");
+    } catch (error) {
+      console.error("Error ending chat:", error);
+      alert("Failed to end chat. Please try again.");
+    }
+  };
 
   return (
     <div className="flex flex-col lg:flex-row p-5 bg-white rounded-[10px]">
@@ -391,12 +305,18 @@ const Chat = () => {
                 </Link>
               </div>
               <div className="flex items-center">
-                 <button
-    onClick={handleEndChat}
-    className="text-sm text-white bg-red-500 px-3 py-1 rounded hover:bg-red-600 transition"
-  >
-    End Chat
-  </button>
+                {isChatEnded ? (
+                  <span className="text-sm text-red-600 bg-red-100 px-3 py-1 rounded">
+                    Chat Ended
+                  </span>
+                ) : (
+                  <button
+                    onClick={handleEndChat}
+                    className="text-sm text-white bg-red-500 px-3 py-1 rounded hover:bg-red-600 transition"
+                  >
+                    End Chat
+                  </button>
+                )}
                 <a className="pe-3 ps-3" href="#">
                   <SearchIconChat />
                 </a>
@@ -511,34 +431,42 @@ const Chat = () => {
             )}
 
 
-            {/* Message Input */}
-            {/* Message Input */}
-            <form onSubmit={handleSendMessage} className="flex items-center gap-3 sticky top-full bg-white py-4 px-5">
-              <div className="flex-grow bg-gray-300 rounded-full px-4">
-                <input
-                  type="text"
-                  placeholder="Enter your message"
-                  className="w-full outline-none bg-transparent py-4 placeholder:text-black text-sm"
-                  value={messageInput}
-                  onChange={(e) => setMessageInput(e.target.value)}
-                />
+            {/* Chat Ended Message */}
+            {isChatEnded && (
+              <div className="bg-red-100 border border-red-300 text-red-700 px-4 py-3 mx-5 mb-3 rounded">
+                <p className="text-sm font-medium">This chat has been ended. No new messages can be sent.</p>
               </div>
-              <label htmlFor="fileImg" className="cursor-pointer">
-                <input
-                  id="fileImg"
-                  hidden
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImgChange}
-                />
-                <span className="relative">
-                  <PepaerClikupIcon className="cursor-pointer" />
-                </span>
-              </label>
-              <button type="submit" className="cursor-pointer">
-                <MessageSendIcon />
-              </button>
-            </form>
+            )}
+
+            {/* Message Input */}
+            {!isChatEnded && (
+              <form onSubmit={handleSendMessage} className="flex items-center gap-3 sticky top-full bg-white py-4 px-5">
+                <div className="flex-grow bg-gray-300 rounded-full px-4">
+                  <input
+                    type="text"
+                    placeholder="Enter your message"
+                    className="w-full outline-none bg-transparent py-4 placeholder:text-black text-sm"
+                    value={messageInput}
+                    onChange={(e) => setMessageInput(e.target.value)}
+                  />
+                </div>
+                <label htmlFor="fileImg" className="cursor-pointer">
+                  <input
+                    id="fileImg"
+                    hidden
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImgChange}
+                  />
+                  <span className="relative">
+                    <PepaerClikupIcon className="cursor-pointer" />
+                  </span>
+                </label>
+                <button type="submit" className="cursor-pointer">
+                  <MessageSendIcon />
+                </button>
+              </form>
+            )}
           </>
         ) : (
           <div className="h-full flex items-center justify-center text-gray-500 bg-[#f7eeee] text-xl font-medium">
