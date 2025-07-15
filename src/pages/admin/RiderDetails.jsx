@@ -5,10 +5,12 @@ import DisableProviderPopUp from "../../Components/Popups/DisableProviderPopUp";
 import DenialReasonPopUp from "../../Components/Popups/DenialReasonPopUp";
 import { supabase } from "../../store/supabaseCreateClient";
 import { toast } from "react-toastify";
+import { DisableRedicon, EnableRedIcon } from "../../assets/icon/Icons";
 
 function RiderDetails() {
   const { id } = useParams();
   const [rider, setRider] = useState(null);
+  const [user, setUser] = useState(null); // user object for block/unblock
   const [showPopupDisable, setShowPopupDisable] = useState(false);
   const [showDenialPopup, setShowDenialPopup] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -28,6 +30,7 @@ function RiderDetails() {
     return `${day} ${month} ${year} | ${formattedHours}:${formattedMinutes} ${ampm}`;
   };
 
+  // Fetch rider and user data
   const fetchRiderData = async () => {
     setLoading(true);
     try {
@@ -42,6 +45,15 @@ function RiderDetails() {
         toast.error("Failed to fetch rider details");
       } else {
         setRider(RiderDetailsView);
+        // Fetch user for block/unblock
+        if (RiderDetailsView?.userId) {
+          const { data: userData, error: userError } = await supabase
+            .from('Users')
+            .select('*')
+            .eq('id', RiderDetailsView.userId)
+            .single();
+          if (!userError) setUser(userData);
+        }
       }
     } catch (err) {
       console.error("❌ Unexpected error:", err);
@@ -59,7 +71,8 @@ function RiderDetails() {
     setShowPopupDisable(!showPopupDisable);
   };
 
-
+  // Use user.accountStatus for block/unblock
+  const isBlocked = user?.accountStatus?.isBlocked === true;
 
   const handleApprove = async () => {
     try {
@@ -106,7 +119,25 @@ function RiderDetails() {
 
   return (
     <div className="px-4">
-      
+      {/* Block/Unblock Button - always visible */}
+      <div className="flex items-center justify-end mb-4">
+        <button
+          onClick={handlePopupDisable}
+          className="flex items-center gap-3 py-2.5 h-[42px] px-3 xl:px-[15px] rounded-[10px]"
+        >
+          {isBlocked ? (
+            <>
+              <EnableRedIcon />
+              <span className="text-black font-normal text-base">Unblock</span>
+            </>
+          ) : (
+            <>
+              <DisableRedicon />
+              <span className="text-black font-normal text-base">Block</span>
+            </>
+          )}
+        </button>
+      </div>
 
         {/* Full width blue container with profile picture */}
         <div className="bg-[#6C4DEF] px-[30px] py-5 rounded-[10px] w-full flex ">
@@ -326,8 +357,8 @@ function RiderDetails() {
       {showPopupDisable && (
         <DisableProviderPopUp
           handlePopupDisable={handlePopupDisable}
-          userId={id}
-          currentStatus={rider?.status === "Inactive" ? "blocked" : "active"}
+          userId={user?.id}
+          currentStatus={isBlocked ? "blocked" : "active"}
           refetchUser={fetchRiderData}
         />
       )}

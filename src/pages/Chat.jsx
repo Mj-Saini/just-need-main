@@ -28,6 +28,7 @@ const Chat = () => {
   const [uploadImg, setUploadImg] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [isChatEnded, setIsChatEnded] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
 
   const currentUserInfo = chatRoomInfo.find(
@@ -93,6 +94,7 @@ const Chat = () => {
       const isImageUpload = !!uploadImg;
 
       if (uploadImg) {
+        setIsLoading(true); // <-- Start loader
         // Upload image to just_need bucket in ChatImages folder
         const fileExt = uploadImg.name.split('.').pop();
         const fileName = `${timestamp}_${uploadImg.name}`;
@@ -129,6 +131,7 @@ const Chat = () => {
 
         if (messageError) throw messageError;
         messageData = data;
+        setIsLoading(false); // <-- Stop loader after upload
       }
 
       // Only send text message if no image was uploaded
@@ -162,6 +165,7 @@ const Chat = () => {
       setUploadImg(null);
 
     } catch (error) {
+      setIsLoading(false); // <-- Stop loader on error
       console.error("Error in handleSendMessage:", error);
       // Show error to user
       alert('Message sending failed. Please try again.');
@@ -418,15 +422,28 @@ const Chat = () => {
             )}
             {uploadImg && (
               <div className="absolute top-0 left-0 p-10 w-full h-full bg-black/70 flex items-center justify-center">
-                <img
-                  src={URL.createObjectURL(uploadImg)}
-                  alt="Preview"
-                  className="w-[500px] h-auto rounded-lg"
-                />
-                <button onClick={() => setUploadImg(null)} className="absolute top-12 right-5 text-white text-3xl z-10">
+                <div className="relative">
+                  <img
+                    src={URL.createObjectURL(uploadImg)}
+                    alt="Preview"
+                    className={`w-[500px] h-auto rounded-lg ${isLoading ? 'opacity-50' : ''}`}
+                  />
+                  {isLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30 rounded-lg">
+                      <div className="flex flex-col items-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2"></div>
+                        <span className="text-white text-sm">Uploading...</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <button 
+                  onClick={() => setUploadImg(null)} 
+                  className={`absolute top-12 right-5 text-white text-3xl z-10 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+                  disabled={isLoading}
+                >
                   x
                 </button>
-
               </div>
             )}
 
