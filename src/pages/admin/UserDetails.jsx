@@ -30,12 +30,15 @@ function UserDetails() {
   const [listings, setListings] = useState([]);
   const [riderDetails, setRiderDetails] = useState(null);
   const [withdrawals, setWithdrawals] = useState([]);
+  const [userbusinessDetails, setUserBusinessDetails] = useState([]);
+  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [activeTab, setActiveTab] = useState("withdrawals"); // Add active tab state
 
   const { setUsers, loading, setLoading } = useCustomerContext();
   const { fetchlisting } = useListingContext();
 
   const { setUserName } = useUserContext()
-  const [isImageModalOpen, setIsImageModalOpen] = useState(false);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -78,8 +81,6 @@ function UserDetails() {
 
     setLoading(false);
   };
-
-  const [userbusinessDetails, setUserBusinessDetails] = useState([])
 
   const fetchBusinessData = async () => {
     setLoading(true);
@@ -294,7 +295,7 @@ function UserDetails() {
     }
   };
 
-  console.log(user, "user")
+  console.log(userbusinessDetails, "user")
 
   return (
     <div className="px-4">
@@ -468,6 +469,80 @@ function UserDetails() {
                   </h2>
                 </div>
               </div>
+              {/* Business Detail Image Section */}
+              {userbusinessDetails?.businessImage && userbusinessDetails.businessImage.length > 0 && (
+                <div className="mt-6">
+                  <h2 className="font-medium text-sm xl:text-base text-black mb-3">
+                    Business Detail Images:
+                  </h2>
+                  <div className="flex flex-wrap gap-3">
+                    {userbusinessDetails.businessImage.map((img, idx) => (
+                      <div key={idx} className="relative">
+                        <img
+                          src={img}
+                          alt={`Business Detail ${idx + 1}`}
+                          className="w-24 h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => setPreviewImage(img)}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "/fallback-image.png";
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Business Images Section */}
+              {userbusinessDetails?.businessImages && userbusinessDetails.businessImages.length > 0 && (
+                <div className="mt-6">
+                  <h2 className="font-medium text-sm xl:text-base text-black mb-3">
+                    Business Images:
+                  </h2>
+                  <div className="flex flex-wrap gap-3">
+                    {userbusinessDetails.businessImages.map((image, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={image}
+                          alt={`Business ${index + 1}`}
+                          className="w-24 h-24 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => setPreviewImage(image)}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "/fallback-image.png";
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Business Documents Section */}
+              {userbusinessDetails?.businessDocuments && userbusinessDetails.businessDocuments.length > 0 && (
+                <div className="mt-12">
+                  <h2 className="font-medium text-sm xl:text-base text-black mb-3">
+                    Business Documents:
+                  </h2>
+                  <div className="flex flex-wrap gap-3">
+                    {userbusinessDetails.businessDocuments.map((document, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={document}
+                          alt={`Document ${index + 1}`}
+                          className="object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                          onClick={() => setPreviewImage(document)}
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.src = "/fallback-image.png";
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -593,65 +668,83 @@ function UserDetails() {
         )}
       </div>
 
-      {/* Withdrawal Transactions Section */}
+      {/* Tabs Section */}
       <div className="mt-[30px]">
-        <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066]">
-          Withdrawal Transactions
-        </p>
-
-        <div className="bg-white shadow rounded-lg overflow-x-auto mt-4">
-          {withdrawals.length > 0 ? (
-            <table className="min-w-full">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">S.No</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Amount</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">UPI ID</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Status</th>
-                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Date</th>
-                </tr>
-              </thead>
-              <tbody>
-                {withdrawals.map((withdrawal, index) => (
-                  <tr key={withdrawal.id} className="border-t">
-                    <td className="px-4 py-2">{index + 1}</td>
-                    <td className="px-4 py-2 font-semibold">₹{withdrawal.amount}</td>
-                    <td className="px-4 py-2">{withdrawal.upi_id}</td>
-                    <td className="px-4 py-2">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          withdrawal.status === 'Pending'
-                            ? 'bg-yellow-100 text-yellow-700'
-                            : withdrawal.status === 'Approved'
-                            ? 'bg-green-100 text-green-700'
-                            : 'bg-red-100 text-red-700'
-                        }`}
-                      >
-                        {withdrawal.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2 text-sm text-gray-600">
-                      {formatDate(withdrawal.created_at)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <p className="text-lg">No withdrawal transactions found</p>
-            </div>
+        <div className="flex space-x-4 mb-4 border-b">
+          <button
+            onClick={() => setActiveTab("withdrawals")}
+            className={`px-4 py-2 capitalize border-b-2 ${
+              activeTab === "withdrawals"
+                ? 'border-blue-600 text-blue-600 font-semibold'
+                : 'border-transparent text-gray-600 hover:text-blue-600'
+            }`}
+          >
+            Withdraw Transactions
+          </button>
+          {user?.userType === "Seller" && (
+            <button
+              onClick={() => setActiveTab("listings")}
+              className={`px-4 py-2 capitalize border-b-2 ${
+                activeTab === "listings"
+                  ? 'border-blue-600 text-blue-600 font-semibold'
+                  : 'border-transparent text-gray-600 hover:text-blue-600'
+              }`}
+            >
+              Posted Listing
+            </button>
           )}
         </div>
-      </div>
 
-      {/* Show listings only for Seller userType */}
-      {user?.userType === "Seller" && (
-        <>
-          <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066] mt-[30px]">
-            Posted Listing
-          </p>
+        {/* Withdrawal Transactions Tab */}
+        {activeTab === "withdrawals" && (
+          <div className="bg-white shadow rounded-lg overflow-x-auto">
+            {withdrawals.length > 0 ? (
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">S.No</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Amount</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">UPI ID</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Status</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {withdrawals.map((withdrawal, index) => (
+                    <tr key={withdrawal.id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2 font-semibold">₹{withdrawal.amount}</td>
+                      <td className="px-4 py-2">{withdrawal.upi_id}</td>
+                      <td className="px-4 py-2">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            withdrawal.status === 'Pending'
+                              ? 'bg-yellow-100 text-yellow-700'
+                              : withdrawal.status === 'Approved'
+                              ? 'bg-green-100 text-green-700'
+                              : 'bg-red-100 text-red-700'
+                          }`}
+                        >
+                          {withdrawal.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2 text-sm text-gray-600">
+                        {formatDate(withdrawal.created_at)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p className="text-lg">No withdrawal transactions found</p>
+              </div>
+            )}
+          </div>
+        )}
 
+        {/* Posted Listing Tab */}
+        {activeTab === "listings" && user?.userType === "Seller" && (
           <div className="flex flex-row flex-wrap -mx-3">
             {listings.length > 0 ? (listings?.map((item) => (
               <Link
@@ -744,8 +837,8 @@ function UserDetails() {
               <p className="text-center text-gray-500 text-lg mt-5 w-full">No Data Found</p>
             )}
           </div>
-        </>
-      )}
+        )}
+      </div>
 
       {isImageModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
@@ -759,6 +852,24 @@ function UserDetails() {
             <img
               src={user?.image || MechanicImage}
               alt="Profile Preview"
+              className="max-w-full max-h-screen object-contain"
+            />
+          </div>
+        </div>
+      )}
+
+      {previewImage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
+          <div className="relative max-w-4xl max-h-screen p-4">
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute top-4 right-4 text-white text-2xl bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center"
+            >
+              &times;
+            </button>
+            <img
+              src={previewImage}
+              alt="Image Preview"
               className="max-w-full max-h-screen object-contain"
             />
           </div>

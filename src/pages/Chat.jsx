@@ -29,6 +29,7 @@ const Chat = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const [isChatEnded, setIsChatEnded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [chatLoading, setChatLoading] = useState(false); // <-- Add chat loading state
 
 
   const currentUserInfo = chatRoomInfo.find(
@@ -177,7 +178,7 @@ const Chat = () => {
   useEffect(() => {
     const fetchChatMessages = async () => {
       if (!selectedRoomId) return;
-
+      setChatLoading(true); // <-- Start chat loading
       const { data: AdminChatMessages, error } = await supabase
         .from("AdminChatMessages")
         .select("*")
@@ -188,6 +189,7 @@ const Chat = () => {
       } else {
         setChatMassages(AdminChatMessages || []);
       }
+      setChatLoading(false); // <-- End chat loading
     };
 
     fetchChatMessages();
@@ -282,17 +284,17 @@ const Chat = () => {
         {selectedChat ? (
           <>
             {/* Chat Header */}
-            <div className="flex justify-between sticky top-0 z-10 items-center bg-gray-300 py-3">
+            <div className="flex justify-between sticky top-0 z-10 items-center bg-gray-300 p-3">
               <div className="flex">
                 <button
                   onClick={() => setSelectedChat(null)}
-                  className="text-blue-500 font-medium text-sm lg:hidden ps-3"
+                  className="text-blue-500 font-medium text-sm lg:hidden"
                 >
                   <BackArrowIcon />
                 </button>
                 <Link
                   to={`/dashboard/usersList/userDetails/${currentUserInfo.chatRoomId}`}
-                  className="flex items-center ps-3"
+                  className="flex items-center"
                 >
                   {currentUserInfo?.userImage ? (
                     <img
@@ -321,18 +323,18 @@ const Chat = () => {
                     End Chat
                   </button>
                 )}
-                <a className="pe-3 ps-3" href="#">
-                  <SearchIconChat />
-                </a>
-                <a className="pe-5" href="#">
-                  <DoteedIconChat />
-                </a>
+               
               </div>
             </div>
 
             {/* Message List */}
             <div className={`flex-1 overflow-y-auto mb-3 pr-2 ps-2 flex flex-col custom-scrollbar relative ${uploadImg ? "overflow-hidden" : "space-y-3 "}`}>
-              {chatMassages.length > 0 ? (
+              {chatLoading ? (
+                <div className="flex flex-1 items-center justify-center h-full">
+                  <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-2"></div>
+                  <span className="ml-3 text-blue-600 font-medium">Loading chat...</span>
+                </div>
+              ) : chatMassages.length > 0 ? (
                 chatMassages.map((chat, index) => {
                   const senderId = localStorage.getItem("senderId");
                   const isSender = chat.senderId === senderId;
@@ -361,15 +363,15 @@ const Chat = () => {
                           </div>
                         )}
                         <div
-                          className={`p-2 text-black rounded-t-xl relative min-w-20 ${isSender
-                            ? "bg-blue-500 text-white rounded-bl-xl self-end"
-                            : "bg-gray-300 rounded-br-lg"
-                            }`}
+                          className={`p-2 text-black rounded-t-xl relative`}
                         >
                           {
                             chat.messageType === "image" ? (
                               <div className="max-w-xs pb-2.5">
-                                <div className="w-[250px] h-[200px] bg-gray-200 flex items-center justify-center rounded-lg border border-gray-300 overflow-hidden">
+                                <div className={`w-[250px] h-[200px] bg-gray-200 flex items-center justify-center rounded-lg border border-gray-300 overflow-hidden ${isSender
+                            ? "bg-blue-500 text-white rounded-bl-xl self-end"
+                            : "bg-gray-300 rounded-br-lg"
+                            }`}>
                                   <img
                                     src={chat.message}
                                     alt="Chat image"
@@ -383,12 +385,15 @@ const Chat = () => {
                                 </div>
                               </div>
                             ) : (
-                              <p className="font-normal text-base pb-1">
+                              <p className={`font-normal text-base p-2  min-w-20 ${isSender
+                            ? "bg-blue-500 text-white rounded-bl-xl self-end"
+                            : "bg-gray-300 rounded-br-lg"
+                            }`}>
                                 {chat.message}
                               </p>
                             )
                           }
-                          <p className="absolute bottom-0 right-3 text-[10px] pt-4">
+                          <p className="absolute -bottom-2 right-3 text-[10px] pt-4">
                             {extractTime(chat.createdAt)}
                           </p>
                         </div>

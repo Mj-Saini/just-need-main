@@ -6,6 +6,8 @@ import { ClipboardIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline
 import { supabase } from '../../store/supabaseCreateClient';
 import DisablePopUp from '../../Components/Popups/DisablePopUp';
 import { useNavigate } from 'react-router-dom';
+import ApproveIcon from '../../assets/png/Approve_icon.svg.png';
+import RejectIcon from '../../assets/png/reject-icon.jpg';
 
 const Withdraw = () => {
   const navigate = useNavigate();
@@ -180,6 +182,7 @@ const Withdraw = () => {
           onCancel={() => setConfirmAction(null)}
           isActive={confirmAction.type === 'Approve' ? false : true}
           confirmText={confirmAction.type}
+          icon={confirmAction.type === 'Approve' ? ApproveIcon : RejectIcon}
         />
       )}
     </div>

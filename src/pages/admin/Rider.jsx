@@ -160,6 +160,9 @@ const Rider = () => {
                                         Email
                                     </th>
                                     <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                                        Phone
+                                    </th>
+                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                                         Vehicle Type
                                     </th>
                                     <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
@@ -218,6 +221,9 @@ const Rider = () => {
                                                 </td>
                                                 <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
                                                     {rider.user_detail?.useremail || 'N/A'}
+                                                </td>
+                                                <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                                                    {rider.user_detail?.mobile_number || 'N/A'}
                                                 </td>
                                                 <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
                                                     <span className="capitalize">{rider.vehicleType || 'N/A'}</span>

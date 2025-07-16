@@ -556,7 +556,7 @@ const pendingBusinessUsers = users.filter(user =>
                   </td>
                 </tr>
               ) : (
-                paginatedData?.map((customer) => {
+                paginatedData?.filter(user => user.userType !== 'Rider').map((customer) => {
                   return (
                     <tr key={customer.id}>
                       {/* <td className="px-[19px] md:px-[24px]">

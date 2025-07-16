@@ -201,12 +201,36 @@ function RiderDetails() {
             <div className="flex items-center mt-3 xl:mt-[15px]">
               <div className="w-4/12">
                 <h2 className="font-medium text-sm xl:text-base text-black">
-                  User ID:
+                  Rider Name:
                 </h2>
               </div>
               <div className="w-10/12">
                 <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
-                  {rider?.userId}
+                  {user?.firstName} {user?.lastName}
+                </h2>
+              </div>
+            </div>
+            <div className="flex items-center mt-3 xl:mt-[15px]">
+              <div className="w-4/12">
+                <h2 className="font-medium text-sm xl:text-base text-black">
+                  Email:
+                </h2>
+              </div>
+              <div className="w-10/12">
+                <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
+                  {user?.useremail}
+                </h2>
+              </div>
+            </div>
+            <div className="flex items-center mt-3 xl:mt-[15px]">
+              <div className="w-4/12">
+                <h2 className="font-medium text-sm xl:text-base text-black">
+                  Phone No:
+                </h2>
+              </div>
+              <div className="w-10/12">
+                <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
+                  {user?.mobile_number}
                 </h2>
               </div>
             </div>
