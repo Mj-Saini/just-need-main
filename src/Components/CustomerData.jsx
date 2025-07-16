@@ -52,44 +52,79 @@ const CustomerData = () => {
 
   const { users, setUsers, loading, fetchUsers } = useCustomerContext();
   const [filteredUsers, setFilteredUsers] = useState(users);
-  // Filter logic based on selected fields - exclude riders, show only sellers and consumers
-  const nonBlockedUsers = users?.filter(user => 
-    user?.accountStatus?.isBlocked !== true && 
-    user?.userType !== "Rider"
-  );
-  const filteredData = nonBlockedUsers?.filter((customer) => {
-    if (selectedFilters.length === 0) {
-      return (customer.firstName + " " + customer.lastName)
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase());
-    }
-
-    return selectedFilters.some((filter) => {
-      switch (filter) {
-        case "name":
-          return (customer.firstName + " " + customer.lastName)
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase());
-        case "email":
-          return customer.useremail
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase());
-        case "address":
-          return customer?.address?.some((addr) =>
-            `${addr.city}/${addr.state}`
-              .toLowerCase()
-              .includes(searchTerm.toLowerCase())
-          );
-        case "mobile":
-          return customer.mobile_number
-            ?.toLowerCase()
-            .includes(searchTerm.toLowerCase());
-        default:
-          return false;
+  // Show all users except blocked and Rider in userlist, and only pending in pendingRequest
+  let filteredData = [];
+  if (userActiveTabs === "userlist") {
+    filteredData = users?.filter(user => 
+      user?.accountStatus?.isBlocked !== true && 
+      user?.userType !== "Rider"
+    )?.filter((customer) => {
+      if (selectedFilters.length === 0) {
+        return (customer.firstName + " " + customer.lastName)
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
       }
+      return selectedFilters.some((filter) => {
+        switch (filter) {
+          case "name":
+            return (customer.firstName + " " + customer.lastName)
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase());
+          case "email":
+            return customer.useremail
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase());
+          case "address":
+            return customer?.address?.some((addr) =>
+              `${addr.city}/${addr.state}`
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
+            );
+          case "mobile":
+            return customer.mobile_number
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase());
+          default:
+            return false;
+        }
+      });
     });
-  });
-
+  } else if (userActiveTabs === "pendingRequest") {
+    filteredData = users?.filter(user => 
+      user?.userType === "Seller" && 
+      user?.businessDetail?.status === "Pending"
+    )?.filter((customer) => {
+      if (selectedFilters.length === 0) {
+        return (customer.firstName + " " + customer.lastName)
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
+      }
+      return selectedFilters.some((filter) => {
+        switch (filter) {
+          case "name":
+            return (customer.firstName + " " + customer.lastName)
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase());
+          case "email":
+            return customer.useremail
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase());
+          case "address":
+            return customer?.address?.some((addr) =>
+              `${addr.city}/${addr.state}`
+                .toLowerCase()
+                .includes(searchTerm.toLowerCase())
+            );
+          case "mobile":
+            return customer.mobile_number
+              ?.toLowerCase()
+              .includes(searchTerm.toLowerCase());
+          default:
+            return false;
+        }
+      });
+    });
+  }
 
 
   const [paginatedData, setPaginatedData] = useState([]);

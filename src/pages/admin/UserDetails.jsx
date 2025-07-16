@@ -230,7 +230,6 @@ function UserDetails() {
     }
 
     try {
-
       const { error } = await supabase
         .from('BusinessDetailsView')
         .update({ status: 'Approved' })
@@ -241,7 +240,7 @@ function UserDetails() {
         toast.error("Failed to update business status");
       } else {
         toast.success("Business status updated successfully");
-
+        setUserBusinessDetails((prev) => ({ ...prev, status: 'Approved' }));
         setUser((prevUser) => ({
           ...prevUser,
           businessDetail: { ...prevUser.businessDetail, status: 'Approved' }
@@ -249,6 +248,38 @@ function UserDetails() {
         setUsers((prevUser) => ({
           ...prevUser,
           businessDetail: { ...prevUser.businessDetail, status: 'Approved' }
+        }));
+      }
+    } catch (err) {
+      console.error("🚨 Unexpected Error:", err);
+      toast.error("An unexpected error occurred.");
+    }
+  };
+
+  // Add this function for instant UI update after denial
+  const denyUser = async (reason) => {
+    if (!userbusinessDetails || !userbusinessDetails?.businessId) {
+      toast.error("User data not found or invalid Business ID");
+      return;
+    }
+    try {
+      const { error } = await supabase
+        .from('BusinessDetailsView')
+        .update({ status: 'Rejected', rejectedReason: reason })
+        .eq('businessId', userbusinessDetails.businessId)
+        .select();
+      if (error) {
+        toast.error("Failed to update business status");
+      } else {
+        toast.success("Business status updated successfully");
+        setUserBusinessDetails((prev) => ({ ...prev, status: 'Rejected', rejectedReason: reason }));
+        setUser((prevUser) => ({
+          ...prevUser,
+          businessDetail: { ...prevUser.businessDetail, status: 'Rejected', rejectedReason: reason }
+        }));
+        setUsers((prevUser) => ({
+          ...prevUser,
+          businessDetail: { ...prevUser.businessDetail, status: 'Rejected', rejectedReason: reason }
         }));
       }
     } catch (err) {
@@ -895,6 +926,8 @@ function UserDetails() {
           currentStatus={user?.status}
           refetchData={denialType === "business" ? fetchBusinessData : denialType === "rider" ? fetchRiderData : undefined}
           setUsers={setUsers}
+          onApprove={approveUser}
+          onDeny={denyUser}
         />
       )}
     </div>
