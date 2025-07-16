@@ -173,7 +173,7 @@ const Chat = () => {
     }
   };
 
-  
+
 
   useEffect(() => {
     const fetchChatMessages = async () => {
@@ -323,7 +323,7 @@ const Chat = () => {
                     End Chat
                   </button>
                 )}
-               
+
               </div>
             </div>
 
@@ -345,21 +345,21 @@ const Chat = () => {
                       className={`flex mb-3 px-3 mt-3 ${isSender ? "justify-end" : "justify-start"
                         }`}
                     >
-                      <div className="flex flex-col items-start max-w-[60%]">
+                      <div className="flex items-end max-w-[60%]">
                         {!isSender && (
-                          <div className="flex items-center mb-1">
+                          <div className="flex items-center mb-5">
                             {chat.senderImage ? (
                               <img
                                 src={chat.senderImage}
                                 alt={chat.senderName || "user"}
-                                className="w-6 h-6 rounded-full object-cover mr-2"
+                                className="w-6 h-6 rounded-full border-2 border-black object-cover"
                               />
                             ) : (
-                              <UserIcon className="w-6 h-6 text-gray-500 mr-2" />
-                            )}
-                            <span className="text-xs font-semibold text-gray-700 capitalize">
-                              {chat.senderName || "anonymous"}
-                            </span>
+                              <span className="w-7 h-7 rounded-full border-2 border-black object-cover">
+                                <UserIcon className="text-gray-500 mr-2" />
+
+                              </span>)}
+
                           </div>
                         )}
                         <div
@@ -369,9 +369,9 @@ const Chat = () => {
                             chat.messageType === "image" ? (
                               <div className="max-w-xs pb-2.5">
                                 <div className={`w-[250px] h-[200px] bg-gray-200 flex items-center justify-center rounded-lg border border-gray-300 overflow-hidden ${isSender
-                            ? "bg-blue-500 text-white rounded-bl-xl self-end"
-                            : "bg-gray-300 rounded-br-lg"
-                            }`}>
+                                  ? "bg-blue-500 text-white rounded-bl-xl self-end"
+                                  : "bg-gray-300 rounded-br-lg"
+                                  }`}>
                                   <img
                                     src={chat.message}
                                     alt="Chat image"
@@ -386,9 +386,9 @@ const Chat = () => {
                               </div>
                             ) : (
                               <p className={`font-normal text-base p-2  min-w-20 ${isSender
-                            ? "bg-blue-500 text-white rounded-bl-xl self-end"
-                            : "bg-gray-300 rounded-br-lg"
-                            }`}>
+                                ? "bg-blue-500 text-white rounded-l-xl rounded-t-xl self-end"
+                                : "bg-gray-300 rounded-br-lg"
+                                }`}>
                                 {chat.message}
                               </p>
                             )
@@ -442,8 +442,8 @@ const Chat = () => {
                     </div>
                   )}
                 </div>
-                <button 
-                  onClick={() => setUploadImg(null)} 
+                <button
+                  onClick={() => setUploadImg(null)}
                   className={`absolute top-12 right-5 text-white text-3xl z-10 ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
                   disabled={isLoading}
                 >
