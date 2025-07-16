@@ -373,11 +373,11 @@ const Chat = () => {
                           </div>
                         )}
                         <div
-                          className={`pb-2 text-black rounded-t-xl relative`}
+                          className={`py-2 mb-1 text-black rounded-t-xl relative`}
                         >
                           {
                             chat.messageType === "image" ? (
-                              <div className="max-w-xs pb-0.5">
+                              <div className="max-w-xs pb-1.5">
                                 <div className={`w-[250px] h-[200px] bg-gray-200 flex items-center justify-center rounded-lg border border-gray-300 overflow-hidden ${isSender
                                   ? "bg-blue-500 text-white rounded-bl-xl self-end"
                                   : "bg-gray-300 rounded-br-lg"
@@ -397,27 +397,16 @@ const Chat = () => {
                             ) : (
                               <p className={`font-normal text-base p-2  min-w-20 ${isSender
                                 ? "bg-blue-500 text-white rounded-l-xl rounded-t-xl self-end"
-                                : "bg-gray-300 rounded-br-lg"
+                                : "bg-[#e4e5e7] border rounded-t-lg rounded-r-lg"
                                 }`}>
                                 {chat.message}
                               </p>
                             )
                           }
-                          {/* Show time only for the last message in a group from the same sender */}
-                          {(
-                            (() => {
-                             
-                              const idx = chatMassages.findIndex(m => m.id === chat.id);
-                              const isLastOfGroup =
-                                idx === chatMassages.length - 1 ||
-                                chatMassages[idx + 1]?.senderId !== chat.senderId;
-                              return isLastOfGroup;
-                            })()
-                          ) && (
-                            <p className="absolute -bottom-2 right-1 text-[10px]">
-                              {extractTime(chat.createdAt)}
-                            </p>
-                          )}
+                          {/* Show time with every message */}
+                          <p className="absolute -bottom-2 right-1 text-[10px]">
+                            {extractTime(chat.createdAt)}
+                          </p>
                         </div>
 
                       </div>
