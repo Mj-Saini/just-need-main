@@ -328,7 +328,7 @@ const Chat = () => {
             </div>
 
             {/* Message List */}
-            <div className={`flex-1 overflow-y-auto mb-3 pr-2 ps-2 flex flex-col custom-scrollbar relative ${uploadImg ? "overflow-hidden" : "space-y-3 "}`}>
+            <div className={`flex-1 overflow-y-auto mb-3 pr-2 ps-2 flex flex-col custom-scrollbar relative ${uploadImg ? "overflow-hidden" : "space-y-0 "}`}>
               {chatLoading ? (
                 <div className="flex flex-1 items-center justify-center h-full">
                   <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mb-2"></div>
@@ -339,6 +339,16 @@ const Chat = () => {
                   const senderId = localStorage.getItem("senderId");
                   const isSender = chat.senderId === senderId;
 
+                  // Determine if time should be shown for this message
+                  const showTime = (() => {
+                    if (index === chatMassages.length - 1) return true;
+                    const next = chatMassages[index + 1];
+                    const sameSender = next.senderId === chat.senderId;
+                    // 1 minute window (adjust as needed)
+                    const sameMinute = Math.abs(new Date(next.createdAt) - new Date(chat.createdAt)) < 60000;
+                    return !(sameSender && sameMinute);
+                  })();
+
                   return (
                     <div
                       key={index}
@@ -347,7 +357,7 @@ const Chat = () => {
                     >
                       <div className="flex items-end max-w-[60%]">
                         {!isSender && (
-                          <div className="flex items-center mb-5">
+                          <div className="flex items-center mb-5 me-2">
                             {chat.senderImage ? (
                               <img
                                 src={chat.senderImage}
@@ -367,7 +377,7 @@ const Chat = () => {
                         >
                           {
                             chat.messageType === "image" ? (
-                              <div className="max-w-xs pb-2.5">
+                              <div className="max-w-xs pb-0.5">
                                 <div className={`w-[250px] h-[200px] bg-gray-200 flex items-center justify-center rounded-lg border border-gray-300 overflow-hidden ${isSender
                                   ? "bg-blue-500 text-white rounded-bl-xl self-end"
                                   : "bg-gray-300 rounded-br-lg"
@@ -393,8 +403,18 @@ const Chat = () => {
                               </p>
                             )
                           }
-                          {showTime && (
-                            <p className="absolute -bottom-2 right-1 text-[10px] pt-4">
+                          {/* Show time only for the last message in a group from the same sender */}
+                          {(
+                            (() => {
+                             
+                              const idx = chatMassages.findIndex(m => m.id === chat.id);
+                              const isLastOfGroup =
+                                idx === chatMassages.length - 1 ||
+                                chatMassages[idx + 1]?.senderId !== chat.senderId;
+                              return isLastOfGroup;
+                            })()
+                          ) && (
+                            <p className="absolute -bottom-2 right-1 text-[10px]">
                               {extractTime(chat.createdAt)}
                             </p>
                           )}
