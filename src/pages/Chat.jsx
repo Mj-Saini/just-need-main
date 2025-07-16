@@ -342,7 +342,7 @@ const Chat = () => {
                   return (
                     <div
                       key={index}
-                      className={`flex mb-3 px-3 mt-3 ${isSender ? "justify-end" : "justify-start"
+                      className={`flex px-3 ${isSender ? "justify-end" : "justify-start"
                         }`}
                     >
                       <div className="flex items-end max-w-[60%]">
@@ -363,7 +363,7 @@ const Chat = () => {
                           </div>
                         )}
                         <div
-                          className={`p-2 text-black rounded-t-xl relative`}
+                          className={`pb-2 text-black rounded-t-xl relative`}
                         >
                           {
                             chat.messageType === "image" ? (
@@ -393,9 +393,11 @@ const Chat = () => {
                               </p>
                             )
                           }
-                          <p className="absolute -bottom-2 right-3 text-[10px] pt-4">
-                            {extractTime(chat.createdAt)}
-                          </p>
+                          {showTime && (
+                            <p className="absolute -bottom-2 right-1 text-[10px] pt-4">
+                              {extractTime(chat.createdAt)}
+                            </p>
+                          )}
                         </div>
 
                       </div>
