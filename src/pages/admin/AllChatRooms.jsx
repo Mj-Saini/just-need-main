@@ -64,14 +64,69 @@ useEffect(() => {
     });
   };
 
-  // Search filter
-  const filteredChatData = chatRooms.filter((chat) => {
-    const lowerCaseQuery = searchQuery.toLowerCase();
-    return (
-      (chat.userName?.toLowerCase() || "").includes(lowerCaseQuery) ||
-      (chat.lastMessage?.toLowerCase() || "").includes(lowerCaseQuery)
-    );
-  });
+  // Filter chat rooms based on active button and search query
+  const filterChatRooms = (chats) => {
+    let filteredChats = chats;
+
+    // First filter by button type (All, Read, Unread)
+    switch (activeButton) {
+      case "All":
+        // Show all chat rooms
+        break;
+      case "Read":
+        // Show only chats that have been seen (IsSeen = true)
+        filteredChats = chats.filter(chat => chat.IsSeen === true);
+        break;
+      case "Unread":
+        // Show only chats that haven't been seen (IsSeen = false)
+        filteredChats = chats.filter(chat => chat.IsSeen === false);
+        break;
+      default:
+        break;
+    }
+
+    // Then filter by search query
+    if (searchQuery.trim()) {
+      const lowerCaseQuery = searchQuery.toLowerCase();
+      filteredChats = filteredChats.filter((chat) => {
+        return (
+          (chat.userName?.toLowerCase() || "").includes(lowerCaseQuery) ||
+          (chat.lastMessage?.toLowerCase() || "").includes(lowerCaseQuery)
+        );
+      });
+    }
+
+    return filteredChats;
+  };
+
+  // Handle chat selection and mark as seen
+  const handleChatSelection = async (chat) => {
+    try {
+      // Only update if the chat hasn't been seen yet
+      if (chat.IsSeen === false) {
+        // Update the IsSeen field from false to true in the database
+        const { error } = await supabase
+          .from("AdminChatRooms")
+          .update({ IsSeen: true })
+          .eq("chatRoomId", chat.chatRoomId);
+
+        if (error) {
+          console.error("Error updating IsSeen status:", error);
+        } else {
+          // Refresh the chat rooms to reflect the updated status
+          fetchChatRooms();
+        }
+      }
+    } catch (error) {
+      console.error("Error marking chat as seen:", error);
+    }
+
+    // Call the original handler
+    handleChatSelect(chat);
+  };
+
+  // Get filtered chat data
+  const filteredChatData = filterChatRooms(chatRooms);
 
   getUserInfo(chatRooms )
 
@@ -109,52 +164,63 @@ useEffect(() => {
       </div>
 
       {/* Chat Room List */}
-      {filteredChatData.map((chat) => (
-        <div
-          key={chat.id}
-          onClick={() => handleChatSelect(chat)}
-          className={`flex items-center mt-4 w-full ps-3 pe-5 hover:bg-blue-100 py-1 cursor-pointer rounded-lg ${
-    selectedRoomId === chat.chatRoomId ? "bg-blue-100" : ""
-  }`}
-        >
-          {/* Avatar */}
-          <div className="w-[40px] h-[40px] flex-shrink-0 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-            {chat.userImage ? (
-              <img
-                src={chat.userImage}
-                alt="Chat"
-                className="h-full w-full object-cover"
-              />
-            ) : (
-              <UserIcon />
-            )}
-          </div>
+      {filteredChatData.length > 0 ? (
+        filteredChatData.map((chat) => (
+          <div
+            key={chat.id}
+            onClick={() => handleChatSelection(chat)}
+            className={`flex items-center mt-4 w-full ps-3 pe-5 hover:bg-blue-100 py-1 cursor-pointer rounded-lg ${
+      selectedRoomId === chat.chatRoomId ? "bg-blue-100" : ""
+    }`}
+          >
+            {/* Avatar */}
+            <div className="w-[40px] h-[40px] flex-shrink-0 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
+              {chat.userImage ? (
+                <img
+                  src={chat.userImage}
+                  alt="Chat"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <UserIcon />
+              )}
+            </div>
+            
 
-          {/* Chat Info */}
-          <div className="flex justify-between w-full ps-4">
-            <div className="w-8/12 flex flex-col justify-center">
-              <div className="flex items-center gap-2">
-                <h2 className="font-medium text-sm text-black capitalize">
-                  {chat.userName}
-                </h2>
-                {chat.isChatEnd && (
-                  <span className="text-xs text-red-600 bg-red-100 px-2 py-0.5 rounded">
-                    Ended
-                  </span>
-                )}
+            {/* Chat Info */}
+            <div className="flex justify-between w-full ps-4 overflow-hidden">
+              <div className="w-8/12 flex flex-col justify-center">
+                <div className="flex items-center gap-2">
+                  <h2 className="font-medium text-sm text-black capitalize">
+                    {chat.userName}
+                  </h2>
+                  {chat.isChatEnd && (
+                    <span className="text-xs text-red-600 bg-red-100 px-2 py-0.5 rounded">
+                      Ended
+                    </span>
+                  )}
+                  {/* Show unread indicator for unread chats */}
+                  {chat.IsSeen === false && (
+                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                  )}
+                </div>
+                <p className="font-normal text-sm text-gray-600 pt-1 truncate">
+                  {chat.lastMessage || "No messages yet"}
+                </p>
               </div>
-              <p className="font-normal text-sm text-gray-600 pt-1 truncate">
-                {chat.lastMessage || "No messages yet"}
-              </p>
-            </div>
-            <div className="w-3/12 text-right flex flex-col justify-center">
-              <p className="font-normal text-[10px] whitespace-nowrap">
-                {extractTime(chat.lastMessageCreatedAt)}
-              </p>
+              <div className="w-3/12 text-right flex flex-col justify-center">
+                <p className="font-normal text-[10px] whitespace-nowrap">
+                  {extractTime(chat.lastMessageCreatedAt)}
+                </p>
+              </div>
             </div>
           </div>
+        ))
+      ) : (
+        <div className="flex items-center justify-center mt-8 text-gray-500">
+          <p>No {activeButton.toLowerCase()} chats found</p>
         </div>
-      ))}
+      )}
     </>
   );
 };

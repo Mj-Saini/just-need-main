@@ -6,35 +6,35 @@ import { supabase } from '../../store/supabaseCreateClient';
 
 const Rider = () => {
     const location = useLocation();
-  const [riders, setRiders] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(10);
-  const [showFilterPopup, setShowFilterPopup] = useState(false);
-  const [selectedFilters] = useState(["name"]);
-  const [searchPlaceholder] = useState("Search by name, email, or ID");
+    const [riders, setRiders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
+    const [showFilterPopup, setShowFilterPopup] = useState(false);
+    const [selectedFilters] = useState(["name"]);
+    const [searchPlaceholder] = useState("Search by name, email, or ID");
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const month = date.toLocaleString("default", { month: "short" });
-    const year = date.getFullYear();
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const formattedHours = hours % 12 || 12;
-    const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
-    return `${day} ${month} ${year} | ${formattedHours}:${formattedMinutes} ${ampm}`;
-  };
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = date.getDate();
+        const month = date.toLocaleString("default", { month: "short" });
+        const year = date.getFullYear();
+        const hours = date.getHours();
+        const minutes = date.getMinutes();
+        const ampm = hours >= 12 ? "PM" : "AM";
+        const formattedHours = hours % 12 || 12;
+        const formattedMinutes = minutes < 10 ? `0${minutes}` : minutes;
+        return `${day} ${month} ${year} | ${formattedHours}:${formattedMinutes} ${ampm}`;
+    };
 
-  // Fetch Riders data from Supabase with user details
-  useEffect(() => {
-    const fetchRiders = async () => {
-      setLoading(true);
-      let { data: RiderDetailsView, error } = await supabase
-        .from('RiderDetailsView')
-        .select(`
+    // Fetch Riders data from Supabase with user details
+    useEffect(() => {
+        const fetchRiders = async () => {
+            setLoading(true);
+            let { data: RiderDetailsView, error } = await supabase
+                .from('RiderDetailsView')
+                .select(`
           *,
           user_detail:Users!RiderDetailsView_userId_fkey(
             firstName,
@@ -44,69 +44,69 @@ const Rider = () => {
           )
         `);
 
-      if (error) {
-        console.error(error);
-      } else {
-        setRiders(RiderDetailsView || []);
-      }
-      setLoading(false);
+            if (error) {
+                console.error(error);
+            } else {
+                setRiders(RiderDetailsView || []);
+            }
+            setLoading(false);
+        };
+
+        fetchRiders();
+    }, []);
+
+    // Filter logic based on selected fields
+    const filteredRiders = riders?.filter((rider) => {
+        if (selectedFilters.length === 0) {
+            const riderName = `${rider.user_detail?.firstName || ''} ${rider.user_detail?.lastName || ''}`.toLowerCase();
+            const riderEmail = rider.user_detail?.useremail?.toLowerCase() || '';
+            return riderName.includes(searchTerm.toLowerCase()) ||
+                riderEmail.includes(searchTerm.toLowerCase()) ||
+                rider.userId?.toLowerCase().includes(searchTerm.toLowerCase());
+        }
+
+        return selectedFilters.some((filter) => {
+            const riderName = `${rider.user_detail?.firstName || ''} ${rider.user_detail?.lastName || ''}`.toLowerCase();
+
+            switch (filter) {
+                case "userId":
+                    return rider.userId?.toLowerCase().includes(searchTerm.toLowerCase());
+                case "name":
+                    return riderName.includes(searchTerm.toLowerCase());
+                case "email":
+                    return rider.user_detail?.useremail?.toLowerCase().includes(searchTerm.toLowerCase());
+                case "vehicleType":
+                    return rider.vehicleType?.toLowerCase().includes(searchTerm.toLowerCase());
+                case "vehicleRegistrationNumber":
+                    return rider.vehicleRegistrationNumber?.toLowerCase().includes(searchTerm.toLowerCase());
+                case "drivingLicenseNumber":
+                    return rider.drivingLicenseNumber?.toLowerCase().includes(searchTerm.toLowerCase());
+                default:
+                    return false;
+            }
+        });
+    });
+
+    // Pagination logic
+    const totalPages = Math.ceil(filteredRiders.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, filteredRiders.length);
+    const paginatedData = filteredRiders.slice(startIndex, endIndex);
+
+    // Pagination handlers
+    const handlePageChange = (direction) => {
+        if (direction === "next" && currentPage < totalPages) {
+            setCurrentPage(currentPage + 1);
+        } else if (direction === "prev" && currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        }
     };
 
-    fetchRiders();
-  }, []);
-
-  // Filter logic based on selected fields
-  const filteredRiders = riders?.filter((rider) => {
-    if (selectedFilters.length === 0) {
-      const riderName = `${rider.user_detail?.firstName || ''} ${rider.user_detail?.lastName || ''}`.toLowerCase();
-      const riderEmail = rider.user_detail?.useremail?.toLowerCase() || '';
-      return riderName.includes(searchTerm.toLowerCase()) || 
-             riderEmail.includes(searchTerm.toLowerCase()) ||
-             rider.userId?.toLowerCase().includes(searchTerm.toLowerCase());
+    function handleFilter() {
+        setShowFilterPopup(!showFilterPopup);
     }
 
-    return selectedFilters.some((filter) => {
-      const riderName = `${rider.user_detail?.firstName || ''} ${rider.user_detail?.lastName || ''}`.toLowerCase();
-      
-      switch (filter) {
-        case "userId":
-          return rider.userId?.toLowerCase().includes(searchTerm.toLowerCase());
-        case "name":
-          return riderName.includes(searchTerm.toLowerCase());
-        case "email":
-          return rider.user_detail?.useremail?.toLowerCase().includes(searchTerm.toLowerCase());
-        case "vehicleType":
-          return rider.vehicleType?.toLowerCase().includes(searchTerm.toLowerCase());
-        case "vehicleRegistrationNumber":
-          return rider.vehicleRegistrationNumber?.toLowerCase().includes(searchTerm.toLowerCase());
-        case "drivingLicenseNumber":
-          return rider.drivingLicenseNumber?.toLowerCase().includes(searchTerm.toLowerCase());
-        default:
-          return false;
-      }
-    });
-  });
-
-  // Pagination logic
-  const totalPages = Math.ceil(filteredRiders.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = Math.min(startIndex + itemsPerPage, filteredRiders.length);
-  const paginatedData = filteredRiders.slice(startIndex, endIndex);
-
-  // Pagination handlers
-  const handlePageChange = (direction) => {
-    if (direction === "next" && currentPage < totalPages) {
-      setCurrentPage(currentPage + 1);
-    } else if (direction === "prev" && currentPage > 1) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  function handleFilter() {
-    setShowFilterPopup(!showFilterPopup);
-  }
-
-  console.log(riders, "riders");
+    console.log(riders, "riders");
 
     return (
         <>
@@ -145,7 +145,7 @@ const Rider = () => {
                         </div>
                     </div>
 
-  
+
                     <div className="overflow-x-auto mt-5">
                         <table className="w-full text-left border-separate border-spacing-4 whitespace-nowrap rounded-[10px]">
                             <thead>
@@ -183,7 +183,7 @@ const Rider = () => {
                                     <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                                         Status
                                     </th>
-               
+
                                 </tr>
                                 <tr>
                                     <td colSpan="10">
@@ -244,8 +244,8 @@ const Rider = () => {
                                                     <div className="flex justify-center items-center">
                                                         <span
                                                             className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${rider.offerParcel
-                                                                    ? "text-[#008000] bg-[#00800012]"
-                                                                    : "text-[#FF0000] bg-[#ff000012]"
+                                                                ? "text-[#008000] bg-[#00800012]"
+                                                                : "text-[#FF0000] bg-[#ff000012]"
                                                                 }`}
                                                         >
                                                             {rider.offerParcel ? "Yes" : "No"}
@@ -256,17 +256,15 @@ const Rider = () => {
                                                     <div className="flex justify-center items-center">
                                                         <span
                                                             className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${rider.status === "Active"
-                                                                    ? "bg-[#00800012] text-[#008000]"
-                                                                    : rider.status === "Inactive"
-                                                                        ? "bg-[#FF00001A] text-[#800000]"
-                                                                        : "bg-[#6C4DEF1A] text-[#6C4DEF]"
+                                                                ? "bg-[#00800012] text-[#008000]"
+                                                                : rider.status === "Rejected" ? "bg-[#2b29291a] text-[#800000]" : rider.status === "Approved" ? "bg-[#6C4DEF1A] text-[#6C4DEF]" : "bg-[#ffa50024] text-[#ffa500]"
                                                                 }`}
                                                         >
-                                                            {rider.status || "Pending"}
+                                                            {rider.status}
                                                         </span>
                                                     </div>
                                                 </td>
-                      
+
                                             </tr>
                                         );
                                     })
@@ -274,7 +272,7 @@ const Rider = () => {
                             </tbody>
                         </table>
                     </div>
-   
+
 
 
                     {/* Pagination */}
@@ -306,8 +304,8 @@ const Rider = () => {
                     )}
                 </div>}
             <Outlet />
-            </>
-  );
+        </>
+    );
 };
 
 export default Rider;

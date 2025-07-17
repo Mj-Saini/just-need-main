@@ -335,6 +335,25 @@ function RiderDetails() {
           </div>
         </div>
       )}
+      {/* Rider Photos Section */}
+      {rider?.riderPhoto && rider.riderPhoto.length > 0 && (
+        <div className="mt-[30px]">
+          <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066]">
+            Rider Photos
+          </p>
+          <div className="flex flex-wrap gap-4 mt-4">
+            {rider.riderPhoto.map((photo, index) => (
+              <img
+                key={index}
+                onClick={() => openImageModal(photo)}
+                src={photo}
+                alt={`Rider ${index + 1}`}
+                className="w-64 h-40 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Vehicle Photos Section */}
       {rider?.vehiclePhoto && rider.vehiclePhoto.length > 0 && (
