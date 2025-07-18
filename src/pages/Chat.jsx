@@ -403,8 +403,8 @@ const Chat = () => {
                               </p>
                             )
                           }
-                          {/* Show time with every message */}
-                          <p className="absolute -bottom-2 right-1 text-[10px]">
+                          {/* Show time with every message, align left for receiver, right for sender */}
+                          <p className={`absolute -bottom-2 text-[10px] ${isSender ? 'right-1' : 'left-1'}`}>
                             {extractTime(chat.createdAt)}
                           </p>
                         </div>

@@ -527,6 +527,7 @@ const pendingBusinessUsers = users.filter(user =>
           </button>
         </div>
       </div>
+      
       {userActiveTabs === "userlist" &&
         <div className="overflow-x-auto  mt-5">
           <table className="w-full text-left border-separate border-spacing-4 whitespace-nowrap rounded-[10px]">

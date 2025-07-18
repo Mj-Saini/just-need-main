@@ -15,6 +15,7 @@ import {
   ListingSvg,
   MessageIcon,
   WitdrawSvg,
+  RiderIcon,
 } from "../../assets/icon/Icon";
 import LogOutPopUp from "../Popups/LogOutPopUp";
 
@@ -162,7 +163,7 @@ function SideBar() {
             to="/dashboard/rider"
             className="flex items-center py-2.5 px-2 xl:px-[15px] gap-3 xl:gap-5 ms-[5px] w-full"
           >
-            <ServicesSvg pathName={pathName} />
+            <RiderIcon pathName={pathName} />
             <span
               className={`font-normal text-sm xl:text-base ${pathName == "/dashboard/rider"
                 ? "text-[#6c4def]"

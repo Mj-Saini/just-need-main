@@ -14,11 +14,14 @@
 }
 
 .group_hover:hover svg path,
+.group_hover:hover svg circle,
 .group_hover:hover span {
   fill: #6c4def;
   fillopacity: 1;
   color: #6c4def;
   opacity: 1;
+  stroke: #6c4def;
+  
 }
 
 .group_hover:hover .setting_svg path {

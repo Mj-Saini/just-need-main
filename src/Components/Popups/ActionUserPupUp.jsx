@@ -1,8 +1,21 @@
 import React, { useState } from 'react';
 import { PopupsArrowBlock } from '../../assets/icon/Icons';
 
-function ActionUserPupUp({ handlePopup }) {
+function ActionUserPupUp({ handlePopup, fetchUsers }) {
   const [status, setStatus] = useState('Block');
+  const [reason, setReason] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleUpdateStatus = async () => {
+    setLoading(true);
+    // TODO: Add your Supabase update logic here
+    // Example:
+    // await supabase.from('Users').update({ ... }).eq('id', userId);
+    if (fetchUsers) await fetchUsers();
+    setLoading(false);
+    handlePopup();
+  };
+
   return (
     <>
       <div
@@ -56,11 +69,18 @@ function ActionUserPupUp({ handlePopup }) {
             </label>
             <textarea
               placeholder="type here.."
-              className="w-full h-28 px-5 py-2.5 bg-[#F2F2F2] rounded-[7px] resize-none"></textarea>
+              className="w-full h-28 px-5 py-2.5 bg-[#F2F2F2] rounded-[7px] resize-none"
+              value={reason}
+              onChange={e => setReason(e.target.value)}
+            ></textarea>
           </div>
 
-          <button className="w-full bg-[#0832DE] text-base text-white font-normal py-3 rounded-[10px]">
-            Update Status
+          <button
+            className="w-full bg-[#0832DE] text-base text-white font-normal py-3 rounded-[10px]"
+            onClick={handleUpdateStatus}
+            disabled={loading}
+          >
+            {loading ? 'Updating...' : 'Update Status'}
           </button>
         </div>
       </div>

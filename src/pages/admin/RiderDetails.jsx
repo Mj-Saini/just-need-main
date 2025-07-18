@@ -92,6 +92,7 @@ function RiderDetails() {
           status: "Approved"
         }));
         toast.success("Rider approved successfully!");
+        window.dispatchEvent(new Event('rider-status-updated'));
       }
     } catch (err) {
       console.error("Error approving rider:", err);
@@ -103,8 +104,11 @@ function RiderDetails() {
     setShowDenialPopup(true);
   };
 
-  const handleDenialClose = () => {
+  const handleDenialClose = (wasDenied) => {
     setShowDenialPopup(false);
+    if (wasDenied) {
+      window.dispatchEvent(new Event('rider-status-updated'));
+    }
   };
 
   const openImageModal = (imageUrl) => {
@@ -408,7 +412,7 @@ function RiderDetails() {
 
       {showDenialPopup && (
         <DenialReasonPopUp
-          handleClose={handleDenialClose}
+          handleClose={() => handleDenialClose(true)}
           userId={rider?.userId}
           type="rider"
           itemId={rider?.userId}

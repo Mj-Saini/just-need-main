@@ -28,13 +28,12 @@ const Rider = () => {
         return `${day} ${month} ${year} | ${formattedHours}:${formattedMinutes} ${ampm}`;
     };
 
-    // Fetch Riders data from Supabase with user details
-    useEffect(() => {
-        const fetchRiders = async () => {
-            setLoading(true);
-            let { data: RiderDetailsView, error } = await supabase
-                .from('RiderDetailsView')
-                .select(`
+    // Move fetchRiders outside useEffect
+    const fetchRiders = async () => {
+        setLoading(true);
+        let { data: RiderDetailsView, error } = await supabase
+            .from('RiderDetailsView')
+            .select(`
           *,
           user_detail:Users!RiderDetailsView_userId_fkey(
             firstName,
@@ -44,15 +43,23 @@ const Rider = () => {
           )
         `);
 
-            if (error) {
-                console.error(error);
-            } else {
-                setRiders(RiderDetailsView || []);
-            }
-            setLoading(false);
-        };
+        if (error) {
+            console.error(error);
+        } else {
+            setRiders(RiderDetailsView || []);
+        }
+        setLoading(false);
+    };
 
+    useEffect(() => {
         fetchRiders();
+
+        // Listen for custom event to refresh riders
+        const handler = () => fetchRiders();
+        window.addEventListener('rider-status-updated', handler);
+        return () => {
+            window.removeEventListener('rider-status-updated', handler);
+        };
     }, []);
 
     // Filter logic based on selected fields

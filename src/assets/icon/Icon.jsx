@@ -115,6 +115,22 @@ export const WitdrawSvg = ({ pathName }) => {
 
   );
 };
+export const RiderIcon = ({ pathName }) => {
+  return (
+    <svg width="24" height="24" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M26 32L24 42" stroke={pathName == "/dashboard/rider" ? "#6c4def" : "black"} strokeWidth="3" strokeLinecap="round"/>
+  <path d="M28 26C30 28 34 28 36 30L40 36" stroke={pathName == "/dashboard/rider" ? "#6c4def" : "black"} strokeWidth="3" strokeLinecap="round"/>
+  <path d="M36 36C38 36 40 36 42 34C44 32 50 32 52 36" stroke={pathName == "/dashboard/rider" ? "#6c4def" : "black"} strokeWidth="3" strokeLinecap="round"/>
+  <path d="M24 42C20 38 18 34 12 34C6 34 4 38 4 42C4 48 10 50 12 50C14 50 20 48 24 42Z" stroke={pathName == "/dashboard/rider" ? "#6c4def" : "black"} strokeWidth="3" strokeLinecap="round"/>
+  <path d="M52 36C58 36 60 42 60 44C60 50 54 52 52 52C50 52 44 50 40 44L36 36" stroke={pathName == "/dashboard/rider" ? "#6c4def" : "black"} strokeWidth="3" strokeLinecap="round"/>
+  <path d="M28 26L32 14C34 10 38 8 42 8C46 8 48 10 48 14C48 16 47 18 44 18H42L38 26" stroke={pathName == "/dashboard/rider" ? "#6c4def" : "black"} strokeWidth="3" strokeLinecap="round"/>
+  <circle cx="12" cy="44" r="6" stroke={pathName == "/dashboard/rider" ? "#6c4def" : "black"} strokeWidth="3"/>
+  <circle cx="52" cy="46" r="6" stroke={pathName == "/dashboard/rider" ? "#6c4def" : "black"} strokeWidth="3"/>
+  <path fill={pathName == "/dashboard/rider" ? "#6c4def" : "black"}  fillOpacity={pathName == "/dashboard/serviceRequest" ? "1" : "0.6"} d="M40 18C40 16 40.5 12 44 12" stroke={pathName == "/dashboard/rider" ? "#6c4def" : "black"} strokeWidth="3" strokeLinecap="round"/>
+</svg>
+
+  );
+};
 export const RightSvg = () => {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 48 48"><path fill="#43a047" d="M40.6 12.1L17 35.7l-9.6-9.6L4.6 29L17 41.3l26.4-26.4z" /></svg>
