@@ -3,6 +3,8 @@ import { useState, useEffect } from 'react';
 import { CiSearch, CiFilter } from 'react-icons/ci';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { supabase } from '../../store/supabaseCreateClient';
+import BlockedUserPopups from '../../Components/Popups/BlockedUserPopups';
+import { toast } from 'react-toastify';
 
 const Rider = () => {
     const location = useLocation();
@@ -14,6 +16,7 @@ const Rider = () => {
     const [showFilterPopup, setShowFilterPopup] = useState(false);
     const [selectedFilters] = useState(["name"]);
     const [searchPlaceholder] = useState("Search by name, email, or ID");
+    const [showBlockedOnly, setShowBlockedOnly] = useState(false);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -31,39 +34,59 @@ const Rider = () => {
     // Move fetchRiders outside useEffect
     const fetchRiders = async () => {
         setLoading(true);
-        let { data: RiderDetailsView, error } = await supabase
-            .from('RiderDetailsView')
-            .select(`
-          *,
-          user_detail:Users!RiderDetailsView_userId_fkey(
-            firstName,
-            lastName,
-            useremail,
-            mobile_number
-          )
-        `);
+        
+        // First, get all users who are riders with their accountStatus
+        let { data: usersData, error: usersError } = await supabase
+            .from('Users')
+            .select('*')
+            .eq('userType', 'Rider');
 
-        if (error) {
-            console.error(error);
-        } else {
-            setRiders(RiderDetailsView || []);
+        if (usersError) {
+            console.error('Error fetching users:', usersError);
+            setLoading(false);
+            return;
         }
+
+        // Then get rider details for these users
+        let { data: RiderDetailsView, error: riderError } = await supabase
+            .from('RiderDetailsView')
+            .select('*');
+
+        if (riderError) {
+            console.error('Error fetching rider details:', riderError);
+            setLoading(false);
+            return;
+        }
+
+        // Combine the data
+        const combinedRiders = usersData.map(user => {
+            const riderDetail = RiderDetailsView.find(rider => rider.userId === user.id);
+            return {
+                ...riderDetail,
+                user_detail: {
+                    firstName: user.firstName,
+                    lastName: user.lastName,
+                    useremail: user.useremail,
+                    mobile_number: user.mobile_number,
+                    accountStatus: user.accountStatus,
+                    userType: user.userType
+                }
+            };
+        });
+
+        console.log("Combined riders data:", combinedRiders);
+        setRiders(combinedRiders || []);
         setLoading(false);
     };
 
-    useEffect(() => {
-        fetchRiders();
-
-        // Listen for custom event to refresh riders
-        const handler = () => fetchRiders();
-        window.addEventListener('rider-status-updated', handler);
-        return () => {
-            window.removeEventListener('rider-status-updated', handler);
-        };
-    }, []);
-
     // Filter logic based on selected fields
     const filteredRiders = riders?.filter((rider) => {
+        // First, exclude blocked riders from the main table
+        if (rider.user_detail?.accountStatus?.isBlocked === true) {
+            console.log("Excluding blocked rider from main table:", rider.user_detail?.firstName, rider.user_detail?.lastName);
+            return false;
+        }
+
         if (selectedFilters.length === 0) {
             const riderName = `${rider.user_detail?.firstName || ''} ${rider.user_detail?.lastName || ''}`.toLowerCase();
             const riderEmail = rider.user_detail?.useremail?.toLowerCase() || '';
@@ -94,11 +117,77 @@ const Rider = () => {
         });
     });
 
+    console.log("Total riders:", riders?.length);
+    console.log("Filtered riders (non-blocked):", filteredRiders?.length);
+    console.log("Blocked riders:", riders?.filter(rider => rider.user_detail?.accountStatus?.isBlocked === true)?.length);
+    
+    // Debug blocked riders details
+    const blockedRiders = riders?.filter(rider => 
+        rider.user_detail?.accountStatus?.isBlocked === true && 
+        rider.user_detail?.userType === "Rider"
+    );
+
+    // Blocked Riders List UI (Blocklist)
+    // This will render a blocklist of all blocked riders
+
+    {/* Blocked Riders List (Blocklist) */}
+    <div style={{ margin: "24px 0", padding: "16px", background: "#f8f8fa", borderRadius: "8px" }}>
+        <h3 style={{ marginBottom: "12px", color: "#6c4def" }}>Blocked Riders List</h3>
+        {blockedRiders && blockedRiders.length > 0 ? (
+            <table style={{ width: "100%", borderCollapse: "collapse", background: "#fff", borderRadius: "8px", overflow: "hidden" }}>
+                <thead>
+                    <tr style={{ background: "#ece9fc" }}>
+                        <th style={{ padding: "8px", textAlign: "left" }}>#</th>
+                        <th style={{ padding: "8px", textAlign: "left" }}>Name</th>
+                        <th style={{ padding: "8px", textAlign: "left" }}>User ID</th>
+                        <th style={{ padding: "8px", textAlign: "left" }}>Email</th>
+                        <th style={{ padding: "8px", textAlign: "left" }}>Reason</th>
+                        <th style={{ padding: "8px", textAlign: "left" }}>Blocked At</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {blockedRiders.map((rider, idx) => (
+                        <tr key={rider.userId} style={{ borderBottom: "1px solid #eee" }}>
+                            <td style={{ padding: "8px" }}>{idx + 1}</td>
+                            <td style={{ padding: "8px" }}>
+                                {rider.user_detail?.firstName} {rider.user_detail?.lastName}
+                            </td>
+                            <td style={{ padding: "8px" }}>{rider.userId}</td>
+                            <td style={{ padding: "8px" }}>{rider.user_detail?.useremail}</td>
+                            <td style={{ padding: "8px" }}>
+                                {rider.user_detail?.accountStatus?.reason || "N/A"}
+                            </td>
+                            <td style={{ padding: "8px" }}>
+                                {rider.user_detail?.accountStatus?.timestamp
+                                    ? new Date(rider.user_detail.accountStatus.timestamp).toLocaleString()
+                                    : "N/A"}
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        ) : (
+            <div style={{ color: "#888" }}>No blocked riders found.</div>
+        )}
+    </div>
+    console.log("Blocked riders for popup:", blockedRiders?.length);
+    console.log("Blocked riders details:", blockedRiders?.map(rider => ({
+        name: `${rider.user_detail?.firstName} ${rider.user_detail?.lastName}`,
+        userId: rider.userId,
+        accountStatus: rider.user_detail?.accountStatus,
+        userType: rider.user_detail?.userType
+    })));
+
     // Pagination logic
     const totalPages = Math.ceil(filteredRiders.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, filteredRiders.length);
     const paginatedData = filteredRiders.slice(startIndex, endIndex);
+
+    // Reset current page when filtered data changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [filteredRiders.length]);
 
     // Pagination handlers
     const handlePageChange = (direction) => {
@@ -112,6 +201,64 @@ const Rider = () => {
     function handleFilter() {
         setShowFilterPopup(!showFilterPopup);
     }
+
+    // Handle unblock rider function
+
+ const handleUnblockRider = async (userId) => {
+  console.log("Unblocking user:", userId);
+  try {
+    const { error } = await supabase
+      .from("Users")
+      .update({
+        accountStatus: {
+          isBlocked: false,
+          reason: null,
+          timestamp: Date.now(),
+        },
+        updated_at: Date.now(),
+      })
+      .eq("id", userId); // ✅ This should work since userId is correct now
+
+    if (error) throw error;
+
+    setRiders((prevUsers) =>
+      prevUsers.map((rider) =>
+        rider.userId === userId
+          ? {
+              ...rider,
+              user_detail: {
+                ...rider.user_detail,
+                accountStatus: {
+                  isBlocked: false,
+                  reason: null,
+                  timestamp: Date.now(),
+                },
+              },
+            }
+          : rider
+      )
+    );
+    toast.success("User unblocked successfully!");
+  } catch (err) {
+    toast.error("Failed to unblock user");
+    console.error(err);
+  }
+};
+
+
+    // Auto-refresh riders when component mounts or when riders are updated
+    useEffect(() => {
+        fetchRiders();
+    }, []);
+
+    // Listen for rider updates
+    useEffect(() => {
+        const handler = () => fetchRiders();
+        window.addEventListener('rider-status-updated', handler);
+        return () => {
+            window.removeEventListener('rider-status-updated', handler);
+        };
+    }, []);
 
     console.log(riders, "riders");
 
@@ -148,6 +295,12 @@ const Rider = () => {
                                     <CiFilter className="w-[24px] h-[24px] me-[12px]" />
                                 </span>
                                 Filter
+                            </button>
+                            <button
+                                className="bg-[#0832DE] text-white px-[15px] py-2 rounded-[10px] flex items-center"
+                                onClick={() => setShowBlockedOnly(true)}
+                            >
+                                Block list
                             </button>
                         </div>
                     </div>
@@ -308,6 +461,15 @@ const Rider = () => {
                                 </button>
                             </div>
                         </div>
+                    )}
+
+                    {/* Blocked Riders Popup */}
+                    {showBlockedOnly && (
+                        <BlockedUserPopups
+                            blockedUsers={blockedRiders}
+                            onClose={() => setShowBlockedOnly(false)}
+                            onUnblock={handleUnblockRider}
+                        />
                     )}
                 </div>}
             <Outlet />

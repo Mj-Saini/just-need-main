@@ -1062,7 +1062,7 @@ const pendingBusinessUsers = users.filter(user =>
       )}
       {showBlockedOnly && (
         <BlockedUserPopups
-          blockedUsers={users.filter(user => user?.accountStatus?.isBlocked === true)}
+          blockedUsers={users.filter(user => user?.accountStatus?.isBlocked === true && user?.userType !== "Rider")}
           onClose={() => setShowBlockedOnly(false)}
           onUnblock={handleUnblockUser}
         />
