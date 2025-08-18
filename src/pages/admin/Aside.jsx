@@ -136,7 +136,7 @@ let { data: adminstats, error } = await supabase
                     ) : null}
                   </div>
                 </div>
-                <div className="flex items-center mt-[12px]">
+                {/* <div className="flex items-center mt-[12px]">
                   {index === 3 ? (
                     <p className="text-[12px] font-normal flex items-center gap-1.5">
                       ₹1658.00{" "}
@@ -152,7 +152,7 @@ let { data: adminstats, error } = await supabase
                   <p className="text-[12px] font-normal leading-[15px] ms-[10px]">
                     {card.description}
                   </p>
-                </div>
+                </div> */}
                 {/* Absolute div to show on hover */}
                 <img
                   className="absolute z-[10] start-[0px] bottom-[20px] "

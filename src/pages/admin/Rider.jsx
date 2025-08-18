@@ -6,17 +6,27 @@ import { supabase } from '../../store/supabaseCreateClient';
 import BlockedUserPopups from '../../Components/Popups/BlockedUserPopups';
 import { toast } from 'react-toastify';
 
+
+
+
 const Rider = () => {
     const location = useLocation();
     const [riders, setRiders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
+    // For rider list
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
     const [showFilterPopup, setShowFilterPopup] = useState(false);
     const [selectedFilters] = useState(["name"]);
     const [searchPlaceholder] = useState("Search by name, email, or ID");
     const [showBlockedOnly, setShowBlockedOnly] = useState(false);
+    const [ridingRequests, setRidingRequests] = useState([]);
+    const [riderDetailsTab, setRiderDetailsTab] = useState("riderList");
+
+    // For rider history
+const [currentPageRiderHistory, setCurrentPageRiderHistory] = useState(1);
+const [itemsPerPageRiderHistory] = useState(10);
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -31,10 +41,29 @@ const Rider = () => {
         return `${day} ${month} ${year} | ${formattedHours}:${formattedMinutes} ${ampm}`;
     };
 
+
+     async function getRidingRequests() {
+        const { data, error } = await supabase
+            .from("RidingRequest")   // your table name
+            .select("*")             // fetch all columns
+
+        if (error) {
+            console.error("Error fetching data:", error)
+            return []
+        }
+
+        setRidingRequests(data);
+        return data
+    }
+
+    // call function
+    useEffect(() => {
+        getRidingRequests()
+    }, [])
     // Move fetchRiders outside useEffect
     const fetchRiders = async () => {
         setLoading(true);
-        
+
         // First, get all users who are riders with their accountStatus
         let { data: usersData, error: usersError } = await supabase
             .from('Users')
@@ -74,7 +103,7 @@ const Rider = () => {
             };
         });
 
-        console.log("Combined riders data:", combinedRiders);
+        // console.log("Combined riders data:", combinedRiders);
         setRiders(combinedRiders || []);
         setLoading(false);
     };
@@ -117,20 +146,18 @@ const Rider = () => {
         });
     });
 
-    console.log("Total riders:", riders?.length);
-    console.log("Filtered riders (non-blocked):", filteredRiders?.length);
-    console.log("Blocked riders:", riders?.filter(rider => rider.user_detail?.accountStatus?.isBlocked === true)?.length);
-    
+    // console.log("Total riders:", riders?.length);
+    // console.log("Filtered riders (non-blocked):", filteredRiders?.length);
+    // console.log("Blocked riders:", riders?.filter(rider => rider.user_detail?.accountStatus?.isBlocked === true)?.length);
+
     // Debug blocked riders details
-    const blockedRiders = riders?.filter(rider => 
-        rider.user_detail?.accountStatus?.isBlocked === true && 
+    const blockedRiders = riders?.filter(rider =>
+        rider.user_detail?.accountStatus?.isBlocked === true &&
         rider.user_detail?.userType === "Rider"
     );
 
-    // Blocked Riders List UI (Blocklist)
-    // This will render a blocklist of all blocked riders
 
-    {/* Blocked Riders List (Blocklist) */}
+    {/* Blocked Riders List (Blocklist) */ }
     <div style={{ margin: "24px 0", padding: "16px", background: "#f8f8fa", borderRadius: "8px" }}>
         <h3 style={{ marginBottom: "12px", color: "#6c4def" }}>Blocked Riders List</h3>
         {blockedRiders && blockedRiders.length > 0 ? (
@@ -170,19 +197,25 @@ const Rider = () => {
             <div style={{ color: "#888" }}>No blocked riders found.</div>
         )}
     </div>
-    console.log("Blocked riders for popup:", blockedRiders?.length);
-    console.log("Blocked riders details:", blockedRiders?.map(rider => ({
-        name: `${rider.user_detail?.firstName} ${rider.user_detail?.lastName}`,
-        userId: rider.userId,
-        accountStatus: rider.user_detail?.accountStatus,
-        userType: rider.user_detail?.userType
-    })));
+    // console.log("Blocked riders for popup:", blockedRiders?.length);
+    // console.log("Blocked riders details:", blockedRiders?.map(rider => ({
+    //     name: `${rider.user_detail?.firstName} ${rider.user_detail?.lastName}`,
+    //     userId: rider.userId,
+    //     accountStatus: rider.user_detail?.accountStatus,
+    //     userType: rider.user_detail?.userType
+    // })));
 
-    // Pagination logic
+    // rider list Pagination logic
     const totalPages = Math.ceil(filteredRiders.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = Math.min(startIndex + itemsPerPage, filteredRiders.length);
     const paginatedData = filteredRiders.slice(startIndex, endIndex);
+
+    // Rider history pagination
+const totalPagesRiderHistory = Math.ceil(ridingRequests.length / itemsPerPageRiderHistory);
+const startIndexRiderHistory = (currentPageRiderHistory - 1) * itemsPerPageRiderHistory;
+const endIndexRiderHistory = Math.min(startIndexRiderHistory + itemsPerPageRiderHistory, ridingRequests.length);
+const paginatedRiderHistory = ridingRequests.slice(startIndexRiderHistory, endIndexRiderHistory);
 
     // Reset current page when filtered data changes
     useEffect(() => {
@@ -198,52 +231,60 @@ const Rider = () => {
         }
     };
 
+    const handlePageChangeRiderHistory = (direction) => {
+    if (direction === "next" && currentPageRiderHistory < totalPagesRiderHistory) {
+        setCurrentPageRiderHistory(currentPageRiderHistory + 1);
+    } else if (direction === "prev" && currentPageRiderHistory > 1) {
+        setCurrentPageRiderHistory(currentPageRiderHistory - 1);
+    }
+};
+
     function handleFilter() {
         setShowFilterPopup(!showFilterPopup);
     }
 
     // Handle unblock rider function
 
- const handleUnblockRider = async (userId) => {
-  console.log("Unblocking user:", userId);
-  try {
-    const { error } = await supabase
-      .from("Users")
-      .update({
-        accountStatus: {
-          isBlocked: false,
-          reason: null,
-          timestamp: Date.now(),
-        },
-        updated_at: Date.now(),
-      })
-      .eq("id", userId); // ✅ This should work since userId is correct now
+    const handleUnblockRider = async (userId) => {
+        console.log("Unblocking user:", userId);
+        try {
+            const { error } = await supabase
+                .from("Users")
+                .update({
+                    accountStatus: {
+                        isBlocked: false,
+                        reason: null,
+                        timestamp: Date.now(),
+                    },
+                    updated_at: Date.now(),
+                })
+                .eq("id", userId); // ✅ This should work since userId is correct now
 
-    if (error) throw error;
+            if (error) throw error;
 
-    setRiders((prevUsers) =>
-      prevUsers.map((rider) =>
-        rider.userId === userId
-          ? {
-              ...rider,
-              user_detail: {
-                ...rider.user_detail,
-                accountStatus: {
-                  isBlocked: false,
-                  reason: null,
-                  timestamp: Date.now(),
-                },
-              },
-            }
-          : rider
-      )
-    );
-    toast.success("User unblocked successfully!");
-  } catch (err) {
-    toast.error("Failed to unblock user");
-    console.error(err);
-  }
-};
+            setRiders((prevUsers) =>
+                prevUsers.map((rider) =>
+                    rider.userId === userId
+                        ? {
+                            ...rider,
+                            user_detail: {
+                                ...rider.user_detail,
+                                accountStatus: {
+                                    isBlocked: false,
+                                    reason: null,
+                                    timestamp: Date.now(),
+                                },
+                            },
+                        }
+                        : rider
+                )
+            );
+            toast.success("User unblocked successfully!");
+        } catch (err) {
+            toast.error("Failed to unblock user");
+            console.error(err);
+        }
+    };
 
 
     // Auto-refresh riders when component mounts or when riders are updated
@@ -260,7 +301,8 @@ const Rider = () => {
         };
     }, []);
 
-    console.log(riders, "riders");
+   
+    console.log(ridingRequests, 'sdsds')
 
     return (
         <>
@@ -269,9 +311,16 @@ const Rider = () => {
                     <div className="flex justify-between items-center mt-[15px]">
                         <div className="flex items-center gap-6">
                             <button
+                                onClick={() => setRiderDetailsTab('riderList')}
                                 className="text-base xl:text-[20px] font-medium text-[#fff] py-2 px-4 rounded-[10px] bg-[#0832DE]"
                             >
                                 Riders List
+                            </button>
+                            <button
+                                onClick={() => setRiderDetailsTab('riderHistory')}
+                                className="text-base xl:text-[20px] font-medium text-[#fff] py-2 px-4 rounded-[10px] bg-[#0832DE]"
+                            >
+                                Rider History
                             </button>
                         </div>
 
@@ -305,8 +354,9 @@ const Rider = () => {
                         </div>
                     </div>
 
-
-                    <div className="overflow-x-auto mt-5">
+                    {riderDetailsTab === 'riderList' &&
+                        <>
+                        <div className="overflow-x-auto mt-5">
                         <table className="w-full text-left border-separate border-spacing-4 whitespace-nowrap rounded-[10px]">
                             <thead>
                                 <tr className="py-[8px]">
@@ -431,11 +481,8 @@ const Rider = () => {
                                 )}
                             </tbody>
                         </table>
-                    </div>
-
-
-
-                    {/* Pagination */}
+                        </div>
+                         {/* Pagination */}
                     {paginatedData.length > 0 && (
                         <div className="flex justify-between items-center mt-6">
                             <div className="text-sm text-gray-600">
@@ -462,6 +509,170 @@ const Rider = () => {
                             </div>
                         </div>
                     )}
+                        </>
+                    }
+                    {riderDetailsTab === 'riderHistory' &&
+                        <>
+                        <div className="overflow-x-auto mt-5">
+                        <table className="w-full text-left border-separate border-spacing-4 whitespace-nowrap rounded-[10px]">
+                            <thead>
+                                <tr className="py-[8px]">
+                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                                        S.No
+                                    </th>
+                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                                        Rider Name
+                                    </th>
+                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                                        Email
+                                    </th>
+                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                                        Phone
+                                    </th>
+                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                                        Pick Address
+                                    </th>
+                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
+                                       Drop Address
+                                    </th>
+                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[250px]">
+                                       Rider Detail
+                                    </th>
+                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[100px]">
+                                        Total Fare
+                                    </th>
+                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[200px]">
+                                        Created At
+                                    </th>
+                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                                        Offer Parcel
+                                    </th>
+                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                                        Status
+                                    </th>
+
+                                </tr>
+                                <tr>
+                                    <td colSpan="10">
+                                        <div className="w-full border border-dashed border-[#00000066]"></div>
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan="10" className="text-center py-4">
+                                            Loading...
+                                        </td>
+                                    </tr>
+                                ) : paginatedRiderHistory.length === 0 ? (
+                                    <tr>
+                                        <td colSpan="10" className="text-center py-4">
+                                            No riders found
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    paginatedRiderHistory?.map((rider, index) => {
+                                        return (
+                                            <tr key={rider.id}>
+                                                <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                                                    {index + 1}
+                                                </td>
+                                                <td className="px-[19px] md:px-[24px] text-[#6C4DEF] flex items-center gap-2 min-w-[160px]">
+                                                    <Link
+                                                        className="flex gap-2"
+                                                        // to={`riderDetails/${rider.id}`}
+                                                    >
+                                                        {rider.userDetail?.firstName} {rider.userDetail?.lastName}
+                                                    </Link>
+                                                </td>
+                                                <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                                                    {rider.userDetail?.useremail || 'N/A'}
+                                                </td>
+                                                <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                                                    {rider.userDetail?.mobile_number || 'N/A'}
+                                                </td>
+                                                <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                                                    <span className="capitalize">{rider.dropAddress || 'N/A'}</span>
+                                                </td>
+                                                <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                                                    {rider.pickAddress || 'N/A'}
+                                                </td>
+                                                <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000] w-[120px] truncate text-center">
+                                                    {rider.riderDetail || 'N/A'}
+                                                </td>
+                                                <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000] text-center">
+                                                    {rider.totalFare || 0}
+                                                </td>
+                                                <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                                                    {formatDate(rider.created_at)}
+                                                </td>
+                                                <td>
+                                                    <div className="flex justify-center items-center">
+                                                        <span
+                                                            className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${rider.offerParcel
+                                                                ? "text-[#008000] bg-[#00800012]"
+                                                                : "text-[#FF0000] bg-[#ff000012]"
+                                                                }`}
+                                                        >
+                                                            {rider.isParcel ? "Yes" : "No"}
+                                                        </span>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div className="flex justify-center items-center">
+                                                        <span
+                                                            className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${rider.status === "Active"
+                                                                ? "bg-[#00800012] text-[#008000]"
+                                                                : rider.status === "Rejected" ? "bg-[#2b29291a] text-[#800000]" : rider.status === "Approved" ? "bg-[#6C4DEF1A] text-[#6C4DEF]" : "bg-[#ffa50024] text-[#ffa500]"
+                                                                }`}
+                                                        >
+                                                            {rider.status}
+                                                        </span>
+                                                    </div>
+                                                </td>
+
+                                            </tr>
+                                        );
+                                    })
+                                )}
+                            </tbody>
+                        </table>
+                        </div>
+                         {/* Pagination */}
+                   {paginatedRiderHistory.length > 0 && riderDetailsTab === 'riderHistory' && (
+    <div className="flex justify-between items-center mt-6">
+        <div className="text-sm text-gray-600">
+            Showing {startIndexRiderHistory + 1} to {endIndexRiderHistory} of {ridingRequests.length} requests
+        </div>
+        <div className="flex gap-2">
+            <button
+                onClick={() => handlePageChangeRiderHistory("prev")}
+                disabled={currentPageRiderHistory === 1}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+                Previous
+            </button>
+            <span className="px-3 py-1">
+                Page {currentPageRiderHistory} of {totalPagesRiderHistory}
+            </span>
+            <button
+                onClick={() => handlePageChangeRiderHistory("next")}
+                disabled={currentPageRiderHistory === totalPagesRiderHistory}
+                className="px-3 py-1 border rounded disabled:opacity-50"
+            >
+                Next
+            </button>
+        </div>
+    </div>
+)}
+                        </>
+                    }
+
+
+
+
+                   
 
                     {/* Blocked Riders Popup */}
                     {showBlockedOnly && (
