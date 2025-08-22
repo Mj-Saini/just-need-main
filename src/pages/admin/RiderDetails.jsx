@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import MechanicImage from "../../assets/png/user-profile-icon.png";
 import DisableProviderPopUp from "../../Components/Popups/DisableProviderPopUp";
 import DenialReasonPopUp from "../../Components/Popups/DenialReasonPopUp";
@@ -16,6 +16,13 @@ function RiderDetails() {
   const [loading, setLoading] = useState(true);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [ridingRequests, setRidingRequests] = useState([]);
+
+  const [riderDetailsTab, setRiderDetailsTab] = useState("riderDetails");
+
+  // For rider history
+  const [currentPageRiderHistory, setCurrentPageRiderHistory] = useState(1);
+  const [itemsPerPageRiderHistory] = useState(10);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -67,6 +74,25 @@ function RiderDetails() {
     fetchRiderData();
   }, [id]);
 
+  async function getRidingRequests() {
+    const { data, error } = await supabase
+      .from("RidingRequest")   // your table name
+      .select("*")             // fetch all columns
+
+    if (error) {
+      console.error("Error fetching data:", error)
+      return []
+    }
+
+    setRidingRequests(data);
+    return data
+  }
+
+  // call function
+  useEffect(() => {
+    getRidingRequests()
+  }, [])
+
   const handlePopupDisable = () => {
     setShowPopupDisable(!showPopupDisable);
   };
@@ -78,7 +104,7 @@ function RiderDetails() {
     try {
       const { error } = await supabase
         .from('RiderDetailsView')
-        .update({ 
+        .update({
           status: "Approved"
         })
         .eq('userId', rider?.userId);
@@ -87,8 +113,8 @@ function RiderDetails() {
         console.error("Error approving rider:", error);
         toast.error("Failed to approve rider");
       } else {
-        setRider(prev => ({ 
-          ...prev, 
+        setRider(prev => ({
+          ...prev,
           status: "Approved"
         }));
         toast.success("Rider approved successfully!");
@@ -118,9 +144,19 @@ function RiderDetails() {
 
   if (loading) return <div className="flex justify-center items-center h-64">Loading...</div>;
   if (!rider) return <div className="flex justify-center items-center h-64">Rider not found</div>;
+  // Rider history pagination
+  const totalPagesRiderHistory = Math.ceil(ridingRequests.length / itemsPerPageRiderHistory);
+  const startIndexRiderHistory = (currentPageRiderHistory - 1) * itemsPerPageRiderHistory;
+  const endIndexRiderHistory = Math.min(startIndexRiderHistory + itemsPerPageRiderHistory, ridingRequests.length);
+  const paginatedRiderHistory = ridingRequests.slice(startIndexRiderHistory, endIndexRiderHistory);
 
-
-
+  const handlePageChangeRiderHistory = (direction) => {
+    if (direction === "next" && currentPageRiderHistory < totalPagesRiderHistory) {
+      setCurrentPageRiderHistory(currentPageRiderHistory + 1);
+    } else if (direction === "prev" && currentPageRiderHistory > 1) {
+      setCurrentPageRiderHistory(currentPageRiderHistory - 1);
+    }
+  };
   return (
     <div className="px-4">
       {/* Block/Unblock Button - always visible */}
@@ -143,25 +179,25 @@ function RiderDetails() {
         </button>
       </div>
 
-        {/* Full width blue container with profile picture */}
-        <div className="bg-[#6C4DEF] px-[30px] py-5 rounded-[10px] w-full flex ">
-          <div className="flex items-center w-1/5">
-            <div className="pe-5 border-e-[1px] border-[#FFFFFF66] w-full flex flex-col items-center">
-              <img
-                onClick={() => openImageModal(rider.licensePhoto)}
-                className="w-[78px] h-[78px] rounded-full object-cover cursor-pointer"
-                src={rider.licensePhoto || MechanicImage}
-                alt="rider"
-              />
-              <h1 className="font-medium lg:text-base xl:text-lg text-white mt-2.5 text-center">
-                Rider
-              </h1>
-              <h2 className="text-sm font-normal text-white mt-1 text-center">
-                {rider.vehicleType}
-              </h2>
-            </div>
+      {/* Full width blue container with profile picture */}
+      <div className="bg-[#6C4DEF] px-[30px] py-5 rounded-[10px] w-full flex ">
+        <div className="flex items-center w-1/5">
+          <div className="pe-5 border-e-[1px] border-[#FFFFFF66] w-full flex flex-col items-center">
+            <img
+              onClick={() => openImageModal(rider.licensePhoto)}
+              className="w-[78px] h-[78px] rounded-full object-cover cursor-pointer"
+              src={rider.licensePhoto || MechanicImage}
+              alt="rider"
+            />
+            <h1 className="font-medium lg:text-base xl:text-lg text-white mt-2.5 text-center">
+              Rider
+            </h1>
+            <h2 className="text-sm font-normal text-white mt-1 text-center">
+              {rider.vehicleType}
+            </h2>
           </div>
-             {/* Rider Details Section */}
+        </div>
+        {/* Rider Details Section */}
         <div className=" w-4/5">
           <div className="bg-[#F1F1F1] rounded-[10px] p-[15px] pb-7">
             <div className="flex items-center justify-between">
@@ -188,13 +224,12 @@ function RiderDetails() {
               ) : (
                 <div className="flex items-center">
                   <span
-                    className={`px-3 py-2 rounded-[10px] text-sm font-medium ${
-                      rider?.status === "Approved"
+                    className={`px-3 py-2 rounded-[10px] text-sm font-medium ${rider?.status === "Approved"
                         ? "bg-green-100 text-green-700 border border-green-300"
                         : rider?.status === "Rejected"
-                        ? "bg-red-100 text-red-700 border border-red-300"
-                        : "bg-gray-100 text-gray-700 border border-gray-300"
-                    }`}
+                          ? "bg-red-100 text-red-700 border border-red-300"
+                          : "bg-gray-100 text-gray-700 border border-gray-300"
+                      }`}
                   >
                     {rider?.status || "Unknown"}
                   </span>
@@ -318,66 +353,257 @@ function RiderDetails() {
             </div>
           </div>
         </div>
-       
 
-     
+
+
       </div>
 
-      {/* License Photo Section */}
-      {rider?.licensePhoto && (
-        <div className="mt-[30px]">
-          <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066]">
-            License Photo
-          </p>
-          <div className="mt-4">
-            <img
-              onClick={() => openImageModal(rider.licensePhoto)}
-              src={rider.licensePhoto}
-              alt="License"
-              className="w-64 h-40 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-            />
-          </div>
-        </div>
-      )}
-      {/* Rider Photos Section */}
-      {rider?.riderPhoto && rider.riderPhoto.length > 0 && (
-        <div className="mt-[30px]">
-          <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066]">
-            Rider Photos
-          </p>
-          <div className="flex flex-wrap gap-4 mt-4">
-            {rider.riderPhoto.map((photo, index) => (
-              <img
-                key={index}
-                onClick={() => openImageModal(photo)}
-                src={photo}
-                alt={`Rider ${index + 1}`}
-                className="w-64 h-40 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-              />
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="flex items-center  gap-4 mt-10 md:mt-14">
+        <button
+          onClick={() => setRiderDetailsTab('riderDetails')}
+          className="text-base xl:text-[20px] font-medium text-[#fff] py-2 px-4 rounded-[10px] bg-[#0832DE]"
+        >
+          Rider Details
+        </button>
+        <button
+          onClick={() => setRiderDetailsTab('riderHistory')}
+          className="text-base xl:text-[20px] font-medium text-[#fff] py-2 px-4 rounded-[10px] bg-[#0832DE]"
+        >
+          Rider History
+        </button>
+      </div>
 
-      {/* Vehicle Photos Section */}
-      {rider?.vehiclePhoto && rider.vehiclePhoto.length > 0 && (
-        <div className="mt-[30px]">
-          <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066]">
-            Vehicle Photos
-          </p>
-          <div className="flex flex-wrap gap-4 mt-4">
-            {rider.vehiclePhoto.map((photo, index) => (
-              <img
-                key={index}
-                onClick={() => openImageModal(photo)}
-                src={photo}
-                alt={`Vehicle ${index + 1}`}
-                className="w-64 h-40 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
-              />
-            ))}
+      {riderDetailsTab === 'riderDetails' &&
+        <>
+          {/* License Photo Section */}
+          {rider?.licensePhoto && (
+            <div className="mt-[30px]">
+              <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066]">
+                License Photo
+              </p>
+              <div className="mt-4">
+                <img
+                  onClick={() => openImageModal(rider.licensePhoto)}
+                  src={rider.licensePhoto}
+                  alt="License"
+                  className="w-64 h-40 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                />
+              </div>
+            </div>
+          )}
+          {/* Rider Photos Section */}
+          {rider?.riderPhoto && rider.riderPhoto.length > 0 && (
+            <div className="mt-[30px]">
+              <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066]">
+                Rider Photos
+              </p>
+              <div className="flex flex-wrap gap-4 mt-4">
+                {rider.riderPhoto.map((photo, index) => (
+                  <img
+                    key={index}
+                    onClick={() => openImageModal(photo)}
+                    src={photo}
+                    alt={`Rider ${index + 1}`}
+                    className="w-64 h-40 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Vehicle Photos Section */}
+          {rider?.vehiclePhoto && rider.vehiclePhoto.length > 0 && (
+            <div className="mt-[30px]">
+              <p className="font-medium text-lg leading-[22px] text-black pb-2.5 border-b-[0.5px] border-dashed border-[#00000066]">
+                Vehicle Photos
+              </p>
+              <div className="flex flex-wrap gap-4 mt-4">
+                {rider.vehiclePhoto.map((photo, index) => (
+                  <img
+                    key={index}
+                    onClick={() => openImageModal(photo)}
+                    src={photo}
+                    alt={`Vehicle ${index + 1}`}
+                    className="w-64 h-40 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+        </>}
+      {riderDetailsTab === 'riderHistory' &&
+        <>
+          <div className="overflow-x-auto mt-5">
+            <table className="w-full text-left border-separate border-spacing-4 whitespace-nowrap rounded-[10px]">
+              <thead>
+                <tr className="py-[8px]">
+                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                    S.No
+                  </th>
+                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                    Rider Name
+                  </th>
+                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                    Email
+                  </th>
+                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                    Phone
+                  </th>
+                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                    Pick Address
+                  </th>
+                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
+                    Drop Address
+                  </th>
+                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
+                   Driving License Number
+                  </th>
+                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
+                  Vehicle Type
+                  </th>
+                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
+                 Vehicle Registration Number
+                  </th>
+
+                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[100px]">
+                    Total Fare
+                  </th>
+                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[200px]">
+                    Created At
+                  </th>
+                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                    Offer Parcel
+                  </th>
+                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                    Status
+                  </th>
+
+                </tr>
+                <tr>
+                  <td colSpan="10">
+                    <div className="w-full border border-dashed border-[#00000066]"></div>
+                  </td>
+                </tr>
+              </thead>
+              <tbody>
+                {loading ? (
+                  <tr>
+                    <td colSpan="10" className="text-center py-4">
+                      Loading...
+                    </td>
+                  </tr>
+                ) : paginatedRiderHistory.length === 0 ? (
+                  <tr>
+                    <td colSpan="10" className="text-center py-4">
+                      No riders found
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedRiderHistory?.map((rider, index) => {
+                    console.log(rider, "rider data");
+                    return (
+                      <tr key={rider.id}>
+                        <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                          {index + 1}
+                        </td>
+                        <td className="px-[19px] md:px-[24px] text-[#6C4DEF] flex items-center gap-2 min-w-[160px]">
+                          <Link
+                            className="flex gap-2"
+                          // to={`riderDetails/${rider.id}`}
+                          >
+                            {rider.userDetail?.firstName} {rider.userDetail?.lastName}
+                          </Link>
+                        </td>
+                        <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                          {rider.userDetail?.useremail || 'N/A'}
+                        </td>
+                        <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                          {rider.userDetail?.mobile_number || 'N/A'}
+                        </td>
+                        <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                          <span className="capitalize">{rider.pickAddress || 'N/A'}</span>
+                        </td>
+                        <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                          {rider.dropAddress || 'N/A'}
+                        </td>
+                        <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                          {rider.riderDetail?.drivingLicenseNumber || 'N/A'}
+                        </td>
+                        <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                          {rider.riderDetail?.vehicleType || 'N/A'}
+                        </td>
+                        <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                          {rider.riderDetail?.vehicleRegistrationNumber || 'N/A'}
+                        </td>
+
+                        <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000] text-center">
+                          {rider.totalFare || 0}
+                        </td>
+                        <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                          {formatDate(rider.created_at)}
+                        </td>
+                        <td>
+                          <div className="flex justify-center items-center">
+                            <span
+                              className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${rider.offerParcel
+                                ? "text-[#008000] bg-[#00800012]"
+                                : "text-[#FF0000] bg-[#ff000012]"
+                                }`}
+                            >
+                              {rider.isParcel ? "Yes" : "No"}
+                            </span>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="flex justify-center items-center">
+                            <span
+                              className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${rider.status === "Active"
+                                ? "bg-[#00800012] text-[#008000]"
+                                : rider.riderDetail?.status === "Rejected" ? "bg-[#2b29291a] text-[#800000]" : rider.status === "Approved" ? "bg-[#6C4DEF1A] text-[#6C4DEF]" : "bg-[#ffa50024] text-[#ffa500]"
+                                }`}
+                            >
+                              {rider.riderDetail?.status || 'N/A'}
+                            </span>
+                          </div>
+                        </td>
+
+
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
           </div>
-        </div>
-      )}
+          {/* Pagination */}
+          {paginatedRiderHistory.length > 0 && riderDetailsTab === 'riderHistory' && (
+            <div className="flex justify-between items-center mt-6">
+              <div className="text-sm text-gray-600">
+                Showing {startIndexRiderHistory + 1} to {endIndexRiderHistory} of {ridingRequests.length} requests
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handlePageChangeRiderHistory("prev")}
+                  disabled={currentPageRiderHistory === 1}
+                  className="px-3 py-1 border rounded disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <span className="px-3 py-1">
+                  Page {currentPageRiderHistory} of {totalPagesRiderHistory}
+                </span>
+                <button
+                  onClick={() => handlePageChangeRiderHistory("next")}
+                  disabled={currentPageRiderHistory === totalPagesRiderHistory}
+                  className="px-3 py-1 border rounded disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          )}
+        </>
+      }
 
       {/* Image Modal */}
       {isImageModalOpen && selectedImage && (
