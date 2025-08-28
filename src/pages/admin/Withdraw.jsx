@@ -7,14 +7,14 @@ import DisablePopUp from '../../Components/Popups/DisablePopUp';
 import { useNavigate } from 'react-router-dom';
 import ApproveIcon from '../../assets/png/Approve_icon.svg.png';
 import RejectIcon from '../../assets/png/reject-icon.jpg';
-import { useCustomerContext } from '../../store/CustomerContext';
+// import { useCustomerContext } from '../../store/CustomerContext';
 
 
 // import { useUserContext } from '../../store/UserContext';
 
 
 const Withdraw = () => {
-  const { users } = useCustomerContext();
+  // const { users } = useCustomerContext();
   // const { sendFCMMessage } = useUserContext();
   const navigate = useNavigate();
 
@@ -42,29 +42,7 @@ const Withdraw = () => {
     fetchWithdraws();
   }, []);
 
-  const sendFcmNotification = async () => {
-  try {
-    const token = 'd1FMfLkvS-azXi6gV2bRGm:APA91bEk8AvHENGf8LQBHZ2ELCyoxMuMsBZO5fZTtrPiidMLyAu2KKt9bJwKgQjWwygWcAD50MfIDeY66iKB-eJESSb0dV_91QG1_9BYB-O1byQbnsD4zjM';
-
-    const response = await fetch('/api/send-notification', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ token })
-    });
-
-    const data = await response.json();
-    if (response.ok) {
-      console.log('Notification sent:', data);
-    } else {
-      console.error('Error:', data);
-    }
-  } catch (error) {
-    console.error('Request failed:', error);
-  }
-};
-
+ 
 
   // Copy UPI ID to clipboard
   const handleCopy = (upiId) => {
@@ -87,32 +65,7 @@ const Withdraw = () => {
     // Update status in Supabase
     await supabase.from('Withdraw').update({ status: newStatus }).eq('id', id);
 
-   // Find user token for FCM
-  const currentRequest = requests.find((req) => req.id === id);
-  if (currentRequest) {
-    const userToken = users.find((u) => u.id === currentRequest.userId)?.msgToken;
 
-    if (userToken) {
-      const messageTitle = "Just Needs";
-      const messageBody = type === 'Approve'
-        ? `✅ Your withdrawal request of ₹${currentRequest.amount} has been approved.`
-        : `❌ Your withdrawal request of ₹${currentRequest.amount} has been rejected.`;
-
-      try {
-        const result = await sendFcmNotification (userToken, messageTitle, messageBody);
-        
-        if (result.success) {
-          console.log(`Notification sent to user ${currentRequest.user_name}`);
-        } else {
-          console.warn('Notification failed:', result.error);
-        }
-      } catch (error) {
-        console.error('Error sending notification:', error);
-      }
-    } else {
-      console.warn('No FCM token found for user:', currentRequest.userId);
-    }
-  }
     
   
 

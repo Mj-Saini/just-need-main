@@ -172,8 +172,6 @@
 
 import { createContext, useContext, useState } from "react";
 import { supabase } from "./supabaseCreateClient";
-const apiKey =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFteHp1dG5kYnprcGNjZmZ6b3h5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzk3Njg2MDUsImV4cCI6MjA1NTM0NDYwNX0.96QZYdqt7jyIw-w0PEcqXqwToFUAChPCJMzo641WU_k";
 
 const UserContext = createContext();
 
@@ -183,42 +181,11 @@ export const UserProvider = ({ children }) => {
   console.log(supabase,"supabase");
   const [userName, setUserName] = useState("");
 
- const sendFCMMessage = async (userToken, bodyText) => {
-    try {
-      if (!userToken) {
-        throw new Error("FCM token not found for user");
-      }
 
-      // Use your Supabase function endpoint instead of direct FCM API
-      const response = await fetch('https://fcm.googleapis.com/v1/projects/just-need-780a4/messages:send', {
-        method: "POST",
-        headers: { 
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({ 
-          token: userToken, 
-          title: "Just Needs",
-          body: bodyText 
-        })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to send notification: ${errorText}`);
-      }
-
-      console.log("Notification sent successfully!");
-      return true;
-    } catch (err) {
-      console.error("Failed to send notification:", err);
-      return false;
-    }
-  };
 
 
   return (
-    <UserContext.Provider value={{ userName, setUserName, sendFCMMessage }}>
+    <UserContext.Provider value={{ userName, setUserName, }}>
       {children}
     </UserContext.Provider>
   );
