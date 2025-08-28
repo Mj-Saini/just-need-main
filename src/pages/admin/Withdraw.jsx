@@ -1,6 +1,5 @@
 
 
-'use client';
 import { useState, useEffect } from 'react';
 import { ClipboardIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { supabase } from '../../store/supabaseCreateClient';
@@ -8,14 +7,22 @@ import DisablePopUp from '../../Components/Popups/DisablePopUp';
 import { useNavigate } from 'react-router-dom';
 import ApproveIcon from '../../assets/png/Approve_icon.svg.png';
 import RejectIcon from '../../assets/png/reject-icon.jpg';
+import { useCustomerContext } from '../../store/CustomerContext';
+
+
+// import { useUserContext } from '../../store/UserContext';
+
 
 const Withdraw = () => {
+  const { users } = useCustomerContext();
+  // const { sendFCMMessage } = useUserContext();
   const navigate = useNavigate();
+
   const [requests, setRequests] = useState([]);
   const [activeTab, setActiveTab] = useState('Pending');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [confirmAction, setConfirmAction] = useState(null); // { type: "Approve"/"Reject", id }
+  const [confirmAction, setConfirmAction] = useState(null);
 
   // Fetch Withdraw data from Supabase
   useEffect(() => {
@@ -35,35 +42,84 @@ const Withdraw = () => {
     fetchWithdraws();
   }, []);
 
+  const sendFcmNotification = async () => {
+  try {
+    const token = 'd1FMfLkvS-azXi6gV2bRGm:APA91bEk8AvHENGf8LQBHZ2ELCyoxMuMsBZO5fZTtrPiidMLyAu2KKt9bJwKgQjWwygWcAD50MfIDeY66iKB-eJESSb0dV_91QG1_9BYB-O1byQbnsD4zjM';
+
+    const response = await fetch('/api/send-notification', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ token })
+    });
+
+    const data = await response.json();
+    if (response.ok) {
+      console.log('Notification sent:', data);
+    } else {
+      console.error('Error:', data);
+    }
+  } catch (error) {
+    console.error('Request failed:', error);
+  }
+};
+
+
+  // Copy UPI ID to clipboard
   const handleCopy = (upiId) => {
     navigator.clipboard.writeText(upiId);
     alert(`UPI ID "${upiId}" copied to clipboard!`);
   };
 
+  // Handle Approve/Reject Confirmation
   const handleConfirm = async () => {
     if (!confirmAction) return;
 
     const { type, id } = confirmAction;
     const newStatus = type === 'Approve' ? 'Approved' : 'Rejected';
 
-    // Update in state
+    // Optimistically update UI
     setRequests((prev) =>
       prev.map((req) => (req.id === id ? { ...req, status: newStatus } : req))
     );
 
-    // Update in Supabase
+    // Update status in Supabase
     await supabase.from('Withdraw').update({ status: newStatus }).eq('id', id);
 
-    // Close popup
+   // Find user token for FCM
+  const currentRequest = requests.find((req) => req.id === id);
+  if (currentRequest) {
+    const userToken = users.find((u) => u.id === currentRequest.userId)?.msgToken;
+
+    if (userToken) {
+      const messageTitle = "Just Needs";
+      const messageBody = type === 'Approve'
+        ? `✅ Your withdrawal request of ₹${currentRequest.amount} has been approved.`
+        : `❌ Your withdrawal request of ₹${currentRequest.amount} has been rejected.`;
+
+      try {
+        const result = await sendFcmNotification (userToken, messageTitle, messageBody);
+        
+        if (result.success) {
+          console.log(`Notification sent to user ${currentRequest.user_name}`);
+        } else {
+          console.warn('Notification failed:', result.error);
+        }
+      } catch (error) {
+        console.error('Error sending notification:', error);
+      }
+    } else {
+      console.warn('No FCM token found for user:', currentRequest.userId);
+    }
+  }
+    
+  
+
     setConfirmAction(null);
   };
 
-  // Filter requests matching active tab
-  const filteredRequests = requests.filter(
-    (req) => req.status === activeTab
-  );
-
-  console.log('requests',filteredRequests);
+  const filteredRequests = requests.filter((req) => req.status === activeTab);
 
   return (
     <div className="p-6">
@@ -91,6 +147,7 @@ const Withdraw = () => {
             ))}
           </div>
 
+          {/* Table */}
           <div className="bg-white shadow rounded-lg overflow-x-auto">
             <table className="min-w-full">
               <thead>
@@ -107,16 +164,16 @@ const Withdraw = () => {
               </thead>
               <tbody>
                 {filteredRequests.length > 0 ? (
-                  filteredRequests.map((req,index) => (
+                  filteredRequests.map((req, index) => (
                     <tr key={req.id} className="border-t">
-                      <td className="px-4 py-2">{index +1}</td>
+                      <td className="px-4 py-2">{index + 1}</td>
                       <td
                         onClick={() => navigate(`/dashboard/usersList/userDetails/${req.userId}`)}
                         className="px-4 py-2 cursor-pointer text-blue-600 hover:underline"
                       >
                         {req.user_name}
                       </td>
-                      <td className="px-4 py-2 flex items-center  space-x-2">
+                      <td className="px-4 py-2 flex items-center space-x-2">
                         <span>{req.upi_id}</span>
                         <button
                           onClick={() => handleCopy(req.upi_id)}
@@ -176,11 +233,12 @@ const Withdraw = () => {
         </>
       )}
 
+      {/* Confirmation Popup */}
       {confirmAction && (
         <DisablePopUp
           onConfirm={handleConfirm}
           onCancel={() => setConfirmAction(null)}
-          isActive={confirmAction.type === 'Approve' ? false : true}
+          isActive={confirmAction.type !== 'Approve'}
           confirmText={confirmAction.type}
           icon={confirmAction.type === 'Approve' ? ApproveIcon : RejectIcon}
         />
@@ -190,3 +248,4 @@ const Withdraw = () => {
 };
 
 export default Withdraw;
+

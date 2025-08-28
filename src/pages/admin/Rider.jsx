@@ -5,11 +5,13 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { supabase } from '../../store/supabaseCreateClient';
 import BlockedUserPopups from '../../Components/Popups/BlockedUserPopups';
 import { toast } from 'react-toastify';
+// import { useUserContext } from '../../store/UserContext';
 
 
 
 
 const Rider = () => {
+    // const {sendFCMMessage}=useUserContext()
     const location = useLocation();
     const [riders, setRiders] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -36,6 +38,12 @@ const Rider = () => {
         return `${day} ${month} ${year} | ${formattedHours}:${formattedMinutes} ${ampm}`;
     };
 
+    // console.log(riders,"riders");
+
+
+    // useEffect(() => { 
+    //     sendFCMMessage()
+    // })
 
 
     // Move fetchRiders outside useEffect
@@ -267,7 +275,7 @@ const Rider = () => {
                         <div className="flex items-center gap-6">
                             <button
                                
-                                className="text-base xl:text-[20px] font-medium text-[#fff] py-2 px-4 rounded-[10px] bg-[#0832DE]"
+                               className={`text-base xl:text-[20px] font-medium text-[#fff] py-2 px-4 rounded-[10px] bg-[#6C4DEF]`}
                             >
                                 Riders List
                             </button>
@@ -287,7 +295,7 @@ const Rider = () => {
                             </div>
 
                             <button
-                                className="bg-[#0832DE] text-white px-[15px] py-2 rounded-[10px] flex items-center"
+                                className="bg-[#6C4DEF] text-white px-[15px] py-2 rounded-[10px] flex items-center"
                                 onClick={handleFilter}
                             >
                                 <span>
@@ -296,7 +304,7 @@ const Rider = () => {
                                 Filter
                             </button>
                             <button
-                                className="bg-[#0832DE] text-white px-[15px] py-2 rounded-[10px] flex items-center"
+                                className="bg-[#6C4DEF] text-white px-[15px] py-2 rounded-[10px] flex items-center"
                                 onClick={() => setShowBlockedOnly(true)}
                             >
                                 Block list
@@ -321,6 +329,9 @@ const Rider = () => {
                                     <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                                         Phone
                                     </th>
+                                     <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                                        Status
+                                    </th>
                                     <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                                         Vehicle Type
                                     </th>
@@ -339,9 +350,7 @@ const Rider = () => {
                                     <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                                         Offer Parcel
                                     </th>
-                                    <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
-                                        Status
-                                    </th>
+                                   
 
                                 </tr>
                                 <tr>
@@ -384,6 +393,18 @@ const Rider = () => {
                                                 <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
                                                     {rider.user_detail?.mobile_number || 'N/A'}
                                                 </td>
+                                                  <td>
+                                                    <div className="flex justify-center items-center">
+                                                        <span
+                                                            className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${rider.status === "Active"
+                                                                ? "bg-[#0080001d] text-[#008000]"
+                                                                : rider.status === "Rejected" ? "bg-[#F02600a] text-[#F02600]" : rider.status === "Approved" ? "bg-[#6C4DEF1A] text-[#6C4DEF]" : "bg-[#ffa50024] text-[#ffa500]"
+                                                                }`}
+                                                        >
+                                                            {rider.status}
+                                                        </span>
+                                                    </div>
+                                                </td>
                                                 <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
                                                     <span className="capitalize">{rider.vehicleType || 'N/A'}</span>
                                                 </td>
@@ -411,18 +432,7 @@ const Rider = () => {
                                                         </span>
                                                     </div>
                                                 </td>
-                                                <td>
-                                                    <div className="flex justify-center items-center">
-                                                        <span
-                                                            className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${rider.status === "Active"
-                                                                ? "bg-[#00800012] text-[#008000]"
-                                                                : rider.status === "Rejected" ? "bg-[#2b29291a] text-[#800000]" : rider.status === "Approved" ? "bg-[#6C4DEF1A] text-[#6C4DEF]" : "bg-[#ffa50024] text-[#ffa500]"
-                                                                }`}
-                                                        >
-                                                            {rider.status}
-                                                        </span>
-                                                    </div>
-                                                </td>
+                                              
 
                                             </tr>
                                         );

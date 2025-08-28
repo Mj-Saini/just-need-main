@@ -12,17 +12,19 @@ import userDummyImg from '../../assets/Images/Png/dummyimage.jpg'
 import active from "../../assets/png/active.png"
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import { RatingStarIcon } from "../../assets/icon/Icons";
 
 const ListingDetails = () => {
   const [listData, setListData] = useState({});
   const [isOpen, setIsOpen] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
+  const [rating, setRating] = useState(null);
 
- const handleViewImage = (image) => {
-  const index = listData?.images?.indexOf(image);
-  setCurrentImage(index);
-  setIsOpen(true);
-};
+  const handleViewImage = (image) => {
+    const index = listData?.images?.indexOf(image);
+    setCurrentImage(index);
+    setIsOpen(true);
+  };
 
   const { id } = useParams();
   const { fetchlistingWithId } = useListingContext();
@@ -37,36 +39,36 @@ const ListingDetails = () => {
   }
 
   async function handleBlock(e, val) {
-  e.preventDefault();
+    e.preventDefault();
 
-  const actionText = val.isBlocked ? "Unblock" : "Block";
-  const confirmAction = window.confirm(`Are you sure you want to ${actionText} this user?`);
+    const actionText = val.isBlocked ? "Unblock" : "Block";
+    const confirmAction = window.confirm(`Are you sure you want to ${actionText} this user?`);
 
-  if (confirmAction) {
-    const { data, error } = await supabase
-      .from("ServiceListings")
-      .update({
-        blockStatus: {
-          isBlocked: !val.isBlocked,
-          reason: val.reason,
-          blockedBy: val.blockedBy,
-        },
-      })
-      .eq("id", id);
+    if (confirmAction) {
+      const { data, error } = await supabase
+        .from("ServiceListings")
+        .update({
+          blockStatus: {
+            isBlocked: !val.isBlocked,
+            reason: val.reason,
+            blockedBy: val.blockedBy,
+          },
+        })
+        .eq("id", id);
 
-    if (!error) {
-      setListData((prev) => ({
-        ...prev,
-        blockStatus: {
-          ...prev.blockStatus,
-          isBlocked: !prev.blockStatus.isBlocked,
-        },
-      }));
-    } else {
-      alert("Something went wrong. Please try again");
+      if (!error) {
+        setListData((prev) => ({
+          ...prev,
+          blockStatus: {
+            ...prev.blockStatus,
+            isBlocked: !prev.blockStatus.isBlocked,
+          },
+        }));
+      } else {
+        alert("Something went wrong. Please try again");
+      }
     }
   }
-}
 
 
   // async function handleBlock(e, val) {
@@ -101,6 +103,53 @@ const ListingDetails = () => {
   useEffect(() => {
     getData();
   }, []);
+
+  const serviceId = listData?.id;
+  console.log(listData)
+
+  async function getListingRating(serviceId) {
+    const { data, error } = await supabase
+      .rpc('get_listing_rating', { service_id: serviceId });
+    if (error) {
+      console.error('Error fetching rating:', error);
+      return 0; // fallback
+    }
+
+    return Number(data);;
+  }
+
+
+
+
+  useEffect(() => {
+    async function fetchRating() {
+      const avgRating = await getListingRating(serviceId);
+      setRating(avgRating);
+    }
+    fetchRating();
+  }, [serviceId]);
+
+ 
+
+  const renderStars = (rating) => {
+  const stars = [];
+  const fullStars = Math.floor(rating);
+  const hasHalfStar = rating % 1 >= 0.5;
+  const totalStars = 5;
+
+  for (let i = 0; i < totalStars; i++) {
+    if (i < fullStars) {
+      stars.push(<RatingStarIcon key={i} type="full" />);
+    } else if (i === fullStars && hasHalfStar) {
+      stars.push(<RatingStarIcon key={i} type="half" />);
+    } else {
+      stars.push(<RatingStarIcon key={i} type="empty" />);
+    }
+  }
+
+  return stars;
+};
+
 
   return (
     <div className="bg-white rounded-md flex flex-col lg:flex-row h-full overflow-auto scrollRemove">
@@ -248,115 +297,73 @@ const ListingDetails = () => {
           </div>
 
           {isOpen && (
-        <Lightbox
-          open={isOpen}
-          close={() => setIsOpen(false)}
-          index={currentImage}
-          slides={listData?.images?.map(img => ({ src: img })) || []}
-          carousel={{ finite: listData?.images?.length <= 1 }}
-        />
-      )}
-          
+            <Lightbox
+              open={isOpen}
+              close={() => setIsOpen(false)}
+              index={currentImage}
+              slides={listData?.images?.map(img => ({ src: img })) || []}
+              carousel={{ finite: listData?.images?.length <= 1 }}
+            />
+          )}
+
         </div>
       </div>
 
-      {/* Right Side - Fixed Height, Scrollable */}
+
       <div className="lg:w-5/12 w-full p-3 h-[calc(100vh-115px)] overflow-auto scrollRemove">
         <div className="bg-[#DDDADA4D] p-3 rounded-md">
           <h4 className="font-semibold text-[20px]">Reviews</h4>
           <div className="flex gap-[83px] items-center flex-wrap">
             <div className="flex items-center gap-5">
-              <span className="text-[48px]">{listData?.rating}</span>
+              <span className="text-[48px]">{rating || 0}</span>
               <div>
                 <div className="flex gap-2">
-                  <img src={star} alt="star" />
-                  <img src={star} alt="star" />
-                  <img src={star} alt="star" />
-                  <img src={star} alt="star" />
-                  <img src={star} alt="star" />
+                    {renderStars(rating || 0)}
                 </div>
-                <p className="mt-2">{listData?.reviewCount} reviews</p>
-              </div>
-            </div>
 
-            <div className="flex gap-5 items-center">
-              <img src={star} alt="star" />
-              <div className="flex">
-                <div className="relative group">
-                  <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity rounded-md h-[50px] w-[90px] py-[2px] bg-[#FF7F00] text-center -top-[60px] -left-[20px]">
-                    <p className="text-white">1.44k</p>
-                    <p className="text-white text-[12px]">1 star Ratings</p>
-                  </div>
-                  <div className="rounded-md h-[7px] w-[20px] bg-[#FF7F00]"></div>
-                </div>
-                <div className="relative group">
-                  <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity rounded-md h-[50px] w-[90px] py-[2px] bg-[#FF6565] text-center -top-[60px] -left-[20px]">
-                    <p className="text-white">2.41k</p>
-                    <p className="text-white text-[12px]">2 star Ratings</p>
-                  </div>
-                  <div className="rounded-md h-[7px] w-[40px] bg-[#FF6565]"></div>
-                </div>
-                <div className="relative group">
-                  <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity rounded-md h-[50px] w-[90px] py-[2px] bg-[#6C4DEF] text-center -top-[60px] -left-[20px]">
-                    <p className="text-white">1.44k</p>
-                    <p className="text-white text-[12px]">3 star Ratings</p>
-                  </div>
-                  <div className="rounded-md h-[7px] w-[40px] bg-[#6C4DEF]"></div>
-                </div>
-                <div className="relative group">
-                  <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity rounded-md h-[50px] w-[90px] py-[2px] bg-[#0DA800] text-center -top-[60px] -left-[20px]">
-                    <p className="text-white">2.44k</p>
-                    <p className="text-white text-[12px]">4 star Ratings</p>
-                  </div>
-                  <div className="rounded-md h-[7px] w-[50px] bg-[#0DA800]"></div>
-                </div>
-                <div className="relative group">
-                  <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity rounded-md h-[50px] w-[90px] py-[2px] bg-[#a84c00] text-center -top-[60px] -left-[20px]">
-                    <p className="text-white">4.44k</p>
-                    <p className="text-white text-[12px]">5 star Ratings</p>
-                  </div>
-                  <div className="rounded-md h-[7px] w-[30px] bg-[#a84c00]"></div>
-                </div>
+                <p className="mt-2">{rating || 0} reviews</p>
               </div>
-              <p className="text-[18px] font-medium">5.12k</p>
+
             </div>
+         
           </div>
         </div>
 
         <div className="flex flex-col gap-5">
-          {[0, 1, 2, 3, 4].map((item, index) => (
-            <div key={index}>
-              <hr className="my-[32px] border-dotted border-t-0 border-2" />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <img src={user} alt="user" />
-                  <div>
-                    <h5 className="font-medium text-[14px]">Rovert Fox</h5>
-                    <p className="text-[#00000099] text-[10px]">Nov 25, 2024</p>
+          {listData?.reviews?.length > 0 ? (
+            listData.reviews.map((review, index) => (
+              <div key={index}>
+                <hr className="my-[32px] border-dotted border-t-0 border-2" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={review.user?.image || userDummyImg} // Fallback to dummy image if user image is not available
+                      alt="user"
+                      className="h-[40px] w-[40px] rounded-full"
+                    />
+                    <div>
+                      <h5 className="font-medium text-[14px]">
+                        {review.user?.firstName} {review.user?.lastName || "Anonymous"}
+                      </h5>
+                      <p className="text-[#00000099] text-[10px]">
+                        {new Date(review.createdAt).toLocaleDateString() || "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                     <div className="flex gap-2">
+                    {renderStars(review.rating || 0)}
+                </div>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <img src={star} alt="star" />
-                  <img src={star} alt="star" />
-                  <img src={star} alt="star" />
-                  <img src={star} alt="star" />
-                  <img src={star} alt="star" />
-                </div>
+                <p className="text-[#00000099] text-[14px] mt-[22px]">
+                  {review.message || "No comment provided."}
+                </p>
               </div>
-              <p className="text-[#00000099] text-[14px] mt-[22px]">
-                It is a long established fact that a reader will be distracted by
-                the readable content of a page when looking at its layout. The
-                point of using Lorem Ipsum is that it has a more-or-less normal
-                distribution of letters, as opposed to using 'Content here to a ,
-                content here', making it look like readable English. Many desktop
-                publishing packages and web page editors now use Lorem Ipsum as
-                their default model text, and a search for 'lorem ipsum' will
-                uncover many web sites still in their infancy. Various versions
-                have evolved over the years, sometimes by accident, sometimes on
-                purpose (injected humour and the like).
-              </p>
-            </div>
-          ))}
+            ))
+          ) : (
+            <p className="text-[#00000099] text-[14px] mt-[22px]">No reviews available.</p>
+          )}
         </div>
       </div>
     </div>

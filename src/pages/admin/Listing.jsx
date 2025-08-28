@@ -144,6 +144,8 @@ const Listing = () => {
     });
   };
 
+  console.log(listData,"listData");
+
 
   if (listData.length !== 0) {
     return (
@@ -185,7 +187,7 @@ const Listing = () => {
 
               <button
                 onClick={() => setIsfilterPopup(!isFilterPopup)}
-                className="bg-[#0832DE] text-white px-[15px] py-2 ms-5 rounded-[10px] flex items-center"
+                className="bg-[#6C4DEF] text-white px-[15px] py-2 ms-5 rounded-[10px] flex items-center"
               >
                 <span>
                   <CiFilter className="w-[24px] h-[24px] me-[12px]" />
@@ -273,9 +275,9 @@ const Listing = () => {
 
                       <div className="flex justify-between mt-[5px]">
                         <div>
-                          <p className="font-semibold text-[18px]">
+                          {/* <p className="font-semibold text-[18px]">
                             ₹ {item.price}
-                          </p>
+                          </p> */}
                         </div>
                         <div className="group-hover:hidden transition-opacity duration-300">
                           <button className="py-1">

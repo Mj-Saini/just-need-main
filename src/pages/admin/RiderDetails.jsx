@@ -20,6 +20,14 @@ function RiderDetails() {
 
   const [riderDetailsTab, setRiderDetailsTab] = useState("riderDetails");
 
+
+
+  const viewRiderDetails = ridingRequests.filter(
+    (item) => item.riderId === user?.id
+  );
+
+  console.log(viewRiderDetails, "viewRiderDetails");
+
   // For rider history
   const [currentPageRiderHistory, setCurrentPageRiderHistory] = useState(1);
   const [itemsPerPageRiderHistory] = useState(10);
@@ -96,6 +104,7 @@ function RiderDetails() {
   const handlePopupDisable = () => {
     setShowPopupDisable(!showPopupDisable);
   };
+
 
   // Use user.accountStatus for block/unblock
   const isBlocked = user?.accountStatus?.isBlocked === true;
@@ -225,10 +234,10 @@ function RiderDetails() {
                 <div className="flex items-center">
                   <span
                     className={`px-3 py-2 rounded-[10px] text-sm font-medium ${rider?.status === "Approved"
-                        ? "bg-green-100 text-green-700 border border-green-300"
-                        : rider?.status === "Rejected"
-                          ? "bg-red-100 text-red-700 border border-red-300"
-                          : "bg-gray-100 text-gray-700 border border-gray-300"
+                      ? "bg-green-100 text-green-700 border border-green-300"
+                      : rider?.status === "Rejected"
+                        ? "bg-red-100 text-red-700 border border-red-300"
+                        : "bg-gray-100 text-gray-700 border border-gray-300"
                       }`}
                   >
                     {rider?.status || "Unknown"}
@@ -361,13 +370,13 @@ function RiderDetails() {
       <div className="flex items-center  gap-4 mt-10 md:mt-14">
         <button
           onClick={() => setRiderDetailsTab('riderDetails')}
-          className="text-base xl:text-[20px] font-medium text-[#fff] py-2 px-4 rounded-[10px] bg-[#0832DE]"
+          className={`text-base xl:text-[20px] font-medium text-[#fff] py-2 px-4 rounded-[10px] bg-[#0832DE] ${riderDetailsTab === 'riderDetails' ? 'bg-[#0832DE]' : 'bg-[#6C4DEF]'}`}
         >
           Rider Details
         </button>
         <button
           onClick={() => setRiderDetailsTab('riderHistory')}
-          className="text-base xl:text-[20px] font-medium text-[#fff] py-2 px-4 rounded-[10px] bg-[#0832DE]"
+          className={`text-base xl:text-[20px] font-medium text-[#fff] py-2 px-4 rounded-[10px] bg-[#0832DE] ${riderDetailsTab === 'riderHistory' ? 'bg-[#0832DE]' : 'bg-[#6C4DEF]'}`}
         >
           Rider History
         </button>
@@ -455,7 +464,7 @@ function RiderDetails() {
                   <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
                     Drop Address
                   </th>
-                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
+                  {/* <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
                    Driving License Number
                   </th>
                   <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
@@ -463,7 +472,7 @@ function RiderDetails() {
                   </th>
                   <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
                  Vehicle Registration Number
-                  </th>
+                  </th> */}
 
                   <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[100px]">
                     Total Fare
@@ -471,9 +480,9 @@ function RiderDetails() {
                   <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[200px]">
                     Created At
                   </th>
-                  <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                  {/* <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                     Offer Parcel
-                  </th>
+                  </th> */}
                   <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                     Status
                   </th>
@@ -492,14 +501,18 @@ function RiderDetails() {
                       Loading...
                     </td>
                   </tr>
-                ) : paginatedRiderHistory.length === 0 ? (
+                ) : paginatedRiderHistory.filter(
+                  (item) => item.riderId === user?.id
+                ).length === 0 ? (
                   <tr>
                     <td colSpan="10" className="text-center py-4">
                       No riders found
                     </td>
                   </tr>
                 ) : (
-                  paginatedRiderHistory?.map((rider, index) => {
+                  paginatedRiderHistory?.filter(
+                    (item) => item.riderId === user?.id
+                  ).map((rider, index) => {
                     console.log(rider, "rider data");
                     return (
                       <tr key={rider.id}>
@@ -526,15 +539,8 @@ function RiderDetails() {
                         <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
                           {rider.dropAddress || 'N/A'}
                         </td>
-                        <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
-                          {rider.riderDetail?.drivingLicenseNumber || 'N/A'}
-                        </td>
-                        <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
-                          {rider.riderDetail?.vehicleType || 'N/A'}
-                        </td>
-                        <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
-                          {rider.riderDetail?.vehicleRegistrationNumber || 'N/A'}
-                        </td>
+
+
 
                         <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000] text-center">
                           {rider.totalFare || 0}
@@ -542,7 +548,7 @@ function RiderDetails() {
                         <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
                           {formatDate(rider.created_at)}
                         </td>
-                        <td>
+                        {/* <td>
                           <div className="flex justify-center items-center">
                             <span
                               className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${rider.offerParcel
@@ -553,16 +559,16 @@ function RiderDetails() {
                               {rider.isParcel ? "Yes" : "No"}
                             </span>
                           </div>
-                        </td>
+                        </td> */}
                         <td>
                           <div className="flex justify-center items-center">
                             <span
-                              className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${rider.status === "Active"
+                              className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${rider.status === "Completed"
                                 ? "bg-[#00800012] text-[#008000]"
-                                : rider.riderDetail?.status === "Rejected" ? "bg-[#2b29291a] text-[#800000]" : rider.status === "Approved" ? "bg-[#6C4DEF1A] text-[#6C4DEF]" : "bg-[#ffa50024] text-[#ffa500]"
+                                : rider?.status === "Cancelled" ? "bg-[#F02600]/10 text-[#F02600]" : rider.status === "Approved" ? "bg-[#6C4DEF1A] text-[#6C4DEF]" : "bg-[#ffa50024] text-[#ffa500]"
                                 }`}
                             >
-                              {rider.riderDetail?.status || 'N/A'}
+                              {rider?.status || 'N/A'}
                             </span>
                           </div>
                         </td>
