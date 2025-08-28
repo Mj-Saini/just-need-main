@@ -35,17 +35,14 @@ const Listing = () => {
   }
   //handle block
   async function handleBlock(e, id, val) {
+      const newStatus = !val;  
     e.preventDefault();
     const confirmDelete = window.confirm("Are you sure to Block User ?");
     if (confirmDelete) {
       const { data, error } = await supabase
         .from("ServiceListings") // Replace with your table name
         .update({
-          blockStatus: {
-            isBlocked: !val.isBlocked,
-            reason: val.reason,
-            blockedBy: val.blockedBy,
-          },
+          status: newStatus,
         }) // Pass the updated data object
         .eq("id", id); // Filter by id
 
@@ -55,10 +52,7 @@ const Listing = () => {
             item.id == id
               ? {
                 ...item,
-                blockStatus: {
-                  ...item.blockStatus,
-                  isBlocked: !item.blockStatus.isBlocked,
-                },
+                 status: newStatus,
               }
               : item
           )
@@ -101,7 +95,7 @@ const Listing = () => {
       }
       if (appliedFilters.status) {
         tempData = tempData.filter((item) =>
-          item.blockStatus.isBlocked === (appliedFilters.status === "Blocked")
+          item.status === (appliedFilters.status === "Blocked")
         );
       }
       if (appliedFilters.ratings) {
@@ -279,9 +273,9 @@ const Listing = () => {
                             ₹ {item.price}
                           </p> */}
                         </div>
-                        <div className="group-hover:hidden transition-opacity duration-300">
+                        {/* <div className="group-hover:hidden transition-opacity duration-300">
                           <button className="py-1">
-                            {item.blockStatus.isBlocked ? (
+                            {item.status ? (
                               <img src={disable_img} alt="disable_img" />
                             ) : (
                               <span className="text-xs font-normal text-[#0DA800] hover:opacity-100 opacity-100">
@@ -289,14 +283,14 @@ const Listing = () => {
                               </span>
                             )}
                           </button>
-                        </div>
-                        <div className="hidden py-[3px] group-hover:block  transition-opacity duration-300">
+                        </div> */}
+                        {/* <div className="hidden py-[3px] group-hover:block  transition-opacity duration-300">
                           <button
                             onClick={(e) =>
-                              handleBlock(e, item.id, item.blockStatus)
+                              handleBlock(e, item.id, item.status)
                             }
                           >
-                            {item.blockStatus.isBlocked ? (
+                            {item.status ? (
                               <span className="text-sm font-normal text-[#0DA800] hover:opacity-100 opacity-100">
                                 <p>Enable</p>
                               </span>
@@ -306,7 +300,7 @@ const Listing = () => {
                               </span>
                             )}
                           </button>
-                        </div>
+                        </div> */}
                       </div>
 
                       <p className="font-normal text-[14px] text-[#00000099] mt-1">
