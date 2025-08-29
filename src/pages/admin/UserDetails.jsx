@@ -492,11 +492,14 @@ function UserDetails() {
                 </div>
                 <div className="w-10/12">
                   <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
-                    {userbusinessDetails?.categories?.map((category) => (
+                    {/* {userbusinessDetails?.categories?.map((category) => (
                       <span key={category.id}>
                         {category.categoryName}
                       </span>
-                    ))}
+                    ))} */}
+                    {userbusinessDetails?.categories.categoryName} &nbsp;
+                   ( {userbusinessDetails?.categories.businesSubcategory.subCategoryName})
+
                   </h2>
                 </div>
               </div>

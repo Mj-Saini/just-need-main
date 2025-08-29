@@ -49,12 +49,14 @@ const Withdraw = () => {
     alert(`UPI ID "${upiId}" copied to clipboard!`);
   };
 
+  const accesssToken = users.map((token)=> token.msgToken)
+  console.log(accesssToken,"sdsd")
   // Handle Approve/Reject Confirmation
   const handleConfirm = async () => {
     if (!confirmAction) return;
 
     const { type, id } = confirmAction;
-    // const newStatus = type === 'Approve' ? 'Approved' : 'Rejected';
+    const newStatus = type === 'Approve' ? 'Approved' : 'Rejected';
 
     // Optimistically update UI
     // setRequests((prev) =>
@@ -65,9 +67,9 @@ const Withdraw = () => {
     // await supabase.from('Withdraw').update({ status: newStatus }).eq('id', id);
 
  sendNotification({
-    token: "c39BCk-BRoWBrQbkyZ82Ju:APA91bFnggQXoM7ccPvHETU3z63bcIPGuBZUuUvQykkxmvDjoOxzdyGuDr64-1X_rfOyN-WKUFR3moGOV9fpupzAyXr84IbCa4EZVZOoC3jDthTZG7L_1yY", // replace with real device token from your DB
-    // title: `Withdraw ${newStatus}`,
-    // body: `Your withdraw request has been ${newStatus.toLowerCase()}.`,
+    token: accesssToken, 
+    title: `Withdraw ${newStatus}`,
+    body: `Your withdraw request has been ${newStatus.toLowerCase()}.`,
   });
     
   

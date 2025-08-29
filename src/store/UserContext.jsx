@@ -10,8 +10,8 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const [userName, setUserName] = useState("");
 
-  async function sendNotification(token) {
-    console.log(token,"token");
+  async function sendNotification(token, title, body) {
+    console.log(token,title)
     try {
       const response = await fetch(
         "https://qmxzutndbzkpccffzoxy.supabase.co/functions/v1/send-fcm",
@@ -23,14 +23,16 @@ export const UserProvider = ({ children }) => {
           },
          body: JSON.stringify({
         fcm_token: token,
-        title: "088900348",
-        body: "my first notification",
+        title: title,
+        body: body,
       }),
 
         }
       );
 
       const result = await response.json();
+
+      console.log(response.status);
       console.log("FCM Result:", result);
     } catch (err) {
       console.error("Send notification error:", err);
