@@ -7,15 +7,15 @@ import DisablePopUp from '../../Components/Popups/DisablePopUp';
 import { useNavigate } from 'react-router-dom';
 import ApproveIcon from '../../assets/png/Approve_icon.svg.png';
 import RejectIcon from '../../assets/png/reject-icon.jpg';
-// import { useCustomerContext } from '../../store/CustomerContext';
 
 
-// import { useUserContext } from '../../store/UserContext';
+import { useUserContext } from '../../store/UserContext';
+import { useCustomerContext } from '../../store/CustomerContext';
 
 
 const Withdraw = () => {
-  // const { users } = useCustomerContext();
-  // const { sendFCMMessage } = useUserContext();
+  const { users } = useCustomerContext();
+  const { sendNotification } = useUserContext();
   const navigate = useNavigate();
 
   const [requests, setRequests] = useState([]);
@@ -42,7 +42,6 @@ const Withdraw = () => {
     fetchWithdraws();
   }, []);
 
- 
 
   // Copy UPI ID to clipboard
   const handleCopy = (upiId) => {
@@ -55,17 +54,21 @@ const Withdraw = () => {
     if (!confirmAction) return;
 
     const { type, id } = confirmAction;
-    const newStatus = type === 'Approve' ? 'Approved' : 'Rejected';
+    // const newStatus = type === 'Approve' ? 'Approved' : 'Rejected';
 
     // Optimistically update UI
-    setRequests((prev) =>
-      prev.map((req) => (req.id === id ? { ...req, status: newStatus } : req))
-    );
+    // setRequests((prev) =>
+    //   prev.map((req) => (req.id === id ? { ...req, status: newStatus } : req))
+    // );
 
     // Update status in Supabase
-    await supabase.from('Withdraw').update({ status: newStatus }).eq('id', id);
+    // await supabase.from('Withdraw').update({ status: newStatus }).eq('id', id);
 
-
+ sendNotification({
+    token: "c39BCk-BRoWBrQbkyZ82Ju:APA91bFnggQXoM7ccPvHETU3z63bcIPGuBZUuUvQykkxmvDjoOxzdyGuDr64-1X_rfOyN-WKUFR3moGOV9fpupzAyXr84IbCa4EZVZOoC3jDthTZG7L_1yY", // replace with real device token from your DB
+    // title: `Withdraw ${newStatus}`,
+    // body: `Your withdraw request has been ${newStatus.toLowerCase()}.`,
+  });
     
   
 
