@@ -6,16 +6,19 @@ import { useLocation } from "react-router-dom";
 import { supabase } from "../../store/supabaseCreateClient";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
+import { useCustomerContext } from "../../store/CustomerContext";
+import { useUserContext } from "../../store/UserContext";
 
 
 const Provider_Detail = () => {
+    const { users } = useCustomerContext();
+    const { sendNotification } = useUserContext();
   const location = useLocation();
   const complaint = location.state?.complaint;
   const [isFullImg, setIsFullImg] = useState(false)
   const [photoIndex, setPhotoIndex] = useState(null)
   const images = complaint?.images || []
   const [popup, setPopup] = useState(false);
-  const [showImagePreviewPopUp, setShowImagePreviewPupUp] = useState(false);
   const popupRef = useRef(null);
   const [isOpen, setIsOpen] = useState(false);
   const [dropdown, setDropdown] = useState(false);
@@ -26,6 +29,12 @@ const Provider_Detail = () => {
   const [complaintLogs, setComplaintLogs] = useState([]);
   const [loading, setLoading] = useState(false);
 
+
+
+const complaintId=complaint.userdetails?.id
+  const matchingRequest = users.find((req) => req.id === complaintId);
+   console.log(matchingRequest,"complain")
+    const token = matchingRequest?.msgToken;
   
 
   // Fetch complaint logs from Supabase
@@ -183,6 +192,10 @@ const Provider_Detail = () => {
       return null;
     }
   };
+
+
+  console.log(status, "oinstrackt")
+  
   const handleApply = async () => {
     if (assignTo === "Select Assignee") {
       alert("Please select an assignee.");
@@ -194,7 +207,7 @@ const Provider_Detail = () => {
       complaintid: complaint.id,
       assignTo: assignTo,
       instruction: instructions || null,
-      status: status, // Use the selected status directly
+      status: status, 
     };
 
     const savedLog = await saveComplaintLog(newLog);
@@ -202,7 +215,18 @@ const Provider_Detail = () => {
       alert("Failed to save the log. Please try again.");
       return;
     }
-
+sendNotification({
+  token: token,
+  userId: matchingRequest.id,
+  title: `${
+    status === 'Processing'
+      ? "Your complaint is under review."
+      : status === 'Done'
+      ? "Your complaint has been resolved. Thank you for your patience."
+      : "Your complaint has been successfully received. We will review it shortly."
+  }`,
+  body: "Tap here for more details about your complaint.",
+});
     updateComplaintStatus();  // make sure this runs when you click Apply
     // Update local state
     await fetchComplaintLogs();

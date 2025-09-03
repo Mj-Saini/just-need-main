@@ -22,6 +22,8 @@ import { useCustomerContext } from "../../store/CustomerContext";
 import { useUserContext } from "../../store/UserContext";
 
 function UserDetails() {
+  const { users,setUsers, loading, setLoading } = useCustomerContext();
+    const { sendNotification,setUserName } = useUserContext();
   const { id } = useParams();
   const [user, setUser] = useState(null);
   const [showPopupDisable, setShowPopupDisable] = useState(false);
@@ -35,10 +37,14 @@ function UserDetails() {
   const [previewImage, setPreviewImage] = useState(null);
   const [activeTab, setActiveTab] = useState("withdrawals"); // Add active tab state
 
-  const { setUsers, loading, setLoading } = useCustomerContext();
   const { fetchlisting } = useListingContext();
 
-  const { setUserName } = useUserContext()
+  
+// const matchingRequest = user?.find((req) => req.id === id);
+
+console.log(user?.msgToken, "user");
+  const accessToken = user?.msgToken;
+// console.log(accessToken)
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -249,6 +255,12 @@ function UserDetails() {
           ...prevUser,
           businessDetail: { ...prevUser.businessDetail, status: 'Approved' }
         }));
+         sendNotification({
+           token: accessToken, 
+            userId:user.id,
+    title: `Congratulations! Business Approved`,
+  body: `Your business profile has been Approved successfully.`,
+  });
       }
     } catch (err) {
       console.error("🚨 Unexpected Error:", err);
@@ -260,6 +272,7 @@ function UserDetails() {
   const denyUser = async (reason) => {
     if (!userbusinessDetails || !userbusinessDetails?.businessId) {
       toast.error("User data not found or invalid Business ID");
+         
       return;
     }
     try {
@@ -281,12 +294,20 @@ function UserDetails() {
           ...prevUser,
           businessDetail: { ...prevUser.businessDetail, status: 'Rejected', rejectedReason: reason }
         }));
+          sendNotification({
+            token: accessToken, 
+            userId:user.id,
+    title: `Sorry! Business Denied`,
+  body: `Your business profile has been Denied`,
+  });
       }
     } catch (err) {
       console.error("🚨 Unexpected Error:", err);
       toast.error("An unexpected error occurred.");
     }
   };
+
+
 
   const handleRiderStatusUpdate = async (newStatus) => {
     try {
@@ -319,6 +340,13 @@ function UserDetails() {
               : prevUsers
           );
         }
+        sendNotification({
+          token: accessToken, 
+          userId:user.id,
+    title: `Congratulations! Rider Approved`,
+  body: `Your rider profile has been approved successfully please go online to accept rides`,
+    
+  });
       }
     } catch (err) {
       console.error("Error updating rider status:", err);
@@ -326,7 +354,6 @@ function UserDetails() {
     }
   };
 
-  console.log(userbusinessDetails, "user")
 
   return (
     <div className="px-4">

@@ -3,6 +3,8 @@ import { useState } from "react";
 import { StatusCloseIcon } from "../../assets/icon/Icons";
 import { supabase } from "../../store/supabaseCreateClient";
 import { toast } from "react-toastify";
+import { useUserContext } from "../../store/UserContext";
+import { useCustomerContext } from "../../store/CustomerContext";
 
 function DenialReasonPopUp({ 
   handleClose, 
@@ -12,6 +14,8 @@ function DenialReasonPopUp({
   refetchData,
   setUsers 
 }) {
+  const { users } = useCustomerContext();
+      const { sendNotification } = useUserContext();
   const [reason, setReason] = useState("");
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -21,6 +25,11 @@ function DenialReasonPopUp({
     setError(null);
   };
 
+  console.log(userId, '===')
+  
+  const matchingRequest = users?.find((req) => req.id === userId);
+  console.log(matchingRequest, "jsdfsdf")
+  const accessToken=matchingRequest?.msgToken
   const getTitle = () => {
     switch (type) {
       case "business":
@@ -116,6 +125,12 @@ function DenialReasonPopUp({
               )
             : prevUsers
         );
+          sendNotification({
+            token: accessToken, 
+            userId:matchingRequest.id,
+    title: `Action Required! Bussiness Rejected`,
+  body: `Rejection reason: ${reason}`,
+  });
       }
 
       toast.success(`${getTitle()} successful!`);

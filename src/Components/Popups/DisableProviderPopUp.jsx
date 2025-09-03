@@ -6,21 +6,30 @@ import { useState } from "react";
 import { PopupsArrowBlock, StatusCloseIcon } from "../../assets/icon/Icons";
 import { supabase } from "../../store/supabaseCreateClient";
 import { toast } from "react-toastify";
+import { useUserContext } from "../../store/UserContext";
+import { useCustomerContext } from "../../store/CustomerContext";
 
-function DisableProviderPopUp({ handlePopupDisable, userId, currentStatus,refetchUser,setUsers, }) {
+function DisableProviderPopUp({ handlePopupDisable, userId, currentStatus, refetchUser, setUsers, }) {
+  const { sendNotification } = useUserContext();
+   const { users } = useCustomerContext();
   const isCurrentlyBlocked = currentStatus === "blocked";
 
   const [popUpData, setPopUpData] = useState({
     status: isCurrentlyBlocked ? "Unblock" : "Block",
     reason: "",
   });
+// console.log(userId,"id")
 
+  const matchingRequest = users.find((req) => req.id === userId);
+   
+    const token = matchingRequest.msgToken;
   const [error, setError] = useState(null);
 
   const handleOnChange = (e) => {
     const { name, value } = e.target;
     setPopUpData((prev) => ({ ...prev, [name]: value }));
     setError(null);
+     
   };
 
   const handleUpdate = async () => {
@@ -68,6 +77,12 @@ if (setUsers) {
         );
       }
       toast.success(`User ${isBlocked ? "blocked" : "unblocked"} successfully!`);
+      sendNotification({
+        token: token, 
+         userId:matchingRequest.id,
+    title: `User ${popUpData.status}`,
+    body: `Dear ${matchingRequest.firstName} ${matchingRequest.lastName} you are ${popUpData.status} by admin. ${isBlocked === true ? " For more information you can reach out with admin":""}.`,
+  });
       if (refetchUser) await refetchUser();
       handlePopupDisable();
     } catch (error) {

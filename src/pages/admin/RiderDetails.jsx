@@ -6,8 +6,12 @@ import DenialReasonPopUp from "../../Components/Popups/DenialReasonPopUp";
 import { supabase } from "../../store/supabaseCreateClient";
 import { toast } from "react-toastify";
 import { DisableRedicon, EnableRedIcon } from "../../assets/icon/Icons";
+import { useCustomerContext } from "../../store/CustomerContext";
+import { useUserContext } from "../../store/UserContext";
 
 function RiderDetails() {
+  const { users } = useCustomerContext();
+  const { sendNotification } = useUserContext();
   const { id } = useParams();
   const [rider, setRider] = useState(null);
   const [user, setUser] = useState(null); // user object for block/unblock
@@ -109,7 +113,14 @@ function RiderDetails() {
   // Use user.accountStatus for block/unblock
   const isBlocked = user?.accountStatus?.isBlocked === true;
 
+
+  const matchingRequest = users?.find((req) => req.id === rider?.userId);
+
+  // console.log(id,"ididd")
+
   const handleApprove = async () => {
+    const token = matchingRequest.msgToken;
+    console.log(token, "tokem")
     try {
       const { error } = await supabase
         .from('RiderDetailsView')
@@ -128,6 +139,14 @@ function RiderDetails() {
         }));
         toast.success("Rider approved successfully!");
         window.dispatchEvent(new Event('rider-status-updated'));
+
+        sendNotification({
+          token: token,
+           userId:matchingRequest.id,
+          title: `Congratulations! Rider Approved`,
+          body: `Your rider profile has been approved successfully please go online to accept rides`,
+
+        });
       }
     } catch (err) {
       console.error("Error approving rider:", err);

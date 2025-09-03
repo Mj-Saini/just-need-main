@@ -49,25 +49,29 @@ const Withdraw = () => {
     alert(`UPI ID "${upiId}" copied to clipboard!`);
   };
 
-  const accesssToken = users.map((token)=> token.msgToken)
-  console.log(accesssToken,"sdsd")
+
+  
   // Handle Approve/Reject Confirmation
   const handleConfirm = async () => {
     if (!confirmAction) return;
 
     const { type, id } = confirmAction;
+    const matchingRequest = users.find((req) => req.id === id);
+   
+    const token = matchingRequest.msgToken;
     const newStatus = type === 'Approve' ? 'Approved' : 'Rejected';
 
     // Optimistically update UI
-    // setRequests((prev) =>
-    //   prev.map((req) => (req.id === id ? { ...req, status: newStatus } : req))
-    // );
+    setRequests((prev) =>
+      prev.map((req) => (req.id === id ? { ...req, status: newStatus } : req))
+    );
 
     // Update status in Supabase
-    // await supabase.from('Withdraw').update({ status: newStatus }).eq('id', id);
+    await supabase.from('Withdraw').update({ status: newStatus }).eq('id', id);
 
  sendNotification({
-    token: accesssToken, 
+   token: token, 
+   userId:matchingRequest.id,
     title: `Withdraw ${newStatus}`,
     body: `Your withdraw request has been ${newStatus.toLowerCase()}.`,
   });
@@ -78,6 +82,7 @@ const Withdraw = () => {
   };
 
   const filteredRequests = requests.filter((req) => req.status === activeTab);
+
 
   return (
     <div className="p-6">
@@ -158,14 +163,14 @@ const Withdraw = () => {
                       {activeTab === 'Pending' && (
                         <td className="px-4 py-2 space-x-2 flex items-center">
                           <button
-                            onClick={() => setConfirmAction({ type: 'Approve', id: req.id })}
+                            onClick={() => setConfirmAction({ type: 'Approve', id: req.userId })}
                             className="bg-green-500 hover:bg-green-600 text-white p-1 rounded"
                             title="Approve"
                           >
                             <CheckIcon className="h-5 w-5" />
                           </button>
                           <button
-                            onClick={() => setConfirmAction({ type: 'Reject', id: req.id })}
+                            onClick={() => setConfirmAction({ type: 'Reject', id: req.userId })}
                             className="bg-red-500 hover:bg-red-600 text-white p-1 rounded"
                             title="Reject"
                           >

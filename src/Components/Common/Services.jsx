@@ -25,8 +25,12 @@ import { toast } from "react-toastify";
 import Loader from "./Loader";
 import { PlusIcon, SearchingIcon, UnderIcon } from "../../assets/icon/Icon";
 import { supabase } from "../../store/supabaseCreateClient";
+import { useUserContext } from "../../store/UserContext";
+import { useCustomerContext } from "../../store/CustomerContext";
 
 function Services() {
+    const { sendNotification } = useUserContext();
+     const { users } = useCustomerContext();
   const [editIndex, setEditIndex] = useState(null);
   const [editData, setEditData] = useState("");
   const [showPopup, setShowPopup] = useState(false);
@@ -133,45 +137,7 @@ function Services() {
       .filter((cat) => cat !== null);
   }, [categories, searchQuery]);
 
-  // const filteredCategoriesData = useMemo(() => {
-  //   if (!searchQuery.trim()) return categories;
-
-  //   return categories
-  //     .map((category) => {
-  //       const categoryMatches = category?.categoryName
-  //         ?.toLowerCase()
-  //         .includes(searchQuery.toLowerCase());
-  //       const filteredSubcategories = (category.subcategory || []).filter(
-  //         (sub) =>
-  //           sub?.categoryName?.toLowerCase().includes(searchQuery.toLowerCase())
-  //       );
-
-  //       if (categoryMatches || filteredSubcategories.length > 0) {
-  //         return {
-  //           ...category,
-  //           subcategory:
-  //             filteredSubcategories.length > 0 || categoryMatches
-  //               ? category.subcategory
-  //               : [],
-  //         };
-  //       }
-  //       return null;
-  //     })
-  //     .filter((cat) => cat !== null);
-  // }, [categories, searchQuery]);
-
-  // const toggle = useCallback(() => {
-  //   setShowForm((prev) => {
-  //     if (!prev) {
-  //       setCategoryName("");
-  //       setEditingCategoryId(null);
-  //       setEditingSubcategoryId(null);
-  //       setCategoryImage(null); // Reset image when closing form
-  //       setCategoryImageUrl(""); // Reset image URL when closing form
-  //     }
-  //     return !prev;
-  //   });
-  // }, []);
+ 
 
   const toggle = useCallback(() => {
     setShowForm((prev) => {
@@ -262,7 +228,7 @@ function Services() {
       toast.error("Name cannot be empty.");
       return;
     }
-
+console.log(editingCategoryId,"editingCategoryId")
     try {
       if (editingCategoryId) {
         // 🟢 Category update
@@ -498,6 +464,8 @@ function Services() {
 
 
   const handleCategoryEdit = useCallback((categoryId, currentName, e) => {
+    console.log(categoryId,"id")
+    console.log(currentName,"currubnt")
     e.stopPropagation();
     setIsEditing(true);
     setEditingCategoryId(categoryId);
@@ -505,8 +473,8 @@ function Services() {
     setCategoryName(currentName || "");
     // Set the current category image URL when editing starts
     const currentCategory = categories.find((cat) => cat.id === categoryId);
-    setCategoryImageUrl(currentCategory?.image || ""); // Pre-populate with existing image URL
-    setCategoryImage(null); // Reset uploaded image to null
+    setCategoryImageUrl(currentCategory?.image || ""); 
+    setCategoryImage(null); 
     setShowForm(true);
   }, [categories]);
 
@@ -612,6 +580,7 @@ function Services() {
   };
   // Update the handleUnblockBoth function
   const handleUnblockBoth = async (itemId, isCategory = false) => {
+
     try {
       if (isCategory) {
         await toggleCategoryStatus(itemId, true);
@@ -623,6 +592,7 @@ function Services() {
       toast.success(
         `${isCategory ? "Service" : "Subservice"} unblocked successfully!`
       );
+      
     } catch (error) {
       console.error("Error unblocking:", error);
       toast.error(`Failed to unblock: ${error.message}`);
@@ -725,14 +695,13 @@ function Services() {
 
 
           <div className="flex h-[calc(100vh-215px)] mt-5">
-            <div className="mt-6 relative w-[400px] overflow-auto ">
+            <div className="mt-6 relative w-[400px] overflow-auto pb-5">
               <div className={`flex w-full ${isVertical ? "border-b border-[rgb(128,128,128)]" : ""}`}>
                 <div
                   className={`gap-4 flex flex-col w-full cursor-pointer scrollRemove  pe-4  ${isVertical ? "flex-wrap" : ""}`}
                 >
 
                   {sortedData.map((items, index) => {
-                    console.log(items, "items")
                     return (
                       <div
                         key={items.id}
@@ -786,7 +755,6 @@ function Services() {
               <div className="flex justify-between gap-[18px] mt-6 flex-wrap w-full ">
                 {selectedSubcategories?.length > 0 &&
                   selectedSubcategories?.filter((sub) => sub?.isActive).map((sub, index) => {
-
                     return (
                       <div
                         key={index}
@@ -805,7 +773,7 @@ function Services() {
                           ) : (
                             <p className="font-normal text-sm text-[#00000099] lg:mx-[5px] transition group-hover:text-[#6C4DEF] flex items-center lg:gap-4 gap-2">
                           
-                              {highlightText(sub?.categoryName, searchQuery)}
+                              {highlightText(sub?.subCategoryName, searchQuery)}
                             </p>
                           )}
 
@@ -964,7 +932,9 @@ function Services() {
                           No blocked services found.
                         </p>
                       ) : (
-                        blockedItems.categories.map((item) => (
+                          blockedItems.categories.map((item) => {
+                            console.log(item,"items")
+                          return(
                           <div
                             key={`cat-${item.id}`}
                             className="flex justify-between items-center py-2 border-b border-gray-100"
@@ -991,16 +961,19 @@ function Services() {
                               Unblock
                             </button>
                           </div>
-                        ))
+                        )
+                        })
                       )
                     ) : blockedItems.subcategories.length === 0 ? (
                       <p className="text-[#999999] font-normal text-base py-2">
                         No blocked sub services found.
                       </p>
                     ) : (
-                      blockedItems.subcategories.map((item) => (
+                          blockedItems.subcategories.map((item) => {
+                            console.log(item,"itesm")
+                        return(
                         <div
-                          key={`sub-${item.id}`}
+                          key={`sub-${item.categoryID}`}
                           className="flex justify-between items-center py-2 border-b border-gray-100"
                         >
                           <div>
@@ -1014,14 +987,15 @@ function Services() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleUnblockBoth(item.id, false); // false indicates this is a subcategory
+                              handleUnblockBoth(item.categoryID, false); // false indicates this is a subcategory
                             }}
                             className="text-green-600 hover:text-green-800 font-medium"
                           >
                             Unblock
                           </button>
                         </div>
-                      ))
+                      )
+                      })
                     )}
                   </div>
                 </div>

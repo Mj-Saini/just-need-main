@@ -209,9 +209,6 @@ export const Complaints = () => {
               </thead>
               <tbody>
                 {currentItems.map((item) => {
-
-                  console.log(item.status, 'items')
-
                   return (
                     <tr key={item.id} className="align-top">
                       <td className="text-black text-sm font-normal py-[4px] px-4">

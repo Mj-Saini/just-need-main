@@ -148,25 +148,7 @@ const CustomerData = () => {
       setSelectItem([]);
     }
   };
-  // Individual checkbox handler
-  const checkHandler = (e) => {
-    const value = e.target.value;
-    const isChecked = e.target.checked;
-
-    if (isChecked) {
-      const newSelectedItems = [...selectItem, value];
-      setSelectItem(newSelectedItems);
-      const currentPageIds = paginatedData.map((item) => item.id);
-      setMainCheckbox(
-        currentPageIds.every((id) => newSelectedItems.includes(id))
-      );
-    } else {
-      const newSelectedItems = selectItem.filter((id) => id !== value);
-      setSelectItem(newSelectedItems);
-      setMainCheckbox(false);
-    }
-  };
-
+ 
   // Pagination handlers
   const handlePageChange = (direction) => {
     if (direction === "next" && currentPage < totalPages) {
