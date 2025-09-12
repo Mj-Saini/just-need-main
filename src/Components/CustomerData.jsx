@@ -703,6 +703,9 @@ const pendingBusinessUsers = users.filter(user =>
                 <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[150px]">
                   Mobile
                 </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                  Business Profile
+                </th>
                 <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base w-[250px]">
                   Address
                 </th>
@@ -716,9 +719,7 @@ const pendingBusinessUsers = users.filter(user =>
                 <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                   Is Seller Online
                 </th>
-                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
-                  Business Profile
-                </th>
+               
                 <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base  bg-white">
                   Action
                 </th>
@@ -767,6 +768,28 @@ const pendingBusinessUsers = users.filter(user =>
                       <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
                         {customer.mobile_number}
                       </td>
+                      <td>
+                        <div className="flex justify-center items-center">
+                          {customer.userType === "Seller" ? (
+                            <span
+                              className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${!customer?.businessDetail?.status
+                                ? "bg-gray-100 text-gray-500"
+                                : customer.businessDetail.status === "Pending"
+                                  ? "bg-[#6C4DEF1A] text-[#6C4DEF]"
+                                  : customer.businessDetail.status === "Rejected"
+                                    ? "bg-[#FF00001A] text-[#F02600]"
+                                    : customer.businessDetail.status === "Approved"
+                                      ? "bg-[#00800012] text-[#008000]"
+                                      : "bg-gray-100 text-gray-500"
+                                }`}
+                            >
+                              {customer?.businessDetail?.status || "N/A"}
+                            </span>
+                          ) : (
+                            <span className="text-gray-400">-</span>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000] w-[120px] truncate">
                         {customer.address.city}/{customer.address.state}
                       </td>
@@ -805,28 +828,7 @@ const pendingBusinessUsers = users.filter(user =>
 
                         </div>
                       </td>
-                      <td>
-                        <div className="flex justify-center items-center">
-                          {customer.userType === "Seller" ? (
-                            <span
-                              className={`px-[10px] py-[4px] text-sm font-normal text-center rounded-[90px] ${!customer?.businessDetail?.status
-                                ? "bg-gray-100 text-gray-500"
-                                : customer.businessDetail.status === "Pending"
-                                  ? "bg-[#6C4DEF1A] text-[#6C4DEF]"
-                                  : customer.businessDetail.status === "Rejected"
-                                    ? "bg-[#FF00001A] text-[#F02600]"
-                                    : customer.businessDetail.status === "Approved"
-                                      ? "bg-[#00800012] text-[#008000]"
-                                      : "bg-gray-100 text-gray-500"
-                                }`}
-                            >
-                              {customer?.businessDetail?.status || "N/A"}
-                            </span>
-                          ) : (
-                            <span className="text-gray-400">-</span>
-                          )}
-                        </div>
-                      </td>
+                     
                       <td className="px-[19px] md:px-[24px] text-center bg-white">
                         <Link to={`/dashboard/usersList/userDetails/${customer.id}`}>
                           <button className="text-2xl font-medium">
