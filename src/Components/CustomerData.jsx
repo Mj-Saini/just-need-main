@@ -515,14 +515,9 @@ const pendingBusinessUsers = users.filter(user =>
           <table className="w-full text-left border-separate border-spacing-4 whitespace-nowrap rounded-[10px]">
             <thead>
               <tr className="py-[8px]">
-                {/* <th className="px-[19px] py-[8px] md:px-[24px]">
-                <input
-                  className="w-[16px] h-[16px]"
-                  type="checkbox"
-                  checked={mainCheckbox}
-                  onChange={handleMainCheckboxChange}
-                />
-              </th> */}
+                <th className="px-[19px] py-[8px] md:px-[24px]">
+                S.No.
+              </th>
                 <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                   Full Name
                 </th>
@@ -575,18 +570,12 @@ const pendingBusinessUsers = users.filter(user =>
                   </td>
                 </tr>
               ) : (
-                paginatedData?.filter(user => user.userType !== 'Rider').map((customer) => {
+                paginatedData?.filter(user => user.userType !== 'Rider').map((customer,index) => {
                   return (
                     <tr key={customer.id}>
-                      {/* <td className="px-[19px] md:px-[24px]">
-                      <input
-                        className="w-[16px] h-[16px]"
-                        type="checkbox"
-                        onChange={checkHandler}
-                        checked={selectItem.includes(customer.id)}
-                        value={customer.id}
-                      />
-                    </td> */}
+                      <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                        {index + 1}
+                      </td>
                       <td className="px-[19px] md:px-[24px] text-[#6C4DEF] flex items-center gap-2 min-w-[160px]">
                         <Link
                           className="flex gap-2"
@@ -695,6 +684,9 @@ const pendingBusinessUsers = users.filter(user =>
               <tr className="py-[8px]">
                
                 <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
+                 S.No.
+                </th>
+                <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
                   Full Name
                 </th>
                 <th className="px-[19px] py-[8px] md:px-[24px] font-medium text-sm md:text-base">
@@ -744,11 +736,14 @@ const pendingBusinessUsers = users.filter(user =>
                   </td>
                 </tr>
               ) : (
-                pendingBusinessUsers?.map((customer) => {
+                pendingBusinessUsers?.map((customer,index) => {
 
                   return (
                     <tr key={customer.id}>
                     
+                      <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
+                        {index + 1}
+                      </td>
                       <td className="px-[19px] md:px-[24px] text-[#6C4DEF] flex items-center gap-2 min-w-[160px]">
                         <Link
                           className="flex gap-2"

@@ -6,6 +6,7 @@ import { supabase } from '../../store/supabaseCreateClient';
 import BlockedUserPopups from '../../Components/Popups/BlockedUserPopups';
 import { toast } from 'react-toastify';
 import { useCustomerContext } from '../../store/CustomerContext';
+import avatar from "../../assets/Images/Png/dummyimage.jpg";
 // import { useUserContext } from '../../store/UserContext';
 
 
@@ -197,12 +198,6 @@ const Rider = () => {
     };
 
 
-    // Auto-refresh riders when component mounts or when riders are updated
-    // useEffect(() => {
-    //     fetchRiders();
-    // }, []);
-
-    // Listen for rider updates
     useEffect(() => {
         const handler = () => fetchRiders();
         window.addEventListener('rider-status-updated', handler);
@@ -319,7 +314,8 @@ const Rider = () => {
                                         </td>
                                     </tr>
                                 ) : (
-                                    paginatedData?.map((rider, index) => {
+                                            paginatedData?.map((rider, index) => {
+                                        console.log(rider,"rider")
                                         return (
                                             <tr key={rider.id}>
                                                 <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">
@@ -330,7 +326,7 @@ const Rider = () => {
                                                         className="flex gap-2"
                                                         to={`riderDetails/${rider.id}`}
                                                     >
-                                                        {rider.user_detail?.firstName} {rider.user_detail?.lastName}
+                                                        <img width={32} height={32} className='!w-8 h-8 aspect-[1/1] rounded-full object-cover img_user' src={rider.user_detail.image  || avatar} alt={rider.name} />    {rider.user_detail?.firstName} {rider.user_detail?.lastName}
                                                     </Link>
                                                 </td>
                                                 <td className="px-[19px] md:px-[24px] text-sm font-normal text-[#000000]">

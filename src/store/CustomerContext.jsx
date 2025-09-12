@@ -30,6 +30,9 @@ export function CustomerContext({ children }) {
   const fetchRiders = async () => {
     setLoading(true);
 
+    // let { data: userview, error } = await supabase
+    //   .from('userview')
+    //   .select('*')
     // First, get all users who are riders with their accountStatus
     let { data: usersData, error: usersError } = await supabase
       .from('Users')
@@ -64,7 +67,8 @@ export function CustomerContext({ children }) {
           useremail: user.useremail,
           mobile_number: user.mobile_number,
           accountStatus: user.accountStatus,
-          userType: user.userType
+          userType: user.userType,
+          image:user.image
         }
       };
     });
@@ -73,6 +77,8 @@ export function CustomerContext({ children }) {
     setRiders(combinedRiders || []);
     setLoading(false);
   };
+
+
   useEffect(() => {
     fetchUsers();
     fetchRiders()
