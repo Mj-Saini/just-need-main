@@ -154,12 +154,12 @@ function TopBar() {
               </div>
             )}
           </div> */}
-          <button onClick={setchatPopup}>
+          {/* <button onClick={setchatPopup}>
             <ChatIcon />
-          </button>
-          <button onClick={setNotificationPopUp}>
+          </button> */}
+          {/* <button onClick={setNotificationPopUp}>
             <NotificationIcon />
-          </button>
+          </button> */}
           <div className="flex items-center">
             <img className="w-[40px]" src={AdminImage} alt="Admin" />
             <div className="ms-2.5">

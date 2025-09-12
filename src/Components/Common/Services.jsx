@@ -29,8 +29,8 @@ import { useUserContext } from "../../store/UserContext";
 import { useCustomerContext } from "../../store/CustomerContext";
 
 function Services() {
-    const { sendNotification } = useUserContext();
-     const { users } = useCustomerContext();
+  const { sendNotification } = useUserContext();
+  const { users } = useCustomerContext();
   const [editIndex, setEditIndex] = useState(null);
   const [editData, setEditData] = useState("");
   const [showPopup, setShowPopup] = useState(false);
@@ -137,7 +137,7 @@ function Services() {
       .filter((cat) => cat !== null);
   }, [categories, searchQuery]);
 
- 
+
 
   const toggle = useCallback(() => {
     setShowForm((prev) => {
@@ -228,7 +228,7 @@ function Services() {
       toast.error("Name cannot be empty.");
       return;
     }
-console.log(editingCategoryId,"editingCategoryId")
+    console.log(editingCategoryId, "editingCategoryId")
     try {
       if (editingCategoryId) {
         // 🟢 Category update
@@ -464,8 +464,6 @@ console.log(editingCategoryId,"editingCategoryId")
 
 
   const handleCategoryEdit = useCallback((categoryId, currentName, e) => {
-    console.log(categoryId,"id")
-    console.log(currentName,"currubnt")
     e.stopPropagation();
     setIsEditing(true);
     setEditingCategoryId(categoryId);
@@ -473,8 +471,8 @@ console.log(editingCategoryId,"editingCategoryId")
     setCategoryName(currentName || "");
     // Set the current category image URL when editing starts
     const currentCategory = categories.find((cat) => cat.id === categoryId);
-    setCategoryImageUrl(currentCategory?.image || ""); 
-    setCategoryImage(null); 
+    setCategoryImageUrl(currentCategory?.image || "");
+    setCategoryImage(null);
     setShowForm(true);
   }, [categories]);
 
@@ -485,7 +483,7 @@ console.log(editingCategoryId,"editingCategoryId")
     setCategoryName(currentName || "");
     setShowForm(true);
   }, []);
-
+console.log(editData,"data")
   const handleDisableClick = useCallback(
     (subcategoryId) => {
       setCurrentCardIndex(subcategoryId);
@@ -592,7 +590,7 @@ console.log(editingCategoryId,"editingCategoryId")
       toast.success(
         `${isCategory ? "Service" : "Subservice"} unblocked successfully!`
       );
-      
+
     } catch (error) {
       console.error("Error unblocking:", error);
       toast.error(`Failed to unblock: ${error.message}`);
@@ -702,14 +700,11 @@ console.log(editingCategoryId,"editingCategoryId")
                 >
 
                   {sortedData.map((items, index) => {
+
                     return (
                       <div
                         key={items.id}
-                        className={`flex items-center p-2 rounded-xl justify-between 
-      ${!isVertical ? "border-2 " : ""} 
-      hover:text-blue-500 hover:border-blue-500
-      ${activeCategoryId === items.id ? "border-blue-500 text-blue-500" : "border-transparent text-gray-700"}
-      ${!items.isActive ? "opacity-50" : ""}`}
+                        className={`flex items-center p-2 rounded-xl justify-between ${!isVertical ? "border-2 " : ""}    hover:text-blue-500 hover:border-blue-500 ${activeCategoryId === items.id ? "border-blue-500 text-blue-500" : "border-transparent text-gray-700"} ${!items.isActive ? "opacity-50" : ""}`}
                         onClick={() => {
                           if (items.isActive) {
                             handleCategoryClick(items); // ✅ send full item
@@ -755,6 +750,7 @@ console.log(editingCategoryId,"editingCategoryId")
               <div className="flex justify-between gap-[18px] mt-6 flex-wrap w-full ">
                 {selectedSubcategories?.length > 0 &&
                   selectedSubcategories?.filter((sub) => sub?.isActive).map((sub, index) => {
+                    console.log(sub, "items")
                     return (
                       <div
                         key={index}
@@ -772,7 +768,7 @@ console.log(editingCategoryId,"editingCategoryId")
                             />
                           ) : (
                             <p className="font-normal text-sm text-[#00000099] lg:mx-[5px] transition group-hover:text-[#6C4DEF] flex items-center lg:gap-4 gap-2">
-                          
+
                               {highlightText(sub?.subCategoryName, searchQuery)}
                             </p>
                           )}
@@ -780,7 +776,7 @@ console.log(editingCategoryId,"editingCategoryId")
                           <div className="flex lg:gap-4 gap-2">
                             <div
                               className="cursor-pointer"
-                              onClick={(e) => { handleSubcategoryEdit(sub.id, sub.categoryName, e); setSubCat(sub) }}
+                              onClick={(e) => { handleSubcategoryEdit(sub.subCatId, sub.subCategoryName, e); setSubCat(sub) }}
                             >
                               <Editicon />
                             </div>
@@ -932,36 +928,36 @@ console.log(editingCategoryId,"editingCategoryId")
                           No blocked services found.
                         </p>
                       ) : (
-                          blockedItems.categories.map((item) => {
-                            console.log(item,"items")
-                          return(
-                          <div
-                            key={`cat-${item.id}`}
-                            className="flex justify-between items-center py-2 border-b border-gray-100"
-                          >
-                            <div className="flex items-center">
-                              {item.image && (
-                                <img
-                                  src={item.image}
-                                  alt=""
-                                  className="w-8 h-8 rounded-full mr-3 object-cover"
-                                />
-                              )}
-                              <span className="text-[#333] font-normal text-base">
-                                {item.name || "Unnamed Service"}
-                              </span>
-                            </div>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleUnblockBoth(item.id, true); // true indicates this is a category
-                              }}
-                              className="text-green-600 hover:text-green-800 font-medium"
+                        blockedItems.categories.map((item) => {
+                          console.log(item, "items")
+                          return (
+                            <div
+                              key={`cat-${item.id}`}
+                              className="flex justify-between items-center py-2 border-b border-gray-100"
                             >
-                              Unblock
-                            </button>
-                          </div>
-                        )
+                              <div className="flex items-center">
+                                {item.image && (
+                                  <img
+                                    src={item.image}
+                                    alt=""
+                                    className="w-8 h-8 rounded-full mr-3 object-cover"
+                                  />
+                                )}
+                                <span className="text-[#333] font-normal text-base">
+                                  {item.name || "Unnamed Service"}
+                                </span>
+                              </div>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleUnblockBoth(item.id, true); // true indicates this is a category
+                                }}
+                                className="text-green-600 hover:text-green-800 font-medium"
+                              >
+                                Unblock
+                              </button>
+                            </div>
+                          )
                         })
                       )
                     ) : blockedItems.subcategories.length === 0 ? (
@@ -969,32 +965,32 @@ console.log(editingCategoryId,"editingCategoryId")
                         No blocked sub services found.
                       </p>
                     ) : (
-                          blockedItems.subcategories.map((item) => {
-                            console.log(item,"itesm")
-                        return(
-                        <div
-                          key={`sub-${item.categoryID}`}
-                          className="flex justify-between items-center py-2 border-b border-gray-100"
-                        >
-                          <div>
-                            <p className="text-[#333] text-base font-normal">
-                              {item.categoryName || "Unnamed Sub Service"}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              Parent: {item.parentCategoryName || "No parent service"}
-                            </p>
-                          </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleUnblockBoth(item.categoryID, false); // false indicates this is a subcategory
-                            }}
-                            className="text-green-600 hover:text-green-800 font-medium"
+                      blockedItems.subcategories.map((item) => {
+                        console.log(item, "itesm")
+                        return (
+                          <div
+                            key={`sub-${item.categoryID}`}
+                            className="flex justify-between items-center py-2 border-b border-gray-100"
                           >
-                            Unblock
-                          </button>
-                        </div>
-                      )
+                            <div>
+                              <p className="text-[#333] text-base font-normal">
+                                {item.categoryName || "Unnamed Sub Service"}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Parent: {item.parentCategoryName || "No parent service"}
+                              </p>
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleUnblockBoth(item.categoryID, false); // false indicates this is a subcategory
+                              }}
+                              className="text-green-600 hover:text-green-800 font-medium"
+                            >
+                              Unblock
+                            </button>
+                          </div>
+                        )
                       })
                     )}
                   </div>
