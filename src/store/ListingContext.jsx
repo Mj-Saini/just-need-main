@@ -7,6 +7,7 @@ const ListingContext = createContext();
 export const useListingContext = () => useContext(ListingContext);
 
 function ListingProvider({ children }) {
+  const [listData, setListData] = useState([]);
   const fetchlisting = async () => {
     const { data, error } = await supabase.from("ServiceListings").select("");
     if (!error) {
@@ -25,11 +26,19 @@ function ListingProvider({ children }) {
     if (!error) {
       return data;
     }
-    console.log(data, "data");
   };
+  async function getData() {
+    const value = await fetchlisting();
+
+    setListData([...value]);
+  }
+
+  useEffect(() => {
+    getData();
+  }, []);
 
   return (
-    <ListingContext.Provider value={{ fetchlisting, fetchlistingWithId }}>
+    <ListingContext.Provider value={{ fetchlisting, fetchlistingWithId, listData, setListData }}>
       {children}
     </ListingContext.Provider>
   );

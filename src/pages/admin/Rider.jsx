@@ -5,16 +5,15 @@ import { Link, Outlet, useLocation } from 'react-router-dom';
 import { supabase } from '../../store/supabaseCreateClient';
 import BlockedUserPopups from '../../Components/Popups/BlockedUserPopups';
 import { toast } from 'react-toastify';
+import { useCustomerContext } from '../../store/CustomerContext';
 // import { useUserContext } from '../../store/UserContext';
 
 
 
 
 const Rider = () => {
-    // const {sendFCMMessage}=useUserContext()
     const location = useLocation();
-    const [riders, setRiders] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const { riders, setRiders, loading  } = useCustomerContext();
     const [searchTerm, setSearchTerm] = useState("");
     // For rider list
     const [currentPage, setCurrentPage] = useState(1);
@@ -38,61 +37,8 @@ const Rider = () => {
         return `${day} ${month} ${year} | ${formattedHours}:${formattedMinutes} ${ampm}`;
     };
 
-    // console.log(riders,"riders");
 
 
-    // useEffect(() => { 
-    //     sendFCMMessage()
-    // })
-
-
-    // Move fetchRiders outside useEffect
-    const fetchRiders = async () => {
-        setLoading(true);
-
-        // First, get all users who are riders with their accountStatus
-        let { data: usersData, error: usersError } = await supabase
-            .from('Users')
-            .select('*')
-            .eq('userType', 'Rider');
-
-        if (usersError) {
-            console.error('Error fetching users:', usersError);
-            setLoading(false);
-            return;
-        }
-
-        // Then get rider details for these users
-        let { data: RiderDetailsView, error: riderError } = await supabase
-            .from('RiderDetailsView')
-            .select('*');
-
-        if (riderError) {
-            console.error('Error fetching rider details:', riderError);
-            setLoading(false);
-            return;
-        }
-
-        // Combine the data
-        const combinedRiders = usersData.map(user => {
-            const riderDetail = RiderDetailsView.find(rider => rider.userId === user.id);
-            return {
-                ...riderDetail,
-                user_detail: {
-                    firstName: user.firstName,
-                    lastName: user.lastName,
-                    useremail: user.useremail,
-                    mobile_number: user.mobile_number,
-                    accountStatus: user.accountStatus,
-                    userType: user.userType
-                }
-            };
-        });
-
-        // console.log("Combined riders data:", combinedRiders);
-        setRiders(combinedRiders || []);
-        setLoading(false);
-    };
 
     // Filter logic based on selected fields
     const filteredRiders = riders?.filter((rider) => {
@@ -252,9 +198,9 @@ const Rider = () => {
 
 
     // Auto-refresh riders when component mounts or when riders are updated
-    useEffect(() => {
-        fetchRiders();
-    }, []);
+    // useEffect(() => {
+    //     fetchRiders();
+    // }, []);
 
     // Listen for rider updates
     useEffect(() => {

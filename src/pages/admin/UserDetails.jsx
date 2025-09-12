@@ -22,7 +22,7 @@ import { useCustomerContext } from "../../store/CustomerContext";
 import { useUserContext } from "../../store/UserContext";
 
 function UserDetails() {
-  const { users,setUsers, loading, setLoading } = useCustomerContext();
+  const { setUsers, loading, setLoading } = useCustomerContext();
     const { sendNotification,setUserName } = useUserContext();
   const { id } = useParams();
   const [user, setUser] = useState(null);
@@ -40,12 +40,8 @@ function UserDetails() {
   const { fetchlisting } = useListingContext();
 
   
-// const matchingRequest = user?.find((req) => req.id === id);
 
-console.log(user?.msgToken, "user");
   const accessToken = user?.msgToken;
-// console.log(accessToken)
-
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const day = date.getDate();

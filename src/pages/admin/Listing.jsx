@@ -14,8 +14,8 @@ import FilterComponent from "../../Components/Popups/Filterpop";
 
 
 const Listing = () => {
-  const { fetchlisting } = useListingContext();
-  const [listData, setListData] = useState([]);
+  const {  listData, setListData } = useListingContext();
+
   const [isFilterPopup, setIsfilterPopup] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,11 +28,7 @@ const Listing = () => {
   };
 
   const visibleData = filteredData.slice(0, visibleCount);
-  async function getData() {
-    const value = await fetchlisting();
 
-    setListData([...value]);
-  }
   //handle block
   async function handleBlock(e, id, val) {
       const newStatus = !val;  
@@ -65,9 +61,7 @@ const Listing = () => {
 
 
 
-  useEffect(() => {
-    getData();
-  }, []);
+
 
 
   // 🔎 **Search Logic**
@@ -137,8 +131,6 @@ const Listing = () => {
       return updatedFilters;
     });
   };
-
-  console.log(listData,"listData");
 
 
   if (listData.length !== 0) {
