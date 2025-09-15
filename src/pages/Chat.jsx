@@ -95,8 +95,7 @@ const Chat = () => {
       const isImageUpload = !!uploadImg;
 
       if (uploadImg) {
-        setIsLoading(true); // <-- Start loader
-        // Upload image to just_need bucket in ChatImages folder
+        setIsLoading(true); 
         const fileExt = uploadImg.name.split('.').pop();
         const fileName = `${timestamp}_${uploadImg.name}`;
         const filePath = `ChatImages/${fileName}`;
@@ -132,7 +131,7 @@ const Chat = () => {
 
         if (messageError) throw messageError;
         messageData = data;
-        setIsLoading(false); // <-- Stop loader after upload
+        setIsLoading(false); 
       }
 
       // Only send text message if no image was uploaded
