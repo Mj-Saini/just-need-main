@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import MechanicImage from "../../assets/png/user-profile-icon.png";
 import DisableProviderPopUp from "../../Components/Popups/DisableProviderPopUp";
 import DenialReasonPopUp from "../../Components/Popups/DenialReasonPopUp";
@@ -10,6 +10,7 @@ import { useCustomerContext } from "../../store/CustomerContext";
 import { useUserContext } from "../../store/UserContext";
 
 function RiderDetails() {
+  const navigate = useNavigate();
   const { users } = useCustomerContext();
   const { sendNotification } = useUserContext();
   const { id } = useParams();
@@ -21,16 +22,10 @@ function RiderDetails() {
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [ridingRequests, setRidingRequests] = useState([]);
-
+  const [message, setMessage] = useState("");
   const [riderDetailsTab, setRiderDetailsTab] = useState("riderDetails");
 
 
-
-  const viewRiderDetails = ridingRequests.filter(
-    (item) => item.riderId === user?.id
-  );
-
-  console.log(viewRiderDetails, "viewRiderDetails");
 
   // For rider history
   const [currentPageRiderHistory, setCurrentPageRiderHistory] = useState(1);
@@ -185,8 +180,49 @@ function RiderDetails() {
       setCurrentPageRiderHistory(currentPageRiderHistory - 1);
     }
   };
+
+
+
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      setLoading(true);
+      setMessage("");
+
+      const res = await fetch(
+        "https://qmxzutndbzkpccffzoxy.supabase.co/functions/v1/delete-user",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFteHp1dG5kYnprcGNjZmZ6b3h5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczOTc2ODYwNSwiZXhwIjoyMDU1MzQ0NjA1fQ.MH9YsqO9lwb-HzDxKdYErSiaphlKojNZmTF27Pg13Fo`,
+          },
+          body: JSON.stringify({ userId }),
+        }
+      );
+
+      const data = await res.json();
+      if (data.success) {
+        setMessage(`✅ ${data.message}`);
+        navigate("/riders");
+        window.location.reload(); 
+      } else {
+        setMessage(`⚠️ Failed: ${data.error || "Unknown error"}`);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Error deleting user");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
   return (
     <div className="px-4">
+      {message && (
+        <div className="mb-4 p-2 border rounded bg-gray-100 text-sm">{message}</div>
+      )}
       {/* Block/Unblock Button - always visible */}
       <div className="flex items-center justify-end mb-4">
         <button
@@ -204,6 +240,10 @@ function RiderDetails() {
               <span className="text-black font-normal text-base">Block</span>
             </>
           )}
+        </button>
+        <button onClick={() => handleDeleteUser(user.id)} className="ms-3">
+          <span className="bg-[#d80f0f] text-white rounded-lg px-5 py-1.5 font-normal text-base">Delete</span>
+
         </button>
       </div>
 

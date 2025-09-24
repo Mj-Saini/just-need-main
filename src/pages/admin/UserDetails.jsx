@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+
 import {
   EmailIcon,
   LocationIcon,
@@ -22,6 +23,7 @@ import { useCustomerContext } from "../../store/CustomerContext";
 import { useUserContext } from "../../store/UserContext";
 
 function UserDetails() {
+  const navigate = useNavigate();
   const { setUsers, loading, setLoading } = useCustomerContext();
     const { sendNotification,setUserName } = useUserContext();
   const { id } = useParams();
@@ -350,11 +352,30 @@ function UserDetails() {
     }
   };
 
+  const handleDeleteUser = async (userId) => {
+    const res = await fetch("https://qmxzutndbzkpccffzoxy.supabase.co/functions/v1/delete-user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFteHp1dG5kYnprcGNjZmZ6b3h5Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczOTc2ODYwNSwiZXhwIjoyMDU1MzQ0NjA1fQ.MH9YsqO9lwb-HzDxKdYErSiaphlKojNZmTF27Pg13Fo"
+      },
+      body: JSON.stringify({ userId }),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      console.log("✅ User deleted:", data);
+      navigate("/usersList"); // 👈 redirect
+      window.location.reload(); 
+    } else {
+      console.error("❌ Delete failed:", data.error || data);
+    }
+  };
+
 
   return (
     <div className="px-4">
 
-      <div className="flex items-center justify-end">
 
         <div className="flex items-center justify-end">
           <button
@@ -371,11 +392,18 @@ function UserDetails() {
                 <EnableRedIcon />
                 <span className="text-black font-normal text-base">Unblock</span>
               </>
-            )}
-          </button>
+          )}
+        
+            
+        
+        </button>
+        <button onClick={() => handleDeleteUser(user.id)} className="ms-3">
+          <span className="bg-[#d80f0f] text-white rounded-lg px-5 py-1.5 font-normal text-base">Delete</span>
+
+        </button>
         </div>
 
-      </div>
+     
 
       <div className="lg:flex mt-[30px]">
         <div className="w-full md:w-7/12 lg:w-[399px] xl:pe-2.5 lg:flex">
