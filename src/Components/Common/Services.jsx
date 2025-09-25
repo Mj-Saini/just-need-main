@@ -60,6 +60,8 @@ function Services() {
     setIsVertical((prev) => !prev);
   };
 
+
+
   const {
     categories = [],
     updateSubcategoryName,
@@ -483,7 +485,7 @@ function Services() {
     setCategoryName(currentName || "");
     setShowForm(true);
   }, []);
-console.log(editData,"data")
+
   const handleDisableClick = useCallback(
     (subcategoryId) => {
       setCurrentCardIndex(subcategoryId);
@@ -630,6 +632,8 @@ console.log(editData,"data")
     }
   }, [filteredCategoriesData]);
 
+
+
   return (
     <div className="p-[14px]  bg-white">
       {!categories && (
@@ -750,7 +754,7 @@ console.log(editData,"data")
               <div className="flex justify-between gap-[18px] mt-6 flex-wrap w-full ">
                 {selectedSubcategories?.length > 0 &&
                   selectedSubcategories?.filter((sub) => sub?.isActive).map((sub, index) => {
-                    console.log(sub, "items")
+                    // console.log(sub, "items")
                     return (
                       <div
                         key={index}
@@ -859,7 +863,7 @@ console.log(editData,"data")
                     currentCardIndex,
                     isCategoryToggle
                       ? categories.find((cat) => cat.id === currentCardIndex)?.isActive
-                      : selectedSubcategories.find((sub) => sub.id === currentCardIndex)?.isActive,
+                      : selectedSubcategories.find((sub) => sub.subCatId === currentCardIndex)?.isActive,
                     "confirm",
                     isCategoryToggle
                   )
@@ -868,8 +872,9 @@ console.log(editData,"data")
                 isActive={
                   isCategoryToggle
                     ? categories.find((cat) => cat.id === currentCardIndex)?.isActive
-                    : selectedSubcategories.find((sub) => sub.id === currentCardIndex)?.isActive
+                    : selectedSubcategories.find((sub) => sub.subCatId === currentCardIndex)?.isActive
                 }
+                
                 confirmText={
                   isCategoryToggle &&
                     !categories.find((cat) => cat.id === currentCardIndex)?.isActive
@@ -928,8 +933,8 @@ console.log(editData,"data")
                           No blocked services found.
                         </p>
                       ) : (
-                        blockedItems.categories.map((item) => {
-                          console.log(item, "items")
+                          blockedItems.categories.map((item) => {
+                          console.log(item, "adfsad")  
                           return (
                             <div
                               key={`cat-${item.id}`}
@@ -950,7 +955,7 @@ console.log(editData,"data")
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleUnblockBoth(item.id, true); // true indicates this is a category
+                                  handleUnblockBoth(item.id, true); 
                                 }}
                                 className="text-green-600 hover:text-green-800 font-medium"
                               >
@@ -966,15 +971,15 @@ console.log(editData,"data")
                       </p>
                     ) : (
                       blockedItems.subcategories.map((item) => {
-                        console.log(item, "itesm")
+                        console.log(item, "adfsad")  
                         return (
                           <div
-                            key={`sub-${item.categoryID}`}
+                            key={`sub-${item.subCatId}`}
                             className="flex justify-between items-center py-2 border-b border-gray-100"
                           >
                             <div>
                               <p className="text-[#333] text-base font-normal">
-                                {item.categoryName || "Unnamed Sub Service"}
+                                {item.subCategoryName || "Unnamed Sub Service"}
                               </p>
                               <p className="text-xs text-gray-500">
                                 Parent: {item.parentCategoryName || "No parent service"}
@@ -983,7 +988,7 @@ console.log(editData,"data")
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleUnblockBoth(item.categoryID, false); // false indicates this is a subcategory
+                                handleUnblockBoth(item.subCatId, false); // false indicates this is a subcategory
                               }}
                               className="text-green-600 hover:text-green-800 font-medium"
                             >
@@ -1105,7 +1110,7 @@ console.log(editData,"data")
                       onClick={(e) => {
                         e.preventDefault();
                         const isCategory = !!editingCategoryId;
-                        const itemId = isCategory ? editingCategoryId : subCat.id;
+                        const itemId = isCategory ? editingCategoryId : subCat.subCatId;
                         const currentStatus = isCategory
                           ? categories.find(cat => cat.id === editingCategoryId)?.isActive
                           : subCat?.isActive;
