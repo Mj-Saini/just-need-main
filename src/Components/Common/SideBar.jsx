@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CustomerServiceLogo from "../../assets/png/customerServiceLogo.png";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -18,14 +18,40 @@ import {
   RiderIcon,
 } from "../../assets/icon/Icon";
 import LogOutPopUp from "../Popups/LogOutPopUp";
+import { supabase } from "../../store/supabaseCreateClient";
 
 function SideBar() {
   const [showLogOutPopUp, setShowLogOutPopUp] = useState(false);
   const location = useLocation();
+  const [mainLogo, setMainLogo] = useState("");
   const pathName = location.pathname;
   const handleLogOutPopUp = () => {
     setShowLogOutPopUp(!showLogOutPopUp);
   };
+
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("Config")        // table name in lowercase
+          .select("mainLogo")    // exact column name with uppercase L
+          .limit(1);
+
+        if (error) throw error;
+
+        if (data && data.length > 0) {
+          setMainLogo(data[0].mainLogo || ""); // set fetched main logo
+        }
+      } catch (err) {
+        console.error("Error fetching main logo:", err.message);
+      }
+    };
+
+    fetchLogo();
+  }, []);
+
+
+  console.log(mainLogo, "mainLogo")
   return (
     <div className="bg-white pt-[11px] pb-10  rounded-[10px] h-full overflow-y-auto scrollRemove">
       <div className="px-6 pb-[11px]">
@@ -34,8 +60,8 @@ function SideBar() {
           to="/dashboard"
         >
           <img
-            className="max-w-[150px] xl:max-w-[222px]"
-            src={CustomerServiceLogo}
+            className="max-w-[80px] xl:max-w-[100px]"
+            src={mainLogo || "CustomerServiceLogo"}
             alt="logo"
           />
         </NavLink>
