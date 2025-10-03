@@ -9,6 +9,7 @@ import { DiscardIcon, UpdateIcon } from "../../assets/icon/Icon";
 function SettinGeneral() {
   // State for form fields
   const [image, setImage] = useState(Logo); // Platform logo
+  const [mainLogo, setMainLogo] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#6C4DEF"); // Primary theme color
   const [secondaryColor, setSecondaryColor] = useState("#F1F1F1"); // Secondary theme color
   const [showPrimaryPicker, setShowPrimaryPicker] = useState(false); // Toggle primary color picker
@@ -34,6 +35,57 @@ function SettinGeneral() {
       setImage(imageURL);
     }
   };
+  // const handleMainLogoChange = (event) => {
+  //   const file = event.target.files[0];
+  //   if (file) {
+  //     const imageURL = URL.createObjectURL(file);
+  //     setMainLogo(imageURL);
+  //   }
+  // };
+
+  
+
+
+  const handleMainLogoChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      // Safe filename
+      const fileExt = (file.name.split('.').pop() || '').toLowerCase();
+      const safeFileName = `${Date.now()}.${fileExt}`;
+
+      // Correct path inside bucket folder
+      const filePath = `adminconfig/${safeFileName}`; // folder inside bucket
+
+      // Upload to the correct bucket
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("just_need") // bucket name
+        .upload(filePath, file, { cacheControl: "3600", upsert: true });
+
+      console.log("uploadData:", uploadData, "uploadError:", uploadError);
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: urlData } = supabase.storage.from("just_need").getPublicUrl(filePath);
+      console.log("urlData:", urlData);
+      if (!urlData?.publicUrl) throw new Error("Failed to get public URL");
+
+      const publicUrl = urlData.publicUrl;
+
+      setMainLogo(publicUrl);
+      toast.success("Main logo uploaded successfully!");
+    } catch (err) {
+      console.error("Upload error:", err);
+      toast.error("Failed to upload main logo: " + (err.message || err));
+    }
+  };
+
+
+
+
+
+
 
   // Fetch existing configuration from Supabase on component mount
   useEffect(() => {
@@ -47,6 +99,7 @@ function SettinGeneral() {
       if (data && data.length > 0) {
         const config = data[0]; // Use first record (modify if multiple records exist)
         setImage(config.logo || Logo); // Set logo or default
+        setMainLogo(config.mainlogo || "");
         setPrimaryColor(config.theme?.primaryColor || "#6C4DEF"); // Set primary color or default
         setSecondaryColor(config.theme?.secondaryColor || "#F1F1F1"); // Set secondary color or default
         setTitle(config.title || ""); // Set title or empty
@@ -69,6 +122,7 @@ function SettinGeneral() {
         title: title,
         email: email,
         platformlogo: image, // Note: If using Supabase Storage, replace with uploaded URL
+        mainLogo: mainLogo, 
         theme: {
           primaryColor: primaryColor,
           secondaryColor: secondaryColor,
@@ -239,65 +293,43 @@ function SettinGeneral() {
           </label>
         </div>
 
-        {/* <div className="flex flex-col lg:flex-row gap-5 lg:items-center mt-[30px]">
+        {/* Main Logo Section */}
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-center mt-[30px]">
           <p className="min-w-[160px] text-base font-normal text-black">
-            Platform Appearance:
+            Main Logo:
           </p>
-          <div className="flex items-center gap-2.5 relative">
-            <p className="min-w-[160px] text-base font-normal text-black">
-              Primary Colour
-            </p>
-            <button
-              className="px-[50px] lg:px-[15px] xl:px-[50px] py-3 h-[42px] rounded-[10px] text-white text-sm font-normal"
-              style={{ backgroundColor: primaryColor }}
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent event bubbling to document
-                setShowPrimaryPicker(!showPrimaryPicker);
-              }}
-            >
-              {primaryColor}
-            </button>
-            {showPrimaryPicker && (
-              <div
-                ref={primaryColorPickerRef}
-                className="absolute z-10"
-                style={{ top: "50px", left: "0" }} // Position below the button
-              >
-                <ChromePicker
-                  color={primaryColor}
-                  onChange={(color) => setPrimaryColor(color.hex)}
-                />
-              </div>
-            )}
+          <div className="border-[1px] border-[#00000033] rounded-[10px] w-[90px] h-[90px]">
+            <img
+              className="w-full h-full object-cover rounded-[10px]"
+              src={mainLogo || Logo} // fallback to default if empty
+              alt="Main Logo"
+            />
           </div>
-          <div className="flex items-center gap-2.5 relative">
-            <p className="min-w-[160px] text-base font-normal text-black">
-              Secondary Colour
-            </p>
-            <button
-              className="px-[50px] lg:px-[15px] xl:px-[50px] py-3 h-[42px] rounded-[10px] text-black text-sm font-normal"
-              style={{ backgroundColor: secondaryColor }}
-              onClick={(e) => {
-                e.stopPropagation(); // Prevent event bubbling to document
-                setShowSecondaryPicker(!showSecondaryPicker);
-              }}
-            >
-              {secondaryColor}
-            </button>
-            {showSecondaryPicker && (
-              <div
-                ref={secondaryColorPickerRef}
-                className="absolute z-10"
-                style={{ top: "50px", left: "0" }} // Position below the button
-              >
-                <ChromePicker
-                  color={secondaryColor}
-                  onChange={(color) => setSecondaryColor(color.hex)}
-                />
-              </div>
-            )}
-          </div>
-        </div> */}
+          <label
+            htmlFor="mainLogoInput"
+            className="cursor-pointer flex items-center border-[1px] border-[#00000033] rounded-[10px] bg-white ps-4 w-full justify-between xl:w-[500px]"
+          >
+            <input
+              type="text"
+              value={mainLogo}
+              readOnly
+              className="px-2 w-[250px] xl:w-[356px] text-sm text-gray-600 bg-white pe-4 py-3 h-[42px] outline-none border-none"
+            />
+            <div className="bg-[#335ACB1A] border-s-[1px] border-[#00000033] rounded-[10px] py-3 h-[42px] px-4 text-sm font-medium text-gray-700">
+              Upload Image
+            </div>
+            <input
+              id="mainLogoInput"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleMainLogoChange}
+            />
+          </label>
+        </div>
+
+
+       
       </div>
 
       <div className="my-[15px] border-t-[1px] border-[#00000033]"></div>
