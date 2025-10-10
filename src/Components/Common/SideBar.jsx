@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import CustomerServiceLogo from "../../assets/png/customerServiceLogo.png";
 import { NavLink, useLocation } from "react-router-dom";
 import {
   CustomerSvg,
@@ -51,7 +50,6 @@ function SideBar() {
   }, []);
 
 
-  console.log(mainLogo, "mainLogo")
   return (
     <div className="bg-white pt-[11px] pb-10  rounded-[10px] h-full overflow-y-auto scrollRemove">
       <div className="px-6 pb-[11px]">

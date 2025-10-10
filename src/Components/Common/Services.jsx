@@ -750,7 +750,7 @@ function Services() {
               </div>
             </div>
 
-            <div className="px-5  flex flex-col items-center w-full overflow-auto  bg-[#f7f7f780]/50 rounded-xl">
+            <div className="px-5 pb-10 flex flex-col items-center w-full overflow-auto  bg-[#f7f7f780]/50 rounded-xl">
               <div className="flex justify-between gap-[18px] mt-6 flex-wrap w-full ">
                 {selectedSubcategories?.length > 0 &&
                   selectedSubcategories?.filter((sub) => sub?.isActive).map((sub, index) => {
