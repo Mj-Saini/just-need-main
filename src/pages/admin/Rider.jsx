@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-unused-vars */
 // 'use client';
 // import { useState, useEffect } from 'react';
 // import { CiSearch, CiFilter } from 'react-icons/ci';
