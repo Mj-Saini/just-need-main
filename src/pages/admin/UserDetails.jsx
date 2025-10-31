@@ -373,7 +373,7 @@ function UserDetails() {
     }
   };
 
-
+console.log(user,"uaer")
   return (
     <div className="px-4">
 
@@ -463,7 +463,7 @@ function UserDetails() {
               <div className="bg-white bg-opacity-10 rounded-lg p-3">
                 <div className="flex items-center gap-2.5">
                   <h3 className="text-sm font-normal text-white">
-                    Subscription: {user?.subscription === "null" ? "N/A" : "Yes"}
+                    Subscription: {user?.subscription == null ? "N/A" : "Yes"}
                   </h3>
                 </div>
               </div>
@@ -925,6 +925,67 @@ function UserDetails() {
           </div>
         )}
       </div>
+
+      {/* REFFERAL LIST */}
+
+      <div className="mt-[30px]">
+        <div className="flex space-x-4 mb-4 border-b">
+          <button
+            onClick={() => setActiveTab("withdrawals")}
+            className={`px-4 py-2 capitalize border-b-2 ${activeTab === "withdrawals"
+                ? 'border-blue-600 text-blue-600 font-semibold'
+                : 'border-transparent text-gray-600 hover:text-blue-600'
+              }`}
+          >
+           Refferal List
+          </button>
+          
+        </div>
+
+  
+        <div className="bg-white shadow rounded-lg overflow-x-auto">
+          
+     
+
+          {user.referralList.length > 0 ? (
+              <table className="min-w-full">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">S.No</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Name</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Refferal Code</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                {user.referralList.map((withdrawal, index) => {
+                  console.log(withdrawal)
+                  return (
+                    <tr key={withdrawal.id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2 font-semibold">{withdrawal.name}</td>
+                      <td className="px-4 py-2">{withdrawal.referralCode}</td>
+                     
+                      <td className="px-4 py-2 text-sm text-gray-600">
+                        {formatDate(withdrawal.time)}
+                      </td>
+                    </tr>
+                  )
+                })}
+                </tbody>
+              </table>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <p className="text-lg">No withdrawal transactions found</p>
+              </div>
+            )}
+          </div>
+       
+
+     
+      </div>
+
+ 
 
       {isImageModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75">
