@@ -352,6 +352,28 @@ function RiderDetails() {
                 </h2>
               </div>
             </div>
+            <div className="flex items-center mt-3 xl:mt-[15px]">
+              <div className="w-4/12">
+                <h2 className="font-medium text-sm xl:text-base text-black">
+               
+                    Subscription: 
+                 
+                </h2>
+              </div>
+              <div className="w-10/12">
+                <h2 className="text-[#000000B2] text-sm xl:text-base font-normal">
+                  {user?.subscription == null
+                    ? "N/A"
+                    : `Yes / ${user?.subscription?.plan} / ${new Date(
+                      user?.subscription?.validTill
+                    ).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}`}
+                </h2>
+              </div>
+            </div>
 
             <div className="flex items-center mt-3 xl:mt-[15px]">
               <div className="w-4/12">
@@ -744,7 +766,7 @@ function RiderDetails() {
             </table>
           ) : (
             <div className="text-center py-8 text-gray-500">
-              <p className="text-lg">No withdrawal transactions found</p>
+                <p className="text-lg">No Refferal History found</p>
             </div>
           )}
         </div>

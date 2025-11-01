@@ -476,10 +476,19 @@ console.log(user,"uaer")
 
               {/* Subscription Tile */}
               <div className="bg-white bg-opacity-10 rounded-lg p-3">
-                <div className="flex items-center gap-2.5">
+                <div className="flex justify-between items-center gap-2.5">
                   <h3 className="text-sm font-normal text-white">
-                    Subscription: {user?.subscription == null ? "N/A" : "Yes"}
+                    Subscription:  {user?.subscription == null
+                      ? "N/A"
+                      : `Yes / ${user?.subscription?.plan} / ${new Date(
+                        user?.subscription?.validTill
+                      ).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}`}
                   </h3>
+                  
                 </div>
               </div>
 
@@ -1005,7 +1014,7 @@ console.log(user,"uaer")
               </table>
             ) : (
               <div className="text-center py-8 text-gray-500">
-                <p className="text-lg">No withdrawal transactions found</p>
+                <p className="text-lg">No Refferal History found</p>
               </div>
             )}
           </div>
