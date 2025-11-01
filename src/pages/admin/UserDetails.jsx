@@ -39,6 +39,7 @@ function UserDetails() {
   const [previewImage, setPreviewImage] = useState(null);
   const [activeTab, setActiveTab] = useState("withdrawals"); // Add active tab state
   const [deleteUserPopup, setDeleteUserPopup] = useState(false);
+  const[totalRefferAmount,setTotalRefferAmount]=useState(0)
 
   const { fetchlisting } = useListingContext();
 
@@ -151,6 +152,8 @@ function UserDetails() {
     }
   };
 
+
+
   // Run it on mount
   useEffect(() => {
     fetchData();
@@ -158,6 +161,15 @@ function UserDetails() {
     fetchRiderData();
     fetchWithdrawals();
   }, [id]);
+
+  useEffect(() => {
+    if (user?.referralList?.length > 0) {
+      const total = user.referralList.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
+      setTotalRefferAmount(total);
+    } else {
+      setTotalRefferAmount(0);
+    }
+  }, [user?.referralList]);
 
   // Handle disable/enable provider popup
   const handlePopupDisable = () => {
@@ -372,6 +384,9 @@ function UserDetails() {
       console.error("❌ Delete failed:", data.error || data);
     }
   };
+
+
+
 
 console.log(user,"uaer")
   return (
@@ -929,15 +944,18 @@ console.log(user,"uaer")
       {/* REFFERAL LIST */}
 
       <div className="mt-[30px]">
-        <div className="flex space-x-4 mb-4 border-b">
+        <div className="flex justify-between space-x-4 mb-4 border-b">
           <button
             onClick={() => setActiveTab("withdrawals")}
-            className={`px-4 py-2 capitalize border-b-2 ${activeTab === "withdrawals"
-                ? 'border-blue-600 text-blue-600 font-semibold'
-                : 'border-transparent text-gray-600 hover:text-blue-600'
-              }`}
+            className={`px-4 py-2 capitalize border-b-2 border-blue-600 text-blue-600 font-semibold `}
           >
            Refferal List
+          </button>
+          <button
+            onClick={() => setActiveTab("withdrawals")}
+            className={`px-4 py-2 capitalize   text-blue-600 font-semibold `}
+          >
+            Total Refferal Amount : {totalRefferAmount}
           </button>
           
         </div>
@@ -954,17 +972,28 @@ console.log(user,"uaer")
                     <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">S.No</th>
                     <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Name</th>
                     <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Refferal Code</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Amount</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">plan</th>
+                    <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Duration</th>
                     <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Date</th>
                   </tr>
                 </thead>
                 <tbody>
                 {user.referralList.map((withdrawal, index) => {
-                  console.log(withdrawal)
                   return (
                     <tr key={withdrawal.id} className="border-t">
                       <td className="px-4 py-2">{index + 1}</td>
                       <td className="px-4 py-2 font-semibold">{withdrawal.name}</td>
                       <td className="px-4 py-2">{withdrawal.referralCode}</td>
+                      <td className="px-4 py-2">{withdrawal.amount}</td>
+                      <td className="px-4 py-2">{withdrawal.isSubscribe == true ? "Premium":"Free"}</td>
+                      <td className="px-4 py-2">
+                        {withdrawal.isSubscribe
+                          ? withdrawal.amount == 50
+                            ? "6 Months"
+                            : "1 Year"
+                          : "—"}
+                      </td>
                      
                       <td className="px-4 py-2 text-sm text-gray-600">
                         {formatDate(withdrawal.time)}
@@ -985,6 +1014,9 @@ console.log(user,"uaer")
      
       </div>
 
+      
+      
+      
  
 
       {isImageModalOpen && (

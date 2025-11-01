@@ -25,6 +25,7 @@ function RiderDetails() {
   const [message, setMessage] = useState("");
   const [riderDetailsTab, setRiderDetailsTab] = useState("riderDetails");
   const [deleteUserPopup, setDeleteUserPopup] = useState(false);
+  const [totalRefferAmount, setTotalRefferAmount] = useState(0)
 
 
   // For rider history
@@ -80,6 +81,15 @@ function RiderDetails() {
   useEffect(() => {
     fetchRiderData();
   }, [id]);
+
+  useEffect(() => {
+    if (user?.referralList?.length > 0) {
+      const total = user.referralList.reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
+      setTotalRefferAmount(total);
+    } else {
+      setTotalRefferAmount(0);
+    }
+  }, [user?.referralList]);
 
   async function getRidingRequests() {
     const { data, error } = await supabase
@@ -217,6 +227,7 @@ function RiderDetails() {
     }
   };
 
+  console.log(user,"users")
 
   return (
     <div className="px-4">
@@ -669,6 +680,79 @@ function RiderDetails() {
           )}
         </>
       }
+
+
+      <div className="mt-[30px]">
+        <div className="flex justify-between space-x-4 mb-4 border-b">
+          <button
+        
+            className={`px-4 py-2 capitalize border-b-2 border-blue-600 text-blue-600 font-semibold `}
+          >
+            Refferal List
+          </button>
+          <button
+          
+            className={`px-4 py-2 capitalize   text-blue-600 font-semibold `}
+          >
+            Total Refferal Amount : {totalRefferAmount}
+          </button>
+
+        </div>
+
+
+        <div className="bg-white shadow rounded-lg overflow-x-auto">
+
+
+
+          {user.referralList.length > 0 ? (
+            <table className="min-w-full">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">S.No</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Name</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Refferal Code</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Amount</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">plan</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Duration</th>
+                  <th className="px-4 py-2 text-left text-sm font-medium text-gray-700">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {user.referralList.map((withdrawal, index) => {
+                  return (
+                    <tr key={withdrawal.id} className="border-t">
+                      <td className="px-4 py-2">{index + 1}</td>
+                      <td className="px-4 py-2 font-semibold">{withdrawal.name}</td>
+                      <td className="px-4 py-2">{withdrawal.referralCode}</td>
+                      <td className="px-4 py-2">{withdrawal.amount}</td>
+                      <td className="px-4 py-2">{withdrawal.isSubscribe == true ? "Premium" : "Free"}</td>
+                      <td className="px-4 py-2">
+                        {withdrawal.isSubscribe
+                          ? withdrawal.amount == 50
+                            ? "6 Months"
+                            : "1 Year"
+                          : "—"}
+                      </td>
+
+                      <td className="px-4 py-2 text-sm text-gray-600">
+                        {formatDate(withdrawal.time)}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          ) : (
+            <div className="text-center py-8 text-gray-500">
+              <p className="text-lg">No withdrawal transactions found</p>
+            </div>
+          )}
+        </div>
+
+
+
+      </div>
+
 
       {/* Image Modal */}
       {isImageModalOpen && selectedImage && (
