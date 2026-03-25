@@ -230,11 +230,9 @@ function Services() {
       toast.error("Name cannot be empty.");
       return;
     }
-    console.log("handleSaveEditPopup starting...", { editingCategoryId, categoryName, categoryImage });
     try {
       if (editingCategoryId) {
         // 🟢 Category update using context function
-        console.log("Calling context updateCategoryName with:", { editingCategoryId, categoryName, categoryImage });
         const success = await updateCategoryName(editingCategoryId, categoryName, categoryImage);
 
         if (success) {

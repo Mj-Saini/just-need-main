@@ -23,9 +23,6 @@ function ServiceContext({ children }) {
       if (error)
         throw new Error(`Failed to fetch categories: ${error.message}`);
 
-      console.log("STRUCTURE CHECK - catview sample keys:", data?.[0] ? Object.keys(data[0]) : "No data");
-      console.log("STRUCTURE CHECK - catview sample data:", data?.[0]);
-
       const formattedData = data.map((category) => {
         return {
           ...category,
@@ -235,7 +232,6 @@ function ServiceContext({ children }) {
   }
 
   const updateCategoryName = async (categoryId, newName, imageFile) => {
-    console.log("updateCategoryName called with:", { categoryId, newName, imageFile });
     setLoading(true);
     try {
       let imageUrl = null;
@@ -264,30 +260,16 @@ function ServiceContext({ children }) {
         }
 
         imageUrl = urlData.publicUrl;
-        console.log("New image URL uploaded:", imageUrl);
- 
       }
 
       const updateData = { categoryName: newName };
       if (imageUrl) updateData.image = imageUrl;
-
-      const { data: tableSample } = await supabase.from("Categories").select("*").limit(1);
-      console.log("STRUCTURE CHECK - Categories table sample keys:", tableSample?.[0] ? Object.keys(tableSample[0]) : "No data");
-      console.log("STRUCTURE CHECK - Categories table sample data:", tableSample?.[0]);
-
-      console.log("Attempting database update on table 'Categories' with:", {
-        id: categoryId,
-        updateData: updateData
-      });
 
       const { data, error } = await supabase
         .from("Categories")
         .update(updateData)
         .eq("id", categoryId)
         .select();
-
-      console.log("Supabase result records:", data);
-      console.log("Supabase result error:", error);
 
       if (error) {
         console.error("Error updating category:", error.message);

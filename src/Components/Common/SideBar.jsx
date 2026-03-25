@@ -58,7 +58,7 @@ function SideBar() {
           to="/dashboard"
         >
           <img
-            className="max-w-[80px] xl:max-w-[100px]"
+            className="max-w-[80px] xl:max-w-[100px] rounded-[18px]"
             src={mainLogo || "CustomerServiceLogo"}
             alt="logo"
           />
