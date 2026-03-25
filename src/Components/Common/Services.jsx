@@ -230,61 +230,21 @@ function Services() {
       toast.error("Name cannot be empty.");
       return;
     }
-    console.log(editingCategoryId, "editingCategoryId")
+    console.log("handleSaveEditPopup starting...", { editingCategoryId, categoryName, categoryImage });
     try {
       if (editingCategoryId) {
-        // 🟢 Category update
-        let imageUrl = categoryImageUrl;
+        // 🟢 Category update using context function
+        console.log("Calling context updateCategoryName with:", { editingCategoryId, categoryName, categoryImage });
+        const success = await updateCategoryName(editingCategoryId, categoryName, categoryImage);
 
-        // Upload new image if one was selected
-        if (categoryImage) {
-          // Delete old image if it exists
-          if (categoryImageUrl) {
-            try {
-              const oldImagePath = categoryImageUrl.split('/').pop();
-              await supabase.storage
-                .from("just_need")
-                .remove([`category-images/${oldImagePath}`]);
-            } catch (cleanupError) {
-              console.warn("Failed to delete old image:", cleanupError);
-            }
-          }
-
-          // Upload new image
-          const fileExt = categoryImage.name.split('.').pop();
-          const fileName = `${Date.now()}_${Math.random().toString(36).substring(2)}.${fileExt}`;
-          const filePath = `category-images/${fileName}`;
-
-          const { error: uploadError } = await supabase.storage
-            .from("just_need")
-            .upload(filePath, categoryImage);
-
-          if (uploadError) throw uploadError;
-
-          // Get public URL
-          const { data: { publicUrl } } = await supabase.storage
-            .from("just_need")
-            .getPublicUrl(filePath);
-
-          imageUrl = publicUrl;
+        if (success) {
+          toast.success("Category updated successfully!");
+          // State is updated within context, but we can refresh to be sure
+          await getCategoriesWithSubcategories();
+          toggle();
+        } else {
+          toast.error("Failed to update category.");
         }
-
-        // Update category in database
-        const updateData = {
-          categoryName: categoryName,
-          ...(imageUrl && { image: imageUrl }) // Only include image if we have a URL
-        };
-
-        const { error: updateError } = await supabase
-          .from("Categories")
-          .update(updateData)
-          .eq("id", editingCategoryId);
-
-        if (updateError) throw updateError;
-
-        toast.success("Category updated successfully!");
-        await getCategoriesWithSubcategories();
-        toggle();
       } else if (editingSubcategoryId) {
         // 🔵 Subcategory update (unchanged)
         const updatedData = { categoryName };
@@ -310,6 +270,7 @@ function Services() {
     categoryImageUrl,
     editingCategoryId,
     editingSubcategoryId,
+    updateCategoryName,
     updateSubcategoryName,
     getCategoriesWithSubcategories,
     toggle,

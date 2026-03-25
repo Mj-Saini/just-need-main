@@ -3,15 +3,19 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const ProtectedRoute = ({ Children }) => {
   const navigate = useNavigate();
-  const pathname = useLocation();
+  const location = useLocation();
   useEffect(() => {
     const isAuthenticated = localStorage.getItem("logIn") === "true";
     if (!isAuthenticated) {
-      navigate("/login");
+      if (location.pathname !== "/login") {
+        navigate("/login");
+      }
     } else {
-      navigate(pathname.path === "/login" ? "/dashboard" : pathname.path);
+      if (location.pathname === "/login") {
+        navigate("/dashboard");
+      }
     }
-  }, []);
+  }, [location, navigate]);
   return <div>{<Children />}</div>;
 };
 

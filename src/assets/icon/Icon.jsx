@@ -107,7 +107,7 @@ export const WitdrawSvg = ({ pathName }) => {
   <rect x="20" y="30" width="60" height="50" rx="5" fill={pathName == "/dashboard/withdraw" ? "#6c4def" : "black" }  fillOpacity={pathName == "/dashboard/serviceRequest" ? "1" : "0.6"}/>
   
 
-  <text x="50%" y="63%" dominant-baseline="middle" text-anchor="middle" font-size="30" fill={pathName == "/dashboard/withdraw" ? "#6c4def" : "white"}  fillOpacity={pathName == "/dashboard/serviceRequest" ? "1" : "0.6"} font-family="Arial, sans-serif">
+  <text x="50%" y="63%" dominantBaseline="middle" textAnchor="middle" fontSize="30" fill={pathName == "/dashboard/withdraw" ? "#6c4def" : "white"}  fillOpacity={pathName == "/dashboard/serviceRequest" ? "1" : "0.6"} fontFamily="Arial, sans-serif">
     $
   </text>
   <path d="M50 10 L40 25 H45 V30 H55 V25 H60 L50 10 Z" fill={pathName == "/dashboard/withdraw" ? "#6c4def" : "black"}  fillOpacity={pathName == "/dashboard/serviceRequest" ? "1" : "0.6"}/>
