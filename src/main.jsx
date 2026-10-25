@@ -9,7 +9,7 @@ import AuthProvider from "./store/AuthContext.jsx";
 
 import ServiceContext from "./store/ServiceContext.jsx";
 
-import PolicyProvider from "./store/PrivacyPolicy.jsx";
+import PolicyProvider from "./store/PolicyContext.jsx";
 
 import BannerProvider from "./store/BannerContext.jsx";
 import ListingProvider from "./store/ListingContext.jsx";

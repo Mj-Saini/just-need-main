@@ -15,6 +15,7 @@ import {
   MessageIcon,
   WitdrawSvg,
   RiderIcon,
+  BlaBlaSvg,
 } from "../../assets/icon/Icon";
 import LogOutPopUp from "../Popups/LogOutPopUp";
 import { supabase } from "../../store/supabaseCreateClient";
@@ -195,6 +196,27 @@ function SideBar() {
                 }`}
             >
               Rider
+            </span>
+          </NavLink>
+        </div>
+        <div className="flex items-center mt-3 xl:mt-5 group_hover">
+          <VerticalVilotSettingSvg
+            pathName={pathName}
+            checkpath="/dashboard/bla-bla-rides"
+          />
+          <NavLink
+            state={"Plan, prioritize, and accomplish your tasks with ease."}
+            to="/dashboard/bla-bla-rides"
+            className="flex items-center py-2.5 px-2 xl:px-[15px] gap-3 xl:gap-5 ms-[5px] w-full"
+          >
+            <BlaBlaSvg pathName={pathName} />
+            <span
+              className={`font-normal text-sm xl:text-base ${pathName.startsWith("/dashboard/bla-bla-rides")
+                ? "text-[#6c4def]"
+                : "text-[#00000099]"
+                }`}
+            >
+              Bla Bla Rides
             </span>
           </NavLink>
         </div>

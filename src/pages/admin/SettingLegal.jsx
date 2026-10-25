@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { usePolicyContext } from "../../store/PrivacyPolicy";
+import { usePolicyContext } from "../../store/PolicyContext";
 import { toast } from "react-toastify";
 
 function SettingLegal() {

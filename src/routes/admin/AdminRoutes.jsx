@@ -31,6 +31,7 @@ import DeleteAccount from "../../Components/DeleteAccount";
 import Withdraw from "../../pages/admin/Withdraw";
 import Rider from "../../pages/admin/Rider";
 import RiderDetails from "../../pages/admin/RiderDetails";
+import BlaBlaRides from "../../pages/admin/BlaBlaRides";
 
 function AdminRoutes() {
   return (
@@ -68,6 +69,8 @@ function AdminRoutes() {
         <Route path="rider" element={<Rider />} >
           <Route path="riderDetails/:id" element={<RiderDetails />} />
         </Route>
+        <Route path="bla-bla-rides" element={<BlaBlaRides />} />
+        <Route path="carpool-history" element={<BlaBlaRides />} />
         <Route path="withdraw" element={<Withdraw />} />
 
 
