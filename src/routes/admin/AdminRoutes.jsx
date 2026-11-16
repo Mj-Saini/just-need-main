@@ -60,7 +60,7 @@ function AdminRoutes() {
         element={<ProtectedRoute Children={AdminLayout} />}
       >
         <Route index element={<Aside />} />
-        
+
         <Route path="usersList" element={<Users />}>
           <Route path="userDetails/:id" element={<UserDetails />} />
         </Route>
@@ -99,3 +99,5 @@ function AdminRoutes() {
 }
 
 export default AdminRoutes;
+
+//bo
